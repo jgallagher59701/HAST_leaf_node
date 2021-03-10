@@ -94,9 +94,10 @@
 #define FILE_BASE_NAME "Data"
 #define SD_CARD_WAIT 1 // seconds to wait after last write before power off
 
-// setup() error codes. Any of these errors during the boot of the node
-// and flash the status led 2, 3, ..., n times. The sequence will
-// repeat ERROR_TIMES then continue. The node status will also be set.
+// Error codes for setup(). If any of these errors during the boot of the node
+// flash the status led 2, 3, ..., n times. The sequence will repeat ERROR_TIMES
+// then the node boot will continue. The node status will also be set to include
+// some boot error information (see the codes below).
 #define SHT31_BEGIN_FAIL 2
 #define SD_BEGIN_FAIL 3
 #define SD_WRITE_HEADER_FAIL 4
@@ -107,7 +108,8 @@
 #define ERROR_TIMES 3
 
 // In the RH Datagram and ReliableDatagram header, we can use the four
-// LSB of the 'status' field. Currently this is part of the data packet.
+// LSB of the 'status' field. However, currently node status is part of
+// the data packet.
 #define STATUS_OK 0x00
 
 // These errors are reset on every iteration of loop()
@@ -128,7 +130,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 RHReliableDatagram rf95_manager(rf95, NODE_ADDRESS);
 //RHDatagram rf95_manager(rf95, NODE_ADDRESS);
 
-unsigned int tx_power = 13; // dBm 5 tp 23 for RF95
+unsigned int tx_power = 13; // dBm; 5 to 23 for RF95
 
 // Singleton for the Real Time Clock
 RTCZero rtc;
@@ -138,7 +140,6 @@ Adafruit_SHT31 sht30d = Adafruit_SHT31();
 
 // Singletons for the SD card objects
 SdFat sd; // File system object.
-// FatFile /*SdFile*/ file; // Log file.
 
 uint8_t status = STATUS_OK;
 
@@ -149,6 +150,7 @@ void alarmMatch() {
     // TODO: Need to do this?
     //rtc.detachInterrupt();
 }
+
 // TODO: Are these functions that set the SPI bus CS lines HIGH needed?
 
 /**
@@ -190,7 +192,10 @@ void send_debug(const char *msg, uint8_t to) {
 
 /**
    @brief delay that enables background tasks
-   Used fir debugging and to enable program upload. See setup().
+
+   Used for debugging and to enable program upload. See setup().
+
+   @note Cannot be used when interrupts are disabled (cf. millis())
 */
 void yield(unsigned long ms_delay) {
     unsigned long start = millis();
@@ -200,11 +205,13 @@ void yield(unsigned long ms_delay) {
 
 /**
    @brief Get the current epoch from __DATE__ and __TIME__
-   This function returns the time i seconds since 1 Jan 1970
+
+   This function returns the time in seconds since 1 Jan 1970
    using the string values of the compile-time constants
    __DATE__ and __TIME_. The formats of these are: mmm dd yyyy
    (e.g. "Jan 14 2012") and hh::mm::ss in 24 hour time
    (e.g. "22:29:12")
+
    @note input must be formatted correctly
    @param data The value of __DATE__ or the equiv
    @param time The value of __TIME__ or the equiv
@@ -241,15 +248,20 @@ int get_bat_v() {
     return 430 * (raw / (float)ADC_MAX_VALUE); // voltage * 100
 }
 
+/// Use get_log_filename() and get_new_log_filename()
 char file_name[13] = FILE_BASE_NAME "00.csv";
 
 /**
  * @brief get an unused filename for the new log.
- * This function returns a pointer to local static storage.
+ * 
+ * This function returns a pointer to local static storage. 
+ * 
  * @note Only call this from setup(), never from loop() and never if
  * the SD library has not been initialized correctly and never after
  * the radiohead library (RFM95) has been initialized.
- * @return A pointer to the new file name.
+ * 
+ * @return A pointer to the new file name. Global static storage.
+ * @see get_log_filename()
  */
 const char *
 get_new_log_filename() {
@@ -391,12 +403,16 @@ void shutdown_sd_card() {
 void wake_up_sd_card() {
 #if SD
     yield_spi_to_sd();
+
     digitalWrite(SD_PWR, HIGH);
+
     noInterrupts();
-    yield(SD_POWER_ON_DELAY);
+
+    yield(SD_POWER_ON_DELAY); // TODO Replace with STANDBY_MODE?
     if (!sd.begin(SD_CS)) {
         status |= SD_CARD_WAKEUP_ERROR;
     }
+
     interrupts();
 #endif
 }
@@ -404,7 +420,7 @@ void wake_up_sd_card() {
 /**
  * @brief Send a data packet.
  * 
- * Send the packet to a node and wait for a reply fro=m that node. If
+ * Send the packet to a node and wait for a reply from that node. If
  * the 'to' address is RH_BROADCAST_ADDRESS, wait until the packet is
  * sent (but not for an ACK).
  * 
@@ -414,8 +430,9 @@ void wake_up_sd_card() {
  * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
  */
 void send_data_packet(packet_t &data, uint8_t to) {
-    // This may block for up to CAD_TIMEOUT seconds
     yield_spi_to_rf95();
+
+    // This may block for up to CAD_TIMEOUT seconds
     if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_PACKET_SIZE, to)) {
         status |= RFM95_SEND_ERROR;
     }
@@ -468,7 +485,7 @@ void read_main_node_reply() {
 }
 
 /**
- * @brief RMF95 sleep mode. Any API call wakes it up
+ * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
  */
 void radio_silence() {
     yield_spi_to_rf95();
@@ -476,7 +493,7 @@ void radio_silence() {
 }
 
 /**
- * @brief Get the temperature from the SHT-3
+ * @brief Get the temperature from the SHT-30-D
  * @note If the SHT30D didn't initialize correctly, this will return zero.
  * @return the temperature * 100 as a 16-bit unsigned int
  */
@@ -489,7 +506,7 @@ int16_t get_temperature() {
 }
 
 /**
- * @brief Get the humidity from the SHT-3
+ * @brief Get the humidity from the SHT-30-D
  * @return the humidity * 100 as a 16-bit unsigned int
  */
 uint16_t get_humidity() {
@@ -554,6 +571,7 @@ void sleep_node(unsigned long start_time_ms) {
 #endif
 }
 
+/// Debugging output - set the state of unused GPIOs to track progress
 void init_state_pins() {
     pinMode(STATE_1, OUTPUT);
     pinMode(STATE_2, OUTPUT);
@@ -591,6 +609,7 @@ void setup() {
     pinMode(STATUS_LED, OUTPUT);
     digitalWrite(STATUS_LED, HIGH);
 
+    // Debugging pins initialized
     init_state_pins();
     clear_state_pins();
 
@@ -643,7 +662,7 @@ void setup() {
         status |= SHT_31_INIT_ERROR;
     }
 
-    // The SHT30-D temp/humidity sensor has a heater; turn it off
+    // The SHT30D temp/humidity sensor has a heater; turn it off
     sht30d.heater(false);
 #endif // SHT30D
 
@@ -703,7 +722,7 @@ void setup() {
     // 10 seconds
     rf95.setCADTimeout(RH_CAD_DEFAULT_TIMEOUT);
 
-    // Because the RS Ultra Pro boards native USB won't work with the standby() mode
+    // Because the RS Ultra Pro board's native USB won't work with the standby() mode
     // in the LowPower or RTCZero libraries, the MCU board can easily wind up bricked
     // when using standby(). It will then become impossible to upload new/fixed
     // code. Add a 10s delay here so a coordinated reset/upload will work.
