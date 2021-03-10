@@ -1,0 +1,43 @@
+;PlatformIO Project Configuration File
+;
+;   Build options: build flags, source filter
+;   Upload options: custom upload port, speed and extra flags
+;   Library options: dependencies, extra library storages
+;   Advanced options: extra scripting
+;
+; Please visit documentation for the other options and examples
+; https://docs.platformio.org/page/projectconf.html
+
+[platformio]
+default_envs = rocketscream
+
+; You MUST inject these options into [env:] section
+; using ${common_env_data.***} (see below)
+[common_env_data]
+build_flags =
+    -D VERSION=1.0.0
+
+lib_deps_builtin =
+    SPI
+    Wire
+lib_deps_external =
+    RTCZero
+    RadioHead_ID124
+    SdFat
+    Adafruit_BusIO
+    Adafruit_SHT31
+
+[env:rocketscream]
+platform = espressif8266
+framework = arduino
+board = nodemcuv2
+
+; Serial Monitor options
+monitor_speed = 9600
+monitor_flags =
+    --encoding
+    hexlify
+
+; Unit Testing options
+; Not yet...
+; test_ignore = test_desktop

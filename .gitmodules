@@ -1,0 +1,12 @@
+[submodule "lib/Adafruit_BusIO"]
+        path = lib/Adafruit_BusIO
+        url = https://github.com/adafruit/Adafruit_BusIO
+[submodule "lib/Adafruit_SHT31"]
+        path = lib/Adafruit_SHT31
+        url = https://github.com/adafruit/Adafruit_SHT31
+[submodule "lib/soil_sensor_common"]
+        path = lib/soil_sensor_common
+        url = https://github.com/jgallagher59701/soil_sensor_common
+[submodule "lib/SdFat"]
+        path = lib/SdFat
+        url = https://github.com/greiman/SdFat.git
