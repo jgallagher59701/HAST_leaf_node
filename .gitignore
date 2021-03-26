@@ -1,6 +1,7 @@
 .vscode/
 .DS_Store
 *~
+.pio/
 old/
 SDR_Recordings/
 test_data.csv

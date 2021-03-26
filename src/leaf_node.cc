@@ -32,11 +32,16 @@
 
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
-#define DEBUG 0      // Requires USB
-#define LORA_DEBUG 0 // Send debugging info to the main node
+#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
+#define LORA_DEBUG 1 // Send debugging info to the main node
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #define STANDBY_MODE 1 // Use RTC standby mode and not yield()
+
+#if DEBUG && STANDBY_MODE
+#define STANDBY_MODE 0
+#endif
+
 #define TX_LED 1       // 1 == show the LED during operation, 0 == not
 #define SHT30D 1
 #define SD 1
@@ -84,7 +89,7 @@
 #define EXPECT_REPLY 1
 
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
-#define STANDBY_INTERVAL_S 20 // seconds to wait/sleep before next transmission
+#define STANDBY_INTERVAL_S 10 // 20 // seconds to wait/sleep before next transmission
 #define SD_POWER_ON_DELAY 200 // ms
 
 #define ADC_BITS 12
@@ -92,7 +97,8 @@
 
 // Log file name.
 #define FILE_BASE_NAME "Data"
-#define SD_CARD_WAIT 1 // seconds to wait after last write before power off
+// To avoid a race condition when using 'standby mode' this must be >= 2.
+#define SD_CARD_WAIT 2 // seconds to wait after last write before power off
 
 // Error codes for setup(). If any of these errors during the boot of the node
 // flash the status led 2, 3, ..., n times. The sequence will repeat ERROR_TIMES
@@ -148,7 +154,7 @@ uint8_t status = STATUS_OK;
  */
 void alarmMatch() {
     // TODO: Need to do this?
-    //rtc.detachInterrupt();
+    rtc.detachInterrupt();
 }
 
 // TODO: Are these functions that set the SPI bus CS lines HIGH needed?
@@ -401,20 +407,20 @@ void shutdown_sd_card() {
  * @brief Power on teh SD card and initialize the driver
  */
 void wake_up_sd_card() {
-#if SD
     yield_spi_to_sd();
 
     digitalWrite(SD_PWR, HIGH);
 
-    noInterrupts();
+    // Calling this here freezes the RS. jhrg 3/24/21
+    // noInterrupts();
 
     yield(SD_POWER_ON_DELAY); // TODO Replace with STANDBY_MODE?
+
     if (!sd.begin(SD_CS)) {
         status |= SD_CARD_WAKEUP_ERROR;
     }
 
-    interrupts();
-#endif
+    // See above. interrupts();
 }
 
 /**
@@ -524,12 +530,17 @@ void sleep_node(unsigned long start_time_ms) {
 
     // low-power configuration
     radio_silence();
+    IO(Serial.println("Radio silence"));
 
+#if SD
     shutdown_sd_card();
+    IO(Serial.println("SD shutdown"));
+#endif
 
 #if SPI_SLEEP
     // Adding SPI.end() drops the measured current draw from 0.65mA to 0.18mA
     SPI.end();
+    IO(Serial.println("SPI shutdown"));
 #endif
 
     // TODO Fix this so that the times are on the hour.
@@ -548,6 +559,8 @@ void sleep_node(unsigned long start_time_ms) {
 
     IO(Serial.print("Sleep offset: "));
     IO(Serial.println(offset));
+    IO(Serial.flush());
+    IO(yield(1000));
 
 #if STANDBY_MODE
     rtc.setAlarmEpoch(rtc.getEpoch() + offset);
@@ -562,9 +575,13 @@ void sleep_node(unsigned long start_time_ms) {
 
 #if SPI_SLEEP
     SPI.begin();
+    IO(Serial.println("SPI up"));
 #endif
 
+#if SD
     wake_up_sd_card();
+    IO(Serial.println("SD card up"));
+#endif
 
 #if TX_LED
     digitalWrite(STATUS_LED, HIGH);
@@ -758,6 +775,7 @@ void loop() {
 
     clear_state_pins();
     set_state_pin(STATE_1);
+    IO(Serial.println("STATE 1"));
 
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval
@@ -765,14 +783,17 @@ void loop() {
     send_data_packet(data, RH_BROADCAST_ADDRESS);
 
     set_state_pin(STATE_2);
+    IO(Serial.println("STATE 2"));
 
     read_main_node_reply();
 
     set_state_pin(STATE_3);
+    IO(Serial.println("STATE 3"));
 
     log_data(get_log_filename(), data_packet_to_string(&data, false));
 
     set_state_pin(STATE_4);
+    IO(Serial.println("STATE 4"));
 
     // NB: millis() doesn't run during StandBy mode
     last_time_awake = millis() - start_time_ms; // last_time_awake used next iteration
@@ -780,10 +801,11 @@ void loop() {
     sleep_node(start_time_ms);
 
     set_state_pin(STATE_5);
+    IO(Serial.println("STATE 5"));
 
 #if LORA_DEBUG
     char msg[256];
-    snprintf(msg, 256, "3: t:%ld, o:%d", elapsed_time, offset);
-    send_debug(msg, from);
+    snprintf(msg, 256, "t:%ld, o:%d", millis() - start_time_ms, STANDBY_INTERVAL_S);
+    send_debug(msg, MAIN_NODE_ADDRESS);
 #endif
 }
