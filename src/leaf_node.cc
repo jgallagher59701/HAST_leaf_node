@@ -33,7 +33,7 @@
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
-#define LORA_DEBUG 1 // Send debugging info to the main node
+#define LORA_DEBUG 0 // Send debugging info to the main node
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #define STANDBY_MODE 1 // Use RTC standby mode and not yield()
@@ -42,7 +42,7 @@
 #define STANDBY_MODE 0
 #endif
 
-#define TX_LED 1       // 1 == show the LED during operation, 0 == not
+#define TX_LED 1 // 1 == show the LED during operation, 0 == not
 #define SHT30D 1
 #define SD 1
 #define SPI_SLEEP 1
@@ -85,11 +85,12 @@
 // RH_CAD_DEFAULT_TIMEOUT 10seconds
 
 #define MAIN_NODE_ADDRESS 0
-#define NODE_ADDRESS 4
+#define NODE_ADDRESS 3
 #define EXPECT_REPLY 1
 
+#define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
+
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
-#define STANDBY_INTERVAL_S 10 // 20 // seconds to wait/sleep before next transmission
 #define SD_POWER_ON_DELAY 200 // ms
 
 #define ADC_BITS 12
@@ -523,7 +524,11 @@ uint16_t get_humidity() {
 #endif
 }
 
-void sleep_node(unsigned long start_time_ms) {
+/**
+ * @param sample_time Unix time the last sample was taken.
+ */
+
+void sleep_node(unsigned long sample_time) {
 #if TX_LED
     digitalWrite(STATUS_LED, LOW);
 #endif
@@ -545,32 +550,21 @@ void sleep_node(unsigned long start_time_ms) {
 
     // TODO Fix this so that the times are on the hour.
     // Use setAlaramTime(h, m, s) and rtc.MATCH_MMSS for every hour or MATCH_SS for
-    // every minute. Update the m and s values using 'time + n mod 60'
-
-    // The time interval to sleep is the length of the sample interval minus
-    // the time needed to perform the sample operations millis() - start_time_ms
-    // and minus the time spent sleeping while the SD card cleans up after the
-    // last write.
-    unsigned long elapsed_time = (millis() - start_time_ms) / 1000;
-    uint8_t offset = max(STANDBY_INTERVAL_S - elapsed_time - SD_CARD_WAIT, 1);
-    // remove 1 to account for a rounding error
-    if (offset > 1)
-        offset -= 1;
-
-    IO(Serial.print("Sleep offset: "));
-    IO(Serial.println(offset));
-    IO(Serial.flush());
-    IO(yield(1000));
+    // every minute. Update the m and s values using 'time + n mod 60'.
+    // https://www.arduino.cc/en/Reference/RTC
 
 #if STANDBY_MODE
-    rtc.setAlarmEpoch(rtc.getEpoch() + offset);
+    unsigned long wake_up_time = sample_time + STANDBY_INTERVAL_S;
+    if (wake_up_time < rtc.getEpoch() + 2)
+        wake_up_time = rtc.getEpoch() + 2;
+    rtc.setAlarmEpoch(wake_up_time);
     rtc.enableAlarm(rtc.MATCH_YYMMDDHHMMSS);
     rtc.attachInterrupt(alarmMatch);
     // TODO Try adding a 10ms wait here. jhrg 12/5/20
     yield(10);
     rtc.standbyMode();
 #else
-    yield(offset * 1000);
+    yield(STANDBY_INTERVAL_S * 1000);
 #endif
 
 #if SPI_SLEEP
@@ -758,19 +752,19 @@ void setup() {
 }
 
 void loop() {
-    static unsigned long last_time_awake = 0;
+    static unsigned long last_tx_time = 0;
     static unsigned long message = 0;
 
     // The data sent to the main node
     packet_t data;
 
-    unsigned long start_time_ms = millis();
+    unsigned long sample_time = rtc.getEpoch();
 
     ++message;
 
     // New packet encoding.
     // TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
-    build_data_packet(&data, NODE_ADDRESS, message, rtc.getEpoch(), get_bat_v(), (uint16_t)last_time_awake,
+    build_data_packet(&data, NODE_ADDRESS, message, rtc.getEpoch(), get_bat_v(), (uint16_t)last_tx_time,
                       get_temperature(), get_humidity(), status);
 
     clear_state_pins();
@@ -780,7 +774,9 @@ void loop() {
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval
 
+    last_tx_time = millis();
     send_data_packet(data, RH_BROADCAST_ADDRESS);
+    last_tx_time = millis() - last_tx_time;
 
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
@@ -795,10 +791,7 @@ void loop() {
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
 
-    // NB: millis() doesn't run during StandBy mode
-    last_time_awake = millis() - start_time_ms; // last_time_awake used next iteration
-
-    sleep_node(start_time_ms);
+    sleep_node(sample_time);
 
     set_state_pin(STATE_5);
     IO(Serial.println("STATE 5"));
