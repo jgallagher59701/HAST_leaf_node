@@ -32,6 +32,9 @@
 
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
+#define MAIN_NODE_ADDRESS 0
+#define NODE_ADDRESS 2
+
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node
 
@@ -56,7 +59,11 @@
 #define RFM95_CS 5  // RF95 SPI CS
 
 // NB: The two hand-built units have SD_PWR on 11, the PCB uses pin 9
+#if NODE < 3
+#define SD_PWR 11 // HIGH == power on SD card; hand built nodes use pin 11 for this
+#else
 #define SD_PWR 9 // HIGH == power on SD card; hand built nodes use pin 11 for this
+#endif
 #define SD_CS 10 // CS for the SD card, SPI uses dedicated lines
 
 #define STATUS_LED 13 // Only for DEBUG mode
@@ -84,8 +91,6 @@
 
 // RH_CAD_DEFAULT_TIMEOUT 10seconds
 
-#define MAIN_NODE_ADDRESS 0
-#define NODE_ADDRESS 3
 #define EXPECT_REPLY 1
 
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
