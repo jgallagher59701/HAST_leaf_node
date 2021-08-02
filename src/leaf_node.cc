@@ -33,7 +33,10 @@
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
 #define MAIN_NODE_ADDRESS 0
-#define NODE_ADDRESS 2
+// Define in the platformio file. jhrg 7/31/21
+#ifndef NODE_ADDRESS
+#define NODE_ADDRESS 4
+#endif
 
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node
@@ -49,6 +52,7 @@
 #define SHT30D 1
 #define SD 1
 #define SPI_SLEEP 1
+#define LORA 1
 
 #include "debug.h"
 
@@ -59,7 +63,7 @@
 #define RFM95_CS 5  // RF95 SPI CS
 
 // NB: The two hand-built units have SD_PWR on 11, the PCB uses pin 9
-#if NODE < 3
+#if NODE_ADDRESS < 3
 #define SD_PWR 11 // HIGH == power on SD card; hand built nodes use pin 11 for this
 #else
 #define SD_PWR 9 // HIGH == power on SD card; hand built nodes use pin 11 for this
@@ -82,7 +86,10 @@
 
 // Channel 0 is 902.3, others are + 200KHz for BW = 125 KHz. There are 64 channels.
 // 915.0 MHz is the no-channel nominal freq
+// Define in the platformio file. jhrg 7/31/21
+#ifndef FREQUENCY
 #define FREQUENCY 902.3
+#endif
 
 // Use these settings:
 #define BANDWIDTH 125000
@@ -93,7 +100,9 @@
 
 #define EXPECT_REPLY 1
 
+#ifndef STANDBY_INTERVAL_S
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
+#endif
 
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
 #define SD_POWER_ON_DELAY 200 // ms
@@ -136,11 +145,12 @@
 #define RFM95_INIT_ERROR 0x40
 #define SHT_31_INIT_ERROR 0x80
 
+#if LORA
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 // Singleton instance for the reliable datagram manager
 RHReliableDatagram rf95_manager(rf95, NODE_ADDRESS);
-//RHDatagram rf95_manager(rf95, NODE_ADDRESS);
+#endif
 
 unsigned int tx_power = 13; // dBm; 5 to 23 for RF95
 
@@ -198,8 +208,10 @@ void yield_spi_bus() {
  * @param to Send to this node
  */
 void send_debug(const char *msg, uint8_t to) {
+#if LORA
     yield_spi_to_rf95();
     rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg), to);
+#endif
 }
 
 /**
@@ -442,6 +454,7 @@ void wake_up_sd_card() {
  * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
  */
 void send_data_packet(packet_t &data, uint8_t to) {
+#if LORA
     yield_spi_to_rf95();
 
     // This may block for up to CAD_TIMEOUT seconds
@@ -456,6 +469,7 @@ void send_data_packet(packet_t &data, uint8_t to) {
             status |= RFM95_SEND_ERROR;
         }
     }
+#endif
 }
 
 /**
@@ -466,6 +480,7 @@ void send_data_packet(packet_t &data, uint8_t to) {
  * the local node's RTC.
  */
 void read_main_node_reply() {
+#if LORA
     yield_spi_to_rf95();
 
     // Used to hold any reply from the main node
@@ -494,14 +509,17 @@ void read_main_node_reply() {
     } else {
         status |= RFM95_NO_REPLY;
     }
+#endif
 }
 
 /**
  * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
  */
 void radio_silence() {
+#if LORA
     yield_spi_to_rf95();
     rf95.sleep(); // Turn off the LoRa
+#endif
 }
 
 /**
@@ -538,9 +556,11 @@ void sleep_node(unsigned long sample_time) {
     digitalWrite(STATUS_LED, LOW);
 #endif
 
+#if LORA
     // low-power configuration
     radio_silence();
     IO(Serial.println("Radio silence"));
+#endif
 
 #if SD
     shutdown_sd_card();
@@ -634,7 +654,7 @@ void setup() {
     // RocketScream's built-in flash not used
     SerialFlash.begin(FLASH_CS);
     SerialFlash.sleep();
-    digitalWrite(FLASH_CS, HIGH); // deselect
+    // digitalWrite(FLASH_CS, HIGH); // deselect
 
     // SD card power control (low-side switching)
     pinMode(SD_PWR, OUTPUT);
@@ -705,6 +725,7 @@ void setup() {
     }
 #endif
 
+#if LORA
     yield_spi_to_rf95();
 
     if (!rf95_manager.init()) {
@@ -737,6 +758,7 @@ void setup() {
     rf95.setCodingRate4(CODING_RATE);
     // 10 seconds
     rf95.setCADTimeout(RH_CAD_DEFAULT_TIMEOUT);
+#endif // LORA
 
     // Because the RS Ultra Pro board's native USB won't work with the standby() mode
     // in the LowPower or RTCZero libraries, the MCU board can easily wind up bricked
@@ -779,6 +801,7 @@ void loop() {
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval
 
+#if LORA
     last_tx_time = millis();
     send_data_packet(data, RH_BROADCAST_ADDRESS);
     last_tx_time = millis() - last_tx_time;
@@ -790,6 +813,7 @@ void loop() {
 
     set_state_pin(STATE_3);
     IO(Serial.println("STATE 3"));
+#endif
 
     log_data(get_log_filename(), data_packet_to_string(&data, false));
 
