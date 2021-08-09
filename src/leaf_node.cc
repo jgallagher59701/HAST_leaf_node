@@ -80,7 +80,7 @@
 #define STATE_4 8
 #define STATE_5 12
 
-#define V_BAT A0
+#define V_BAT A5 // A0
 
 // Constants
 
@@ -261,15 +261,46 @@ get_epoch(const char *date, const char *time) {
     return mktime(&t);
 }
 
+// Interesting low-level control of the ADC. Not used.
+#if 0
+/**
+ * @brief Fix (?) for a flaw in the SAMD21G18 analogRead().
+ * @note Hardwired to A0
+ */
+uint32_t adcRead() {
+    REG_ADC_CTRLA = 2;
+    REG_ADC_INPUTCTRL = 0x0F001800;
+    REG_ADC_SWTRIG = 2;
+    while (!(REG_ADC_INTFLAG & 1))
+        ;
+    return REG_ADC_RESULT;
+}
+#endif
+
 /**
    @note this version assumes that a voltage divider reduces Vbat by 1/4.3
    @return The battery voltage x 100 as an int
 */
 int get_bat_v() {
-    // voltage divider v_bat = 4.3 * vadc
-    // vadc = (raw / 4096)
+    // voltage divider v_bat = (4.3 / 3.3) * vadc
+    // vadc = 3.3 *(raw / 4096)
+
+    // let the ADC 'settle.' This, along with the loop below makes the values
+    // correct from the start and maybe needed for correctness after wakeup.
+    // jhrg 8/8/21
+    yield(100);
+
     int raw = analogRead(V_BAT);
-    return 430 * (raw / (float)ADC_MAX_VALUE); // voltage * 100
+    int delta;
+    do {
+        yield(100);
+        int raw2 = analogRead(V_BAT);
+        delta = raw - raw2;
+        raw = raw2;
+    } while (delta > 1);
+
+    float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
+    return (int)(voltage * 100.0); // voltage * 100
 }
 
 /// Use get_log_filename() and get_new_log_filename()
@@ -683,9 +714,9 @@ void setup() {
     IO(Serial.print(__DATE__));
     IO(Serial.print(F(", ")));
     IO(Serial.println(__TIME__));
-    char date_str[32] = {0};
-    snprintf(date_str, sizeof(date_str), "%d/%d/%dT%d:%d:%d", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
-             rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+    IO(char date_str[32] = {0});
+    IO(snprintf(date_str, sizeof(date_str), "%d/%d/%dT%d:%d:%d", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
+                rtc.getHours(), rtc.getMinutes(), rtc.getSeconds()));
     IO(Serial.print(F("RTC: ")));
     IO(Serial.println((const char *)date_str));
 
@@ -791,7 +822,7 @@ void loop() {
 
     // New packet encoding.
     // TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
-    build_data_packet(&data, NODE_ADDRESS, message, rtc.getEpoch(), get_bat_v(), (uint16_t)last_tx_time,
+    build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_bat_v(), (uint16_t)last_tx_time,
                       get_temperature(), get_humidity(), status);
 
     clear_state_pins();
