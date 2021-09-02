@@ -30,13 +30,16 @@
 #include "blink.h"
 #include "data_packet.h"
 
-#define Serial SerialUSB // Needed for RS. jhrg 7/26/20
-
 #define MAIN_NODE_ADDRESS 0
+
 // Define in the platformio file. jhrg 7/31/21
 #ifndef NODE_ADDRESS
 #define NODE_ADDRESS 4
 #endif
+
+#define Serial SerialUSB // Needed for RS. jhrg 7/26/20
+#define SERIAL_CONNECT_TRIES 10
+#define SERIAL_CONNECT_INTERVAL 1000 // ms
 
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node
@@ -45,6 +48,7 @@
 #define STANDBY_MODE 1 // Use RTC standby mode and not yield()
 
 #if DEBUG && STANDBY_MODE
+#undef STANDBY_MODE
 #define STANDBY_MODE 0
 #endif
 
@@ -104,6 +108,8 @@
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
 #endif
 
+#define BOOT_SAFTEY_DELAY 10000 // 10s
+
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
 #define SD_POWER_ON_DELAY 200 // ms
 
@@ -152,7 +158,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 RHReliableDatagram rf95_manager(rf95, NODE_ADDRESS);
 #endif
 
-unsigned int tx_power = 13; // dBm; 5 to 23 for RF95
+unsigned int tx_power = 23; // dBm; 5 to 23 for RF95
 
 // Singleton for the Real Time Clock
 RTCZero rtc;
@@ -169,7 +175,6 @@ uint8_t status = STATUS_OK;
  * @brief Call back for the sleep alarm
  */
 void alarmMatch() {
-    // TODO: Need to do this?
     rtc.detachInterrupt();
 }
 
@@ -207,10 +212,10 @@ void yield_spi_bus() {
  * @param msg The message; null terminated string
  * @param to Send to this node
  */
-void send_debug(const char *msg, uint8_t to) {
-#if LORA
+void lora_debug(const char *msg, uint8_t to) {
+#if LORA && LORA_DEBUG
     yield_spi_to_rf95();
-    rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg), to);
+    rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg)+1, to);
 #endif
 }
 
@@ -261,22 +266,6 @@ get_epoch(const char *date, const char *time) {
     return mktime(&t);
 }
 
-// Interesting low-level control of the ADC. Not used.
-#if 0
-/**
- * @brief Fix (?) for a flaw in the SAMD21G18 analogRead().
- * @note Hardwired to A0
- */
-uint32_t adcRead() {
-    REG_ADC_CTRLA = 2;
-    REG_ADC_INPUTCTRL = 0x0F001800;
-    REG_ADC_SWTRIG = 2;
-    while (!(REG_ADC_INTFLAG & 1))
-        ;
-    return REG_ADC_RESULT;
-}
-#endif
-
 /**
    @note this version assumes that a voltage divider reduces Vbat by 1/4.3
    @return The battery voltage x 100 as an int
@@ -298,6 +287,12 @@ int get_bat_v() {
         delta = raw - raw2;
         raw = raw2;
     } while (delta > 1);
+
+#if LORA_DEBUG
+    char msg[256];
+    snprintf(msg, 256, "get_bat_v(), raw: %d \n", raw);
+    lora_debug(msg, MAIN_NODE_ADDRESS);
+#endif
 
     float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
     return (int)(voltage * 100.0); // voltage * 100
@@ -372,11 +367,25 @@ void write_header(const char *file_name) {
 
     FatFile file; // Log file.
     if (file.open(file_name, O_WRONLY | O_CREAT | O_APPEND)) {
-        file.write("# Start Log");
-        file.write('\n');
+        file.write("# Start Log\n");
+        // getWriteError returns true if there was an error writing OR
+        // if the file has been closed (which is not an error...)
+        if (file.getWriteError())
+            status |= SD_FILE_ENTRY_WRITE_ERROR;
         file.close();
     } else {
+        status |= SD_FILE_ENTRY_WRITE_ERROR;
+    }
+
+    if (status & SD_FILE_ENTRY_WRITE_ERROR) {
+        char error_info[256];
+        int error = sd.sdErrorCode();
+        // sd.errorPrint(error_info);
+        snprintf(error_info, 256, "SD Card error: 0x%02x, node status: 0x%02x.", error, status);
+
         IO(Serial.println(F("Couldn't write file header")));
+        IO(Serial.println(error_info));
+
         blink(STATUS_LED, SD_WRITE_HEADER_FAIL, ERROR_TIMES);
     }
 
@@ -424,7 +433,7 @@ void log_data(const char *file_name, const char *data) {
 
         interrupts(); // enable interrupts for the rfm95
 
-        send_debug(error_info, MAIN_NODE_ADDRESS);
+        lora_debug(error_info, MAIN_NODE_ADDRESS);
     }
 
     // enable interrupts
@@ -463,7 +472,7 @@ void wake_up_sd_card() {
     // Calling this here freezes the RS. jhrg 3/24/21
     // noInterrupts();
 
-    yield(SD_POWER_ON_DELAY); // TODO Replace with STANDBY_MODE?
+    yield(SD_POWER_ON_DELAY);
 
     if (!sd.begin(SD_CS)) {
         status |= SD_CARD_WAKEUP_ERROR;
@@ -701,7 +710,9 @@ void setup() {
 
     // Only start the Serial interface when DEBUG is 1
     IO(Serial.begin(9600));
-    IO(while (!Serial)); // Wait for serial port to be available
+    int tries = 0;
+    // Wait for serial port to be available
+    IO(while ((tries < SERIAL_CONNECT_TRIES) && !Serial) { yield(SERIAL_CONNECT_INTERVAL); ++tries; });
 
     IO(Serial.println(F("Start LoRa Client")));
 
@@ -710,15 +721,16 @@ void setup() {
     rtc.begin(/*reset*/ true);
     rtc.setEpoch(get_epoch(__DATE__, __TIME__));
 
-    IO(Serial.print(F("Date, Time: ")));
-    IO(Serial.print(__DATE__));
-    IO(Serial.print(F(", ")));
-    IO(Serial.println(__TIME__));
-    IO(char date_str[32] = {0});
-    IO(snprintf(date_str, sizeof(date_str), "%d/%d/%dT%d:%d:%d", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
-                rtc.getHours(), rtc.getMinutes(), rtc.getSeconds()));
-    IO(Serial.print(F("RTC: ")));
-    IO(Serial.println((const char *)date_str));
+    IO(
+        Serial.print(F("Date, Time: "));
+        Serial.print(__DATE__);
+        Serial.print(F(", "));
+        Serial.println(__TIME__);
+        char date_str[32] = {0};
+        snprintf(date_str, sizeof(date_str), "%d/%d/%dT%d:%d:%d", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
+                 rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+        Serial.print(F("RTC: "));
+        Serial.println((const char *)date_str));
 
     // Initialize the temp/humidity sensor
 #if SHT30D
@@ -795,7 +807,9 @@ void setup() {
     // in the LowPower or RTCZero libraries, the MCU board can easily wind up bricked
     // when using standby(). It will then become impossible to upload new/fixed
     // code. Add a 10s delay here so a coordinated reset/upload will work.
-    yield(10000);
+    //
+    // 'tries' is the number of times the code tries to init the USB serial object.
+    yield(max(0, BOOT_SAFTEY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
 
 #if !DEBUG
     // Once past setup(), the USB cannot be used unless DEBUG is on. Then it must
@@ -805,7 +819,6 @@ void setup() {
     USBDevice.detach();
 #endif
 
-    // digitalWrite(STATUS_LED, LOW);
     // Exit setup() with the status LED lit.
 }
 
@@ -858,7 +871,7 @@ void loop() {
 
 #if LORA_DEBUG
     char msg[256];
-    snprintf(msg, 256, "t:%ld, o:%d", millis() - start_time_ms, STANDBY_INTERVAL_S);
-    send_debug(msg, MAIN_NODE_ADDRESS);
+    snprintf(msg, 256, "t: %ld, o: %d \n", (unsigned long)rtc.getEpoch() - sample_time, STANDBY_INTERVAL_S);
+    lora_debug(msg, MAIN_NODE_ADDRESS);
 #endif
 }
