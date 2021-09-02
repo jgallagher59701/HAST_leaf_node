@@ -42,7 +42,7 @@
 #define SERIAL_CONNECT_INTERVAL 1000 // ms
 
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
-#define LORA_DEBUG 0 // Send debugging info to the main node
+#define LORA_DEBUG 0 // Send debugging info to the main node using lora
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #define STANDBY_MODE 1 // Use RTC standby mode and not yield()
@@ -62,7 +62,7 @@
 
 // Pin assignments
 
-#define RFM95_INT 2 // RF95 Interrup
+#define RFM95_INT 2 // RF95 Interrupt
 #define FLASH_CS 4  // CS for 2MB onboard flash on the SPI bus
 #define RFM95_CS 5  // RF95 SPI CS
 
@@ -74,7 +74,7 @@
 #endif
 #define SD_CS 10 // CS for the SD card, SPI uses dedicated lines
 
-#define STATUS_LED 13 // Only for DEBUG mode
+#define STATUS_LED 13
 
 // These GPIO pins are used for debugging the leaf node state in case
 // it crashes/freezes. Could add 17–19 if needed. jhrg 1/1/21
@@ -399,7 +399,7 @@ void write_header(const char *file_name) {
    write data to the log, append a new line
    @param file_name open for append
    @param data write this char string
-   @note Claim the SPI bus (calls yield_spi_to_sd()().
+   @note Claim the SPI bus (calls yield_spi_to_sd).
 */
 void log_data(const char *file_name, const char *data) {
 #if SD
@@ -518,6 +518,11 @@ void send_data_packet(packet_t &data, uint8_t to) {
  * Once a packet is sent to the main node, expect a reply (even
  * when broadcasting the packet). Read the time code and update
  * the local node's RTC.
+ *
+ * This must be called within 5000ms of the expected reply.
+ *
+ * @todo This needs to be changed for configurations where nodes'
+ * communication with the main node might overlap.
  */
 void read_main_node_reply() {
 #if LORA
@@ -563,9 +568,9 @@ void radio_silence() {
 }
 
 /**
- * @brief Get the temperature from the SHT-30-D
+ * @brief Get the temperature from the SHT-30D
  * @note If the SHT30D didn't initialize correctly, this will return zero.
- * @return the temperature * 100 as a 16-bit unsigned int
+ * @return the temperature * 100 as a 16-bit signed int
  */
 int16_t get_temperature() {
 #if SHT30D
@@ -588,6 +593,14 @@ uint16_t get_humidity() {
 }
 
 /**
+ * Enter the sleep mode. Wake up after an interrupt. This
+ * handles shutting down the peripherals and puts the RS to
+ * sleep with an interrupt handler set to trigger wakeup.
+ * The sleep time period is set by the compile-time constant
+ * STANDBY_INTERVAL_S, which due to a time rounding error, is
+ * one less than the number of seconds the node will actually
+ * sleep.
+ *
  * @param sample_time Unix time the last sample was taken.
  */
 
@@ -597,7 +610,9 @@ void sleep_node(unsigned long sample_time) {
 #endif
 
 #if LORA
-    // low-power configuration
+    // low-power configuration. There is no corresponding wake up
+    // function since the first use of the LoRa module cancels
+    // its sleep mode.
     radio_silence();
     IO(Serial.println("Radio silence"));
 #endif
@@ -608,15 +623,15 @@ void sleep_node(unsigned long sample_time) {
 #endif
 
 #if SPI_SLEEP
-    // Adding SPI.end() drops the measured current draw from 0.65mA to 0.18mA
+    // TODO Test is this is useful
     SPI.end();
     IO(Serial.println("SPI shutdown"));
 #endif
 
     // TODO Fix this so that the times are on the hour.
-    // Use setAlaramTime(h, m, s) and rtc.MATCH_MMSS for every hour or MATCH_SS for
-    // every minute. Update the m and s values using 'time + n mod 60'.
-    // https://www.arduino.cc/en/Reference/RTC
+    //  Use setAlaramTime(h, m, s) and rtc.MATCH_MMSS for every hour or MATCH_SS for
+    //  every minute. Update the m and s values using 'time + n mod 60'.
+    //  https://www.arduino.cc/en/Reference/RTC
 
 #if STANDBY_MODE
     unsigned long wake_up_time = sample_time + STANDBY_INTERVAL_S;
@@ -625,8 +640,11 @@ void sleep_node(unsigned long sample_time) {
     rtc.setAlarmEpoch(wake_up_time);
     rtc.enableAlarm(rtc.MATCH_YYMMDDHHMMSS);
     rtc.attachInterrupt(alarmMatch);
-    // TODO Try adding a 10ms wait here. jhrg 12/5/20
+    // 10ms wait here. jhrg 12/5/20
     yield(10);
+    // At this point the node will enter sleep and wake up when the alarm is triggered.
+    // Execution resumes in alarmMatch() and then the line following the standbyMode()
+    // call.
     rtc.standbyMode();
 #else
     yield(STANDBY_INTERVAL_S * 1000);
@@ -735,7 +753,7 @@ void setup() {
     // Initialize the temp/humidity sensor
 #if SHT30D
     if (!sht30d.begin(0x44)) { // Set to 0x45 for alternate i2c addr
-        IO(Serial.println(F("Couldn't find SHT31")));
+        IO(Serial.println(F("Couldn't find SHT30D")));
         blink(STATUS_LED, SHT31_BEGIN_FAIL, ERROR_TIMES);
         digitalWrite(STATUS_LED, HIGH);
         status |= SHT_31_INIT_ERROR;
