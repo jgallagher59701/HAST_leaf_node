@@ -42,7 +42,7 @@
 #define SERIAL_CONNECT_INTERVAL 1000 // ms
 
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
-#define LORA_DEBUG 0 // Send debugging info to the main node using lora
+#define LORA_DEBUG 1 // Send debugging info to the main node using lora
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #define STANDBY_MODE 1 // Use RTC standby mode and not yield()
@@ -84,7 +84,8 @@
 #define STATE_4 8
 #define STATE_5 12
 
-#define V_BAT A5 // A0
+#define USE_AREF_2V23 1
+#define V_BAT A1 // A5
 
 // Constants
 
@@ -215,9 +216,13 @@ void yield_spi_bus() {
 void lora_debug(const char *msg, uint8_t to) {
 #if LORA && LORA_DEBUG
     yield_spi_to_rf95();
-    rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg)+1, to);
+    rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg) + 1, to);
 #endif
 }
+
+// Set to 1 to use delay(), zero to use yield(). There are problems
+// debugging the RocketScream using yield().
+#define USE_DELAY 1
 
 /**
    @brief delay that enables background tasks
@@ -227,9 +232,13 @@ void lora_debug(const char *msg, uint8_t to) {
    @note Cannot be used when interrupts are disabled (cf. millis())
 */
 void yield(unsigned long ms_delay) {
+#if USE_DELAY
+    delay(ms_delay);
+#else
     unsigned long start = millis();
     while ((millis() - start) < ms_delay)
         yield();
+#endif
 }
 
 /**
@@ -266,13 +275,38 @@ get_epoch(const char *date, const char *time) {
     return mktime(&t);
 }
 
+#define VALUES_TO_AVG 10
+
 /**
    @note this version assumes that a voltage divider reduces Vbat by 1/4.3
    @return The battery voltage x 100 as an int
 */
 int get_bat_v() {
-    // voltage divider v_bat = (4.3 / 3.3) * vadc
-    // vadc = 3.3 *(raw / 4096)
+#if 1
+    // TODO modify to take one sample, discard it, then 10 samples
+    // and return their average. Time delays, etc., can be set in
+    // setup() using ADC calls. See:
+    // https://blog.thea.codes/getting-the-most-out-of-the-samd21-adc/
+
+    (void)analogRead(V_BAT); // discard the first read
+
+    int raw = 0;
+    int total = 0;
+    for (int i = 0; i < VALUES_TO_AVG; ++i) {
+        raw = analogRead(V_BAT);
+        total += raw;
+    }
+
+    total /= VALUES_TO_AVG;
+
+#if USE_AREF_2V23
+    float voltage = 4.46 * (total / (float)ADC_MAX_VALUE);
+#else
+    float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
+#endif
+    return (int)(voltage * 100.0); // voltage * 100
+
+#else
 
     // let the ADC 'settle.' This, along with the loop below makes the values
     // correct from the start and maybe needed for correctness after wakeup.
@@ -281,21 +315,31 @@ int get_bat_v() {
 
     int raw = analogRead(V_BAT);
     int delta;
+    int i = 1;
     do {
         yield(100);
         int raw2 = analogRead(V_BAT);
         delta = raw - raw2;
+        ++i;
         raw = raw2;
     } while (delta > 1);
 
 #if LORA_DEBUG
     char msg[256];
-    snprintf(msg, 256, "get_bat_v(), raw: %d \n", raw);
+    snprintf(msg, 256, "get_bat_v(), raw: %d, samples: %d \n", raw, i);
     lora_debug(msg, MAIN_NODE_ADDRESS);
 #endif
 
+    // raw += 70;
+
+#if USE_AREF_2V23
+    float voltage = 4.46 * (raw / (float)ADC_MAX_VALUE);
+#else
     float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
+#endif
     return (int)(voltage * 100.0); // voltage * 100
+
+#endif
 }
 
 /// Use get_log_filename() and get_new_log_filename()
@@ -447,6 +491,7 @@ void log_data(const char *file_name, const char *data) {
  * Wait for SD_CARD_WAIT seconds before cutting the power.
  */
 void shutdown_sd_card() {
+    // FIXME only do this if the card started. jhrg 9/26/21
 #if STANDBY_MODE
     // Wait SD_CARD_WAIT seconds for the SD card to settle.
     rtc.setAlarmEpoch(rtc.getEpoch() + SD_CARD_WAIT);
@@ -465,6 +510,7 @@ void shutdown_sd_card() {
  * @brief Power on teh SD card and initialize the driver
  */
 void wake_up_sd_card() {
+    // FIXME Only do this if the SD card was initialized. jhrg 9/26/21
     yield_spi_to_sd();
 
     digitalWrite(SD_PWR, HIGH);
@@ -474,6 +520,9 @@ void wake_up_sd_card() {
 
     yield(SD_POWER_ON_DELAY);
 
+    // FIXME If the SD card didn't init, don't try to start it here.
+    // OR, maybe we should try if it was a transient problem? Probably
+    // a problem at boot time is real and should not be ignored. jhrg 9/25/21
     if (!sd.begin(SD_CS)) {
         status |= SD_CARD_WAKEUP_ERROR;
     }
@@ -623,7 +672,6 @@ void sleep_node(unsigned long sample_time) {
 #endif
 
 #if SPI_SLEEP
-    // TODO Test is this is useful
     SPI.end();
     IO(Serial.println("SPI shutdown"));
 #endif
@@ -707,6 +755,12 @@ void setup() {
     init_state_pins();
     clear_state_pins();
 
+#if USE_AREF_2V23
+    analogReference(AR_INTERNAL2V23);
+    // See https://blog.thea.codes/getting-the-most-out-of-the-samd21-adc/
+    // And assume an input impedance of 500k for the 1M | 1M V divider
+    ADC->SAMPCTRL.reg = ADC_SAMPCTRL_SAMPLEN(2);
+#endif
     analogReadResolution(ADC_BITS);
 
     // RocketScream's built-in flash not used
@@ -723,6 +777,7 @@ void setup() {
     pinMode(RFM95_CS, OUTPUT);
 
     // Initialize USB and attach to host.
+    // TODO Not needed. These are called in the arduino main(). jhrg 9/26/21
     USBDevice.init();
     USBDevice.attach();
 
