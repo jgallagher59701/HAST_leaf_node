@@ -14,6 +14,7 @@
 #define ADC_BITS 12
 #define ADC_MAX_VALUE 4096
 #define VALUES_TO_AVG 10
+#define VOLTAGE_OFFSET 0.01
 
 /**
  * @brief Read the current voltage of the battery 
@@ -47,7 +48,7 @@ int get_battery_voltage() {
     // Vref tracks it, so all values of Vbat < 3.3 show up as 3.3V.
     float voltage = 4.3 * (avg_counts / (float)ADC_MAX_VALUE);
 #endif
-    return (int)roundf(voltage * 100.0); // voltage * 100
+    return (int)roundf((voltage + VOLTAGE_OFFSET) * 100.0); // voltage * 100
 }
 
 void get_battery_voltage_setup() {
