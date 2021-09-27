@@ -7,13 +7,17 @@
 
 #include "get_bat_voltage.h"
 
-void setup() {
-    Serial.begin(115200);
+#define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
-    while (!Serial)
-        ;
+void setup() {
 
     get_battery_voltage_setup();
+
+    Serial.begin(115200);
+#if 0
+    while (!Serial)
+        ;
+#endif
 
     Serial.println("Begin...");
 }
