@@ -12,18 +12,22 @@
 void setup() {
 
     get_battery_voltage_setup();
+#if 1
 
     Serial.begin(115200);
-#if 0
     while (!Serial)
         ;
-#endif
+
 
     Serial.println("Begin...");
+#endif
 }
 
 void loop() {
+#if 1
     Serial.print("get_battery_voltage(): ");
     Serial.println(get_battery_voltage());
+#endif
+    get_battery_voltage();
     delay(1000);
 }
