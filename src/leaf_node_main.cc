@@ -14,14 +14,12 @@ void setup() {
 
     delay(5000);
 
-#if 0
     get_battery_voltage_setup();
 
-
+#if 0
     Serial.begin(115200);
-    //while (!Serial)
-    //  ;
-    //yield();
+    while (!Serial)
+        yield();
 
     Serial.println("Begin...");
 #endif
@@ -31,10 +29,11 @@ void loop() {
 #if 0
     Serial.print("get_battery_voltage(): ");
     Serial.println(get_battery_voltage());
+#endif
 
     get_battery_voltage();
     delay(1000);
-#endif
+
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
     digitalWrite(LED_BUILTIN, LOW);
