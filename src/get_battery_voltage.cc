@@ -5,8 +5,9 @@
 // James Gallagher <jgallagher@opendap.org>
 // 9/26/21
 
-#include "get_bat_voltage.h"
 #include <Arduino.h>
+
+#include "get_battery_voltage.h"
 
 #define USE_AREF_2V23 1
 #define V_BAT A1 // A5

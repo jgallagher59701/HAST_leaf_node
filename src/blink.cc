@@ -2,8 +2,9 @@
 // Created by James Gallagher on 2/1/20.
 //
 
-#include "blink.h"
 #include <Arduino.h>
+
+#include "blink.h"
 
 #define one_second 1000
 #define quarter_second 250

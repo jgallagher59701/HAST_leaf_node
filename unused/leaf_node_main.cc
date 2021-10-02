@@ -16,7 +16,7 @@ void setup() {
 
     get_battery_voltage_setup();
 
-#if 0
+#if 1
     Serial.begin(115200);
     while (!Serial)
         yield();
@@ -26,7 +26,7 @@ void setup() {
 }
 
 void loop() {
-#if 0
+#if 1
     Serial.print("get_battery_voltage(): ");
     Serial.println(get_battery_voltage());
 #endif
