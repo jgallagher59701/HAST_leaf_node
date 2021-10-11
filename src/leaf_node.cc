@@ -54,6 +54,10 @@
 #define STANDBY_MODE 0
 #endif
 
+// Set to 1 to use delay(), zero to use yield(). There are problems
+// debugging the RocketScream using yield().
+#define USE_DELAY 1
+
 #define TX_LED 1 // 1 == show the LED during operation, 0 == not
 #define SHT30D 1
 #define SD 1
@@ -76,17 +80,6 @@
 
 #define STATUS_LED 13
 
-// These GPIO pins are used for debugging the leaf node state in case
-// it crashes/freezes. Could add 17–19 if needed. jhrg 1/1/21
-#define STATE_1 3
-#define STATE_2 6
-#define STATE_3 7
-#define STATE_4 8
-#define STATE_5 12
-
-#define USE_AREF_2V23 1
-#define V_BAT A1 // A5
-
 // Constants
 
 // Channel 0 is 902.3, others are + 200KHz for BW = 125 KHz. There are 64 channels.
@@ -103,6 +96,7 @@
 
 // RH_CAD_DEFAULT_TIMEOUT 10seconds
 
+// Will the main node reply to the data packet broadcast?
 #define EXPECT_REPLY 1
 
 #ifndef STANDBY_INTERVAL_S
@@ -113,9 +107,6 @@
 
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
 #define SD_POWER_ON_DELAY 200 // ms
-
-#define ADC_BITS 12
-#define ADC_MAX_VALUE 4096
 
 // Log file name.
 #define FILE_BASE_NAME "Data"
@@ -220,10 +211,6 @@ void lora_debug(const char *msg, uint8_t to) {
 #endif
 }
 
-// Set to 1 to use delay(), zero to use yield(). There are problems
-// debugging the RocketScream using yield().
-#define USE_DELAY 1
-
 /**
    @brief delay that enables background tasks
 
@@ -275,75 +262,6 @@ get_epoch(const char *date, const char *time) {
     return mktime(&t);
 }
 
-#if 0
-#define VALUES_TO_AVG 10
-
-/**
-   @note this version assumes that a voltage divider reduces Vbat by 1/4.3
-   @return The battery voltage x 100 as an int
-*/
-int get_bat_v() {
-#if 1
-    // TODO modify to take one sample, discard it, then 10 samples
-    // and return their average. Time delays, etc., can be set in
-    // setup() using ADC calls. See:
-    // https://blog.thea.codes/getting-the-most-out-of-the-samd21-adc/
-
-    (void)analogRead(V_BAT); // discard the first read
-
-    int raw = 0;
-    int total = 0;
-    for (int i = 0; i < VALUES_TO_AVG; ++i) {
-        raw = analogRead(V_BAT);
-        total += raw;
-    }
-
-    total /= VALUES_TO_AVG;
-
-#if USE_AREF_2V23
-    float voltage = 4.46 * (total / (float)ADC_MAX_VALUE);
-#else
-    float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
-#endif
-    return (int)(voltage * 100.0); // voltage * 100
-
-#else
-
-    // let the ADC 'settle.' This, along with the loop below makes the values
-    // correct from the start and maybe needed for correctness after wakeup.
-    // jhrg 8/8/21
-    yield(100);
-
-    int raw = analogRead(V_BAT);
-    int delta;
-    int i = 1;
-    do {
-        yield(100);
-        int raw2 = analogRead(V_BAT);
-        delta = raw - raw2;
-        ++i;
-        raw = raw2;
-    } while (delta > 1);
-
-#if LORA_DEBUG
-    char msg[256];
-    snprintf(msg, 256, "get_bat_v(), raw: %d, samples: %d \n", raw, i);
-    lora_debug(msg, MAIN_NODE_ADDRESS);
-#endif
-
-    // raw += 70;
-
-#if USE_AREF_2V23
-    float voltage = 4.46 * (raw / (float)ADC_MAX_VALUE);
-#else
-    float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
-#endif
-    return (int)(voltage * 100.0); // voltage * 100
-
-#endif
-}
-#endif
-
 /// Use get_log_filename() and get_new_log_filename()
 char file_name[13] = FILE_BASE_NAME "00.csv";
 
@@ -362,6 +280,9 @@ char file_name[13] = FILE_BASE_NAME "00.csv";
 const char *
 get_new_log_filename() {
     // If the SD card/library failed to init, don't run this code.
+    if (status & SD_CARD_INIT_ERROR) {
+        return nullptr;
+    }
 
     const uint8_t BASE_NAME_SIZE = sizeof(FILE_BASE_NAME) - 1;
 
@@ -494,6 +415,10 @@ void log_data(const char *file_name, const char *data) {
  */
 void shutdown_sd_card() {
     // FIXME only do this if the card started. jhrg 9/26/21
+    if (status & SD_CARD_INIT_ERROR) {
+        return;
+    }
+
 #if STANDBY_MODE
     // Wait SD_CARD_WAIT seconds for the SD card to settle.
     rtc.setAlarmEpoch(rtc.getEpoch() + SD_CARD_WAIT);
@@ -513,6 +438,10 @@ void shutdown_sd_card() {
  */
 void wake_up_sd_card() {
     // FIXME Only do this if the SD card was initialized. jhrg 9/26/21
+    if (status & SD_CARD_INIT_ERROR) {
+        return;
+    }
+
     yield_spi_to_sd();
 
     digitalWrite(SD_PWR, HIGH);
@@ -539,7 +468,7 @@ void wake_up_sd_card() {
  * the 'to' address is RH_BROADCAST_ADDRESS, wait until the packet is
  * sent (but not for an ACK).
  * 
- * If an error is detected, set the 'status.'
+ * If an error is detected, set 'status.'
  * 
  * @param data The data packet to send
  * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
@@ -715,27 +644,6 @@ void sleep_node(unsigned long sample_time) {
 #endif
 }
 
-/// Debugging output - set the state of unused GPIOs to track progress
-void init_state_pins() {
-    pinMode(STATE_1, OUTPUT);
-    pinMode(STATE_2, OUTPUT);
-    pinMode(STATE_3, OUTPUT);
-    pinMode(STATE_4, OUTPUT);
-    pinMode(STATE_5, OUTPUT);
-}
-
-void clear_state_pins() {
-    digitalWrite(STATE_1, LOW);
-    digitalWrite(STATE_2, LOW);
-    digitalWrite(STATE_3, LOW);
-    digitalWrite(STATE_4, LOW);
-    digitalWrite(STATE_5, LOW);
-}
-
-void set_state_pin(unsigned int pin) {
-    digitalWrite(pin, HIGH);
-}
-
 void setup() {
     // Blanket pin mode settings
     // Switch unused pins as input and enabled built-in pullup
@@ -753,10 +661,6 @@ void setup() {
     pinMode(STATUS_LED, OUTPUT);
     digitalWrite(STATUS_LED, HIGH);
 
-    // Debugging pins initialized
-    init_state_pins();
-    clear_state_pins();
-
     // Configure the ADC
     get_battery_voltage_setup();
 
@@ -773,13 +677,6 @@ void setup() {
     pinMode(SD_CS, OUTPUT);
     pinMode(RFM95_CS, OUTPUT);
 
-#if 0
-    // Initialize USB and attach to host.
-    // TODO Not needed. These are called in the arduino main(). jhrg 9/26/21
-    USBDevice.init();
-    USBDevice.attach();
-#endif
- 
     // Only start the Serial interface when DEBUG is 1
     IO(Serial.begin(115200));
     int tries = 0;
@@ -815,6 +712,8 @@ void setup() {
 
     // The SHT30D temp/humidity sensor has a heater; turn it off
     sht30d.heater(false);
+#else
+    status |= SHT_31_INIT_ERROR;
 #endif // SHT30D
 
     // Not disabling interrupts here since the RFM 95 is not yet running
@@ -838,6 +737,8 @@ void setup() {
         // Write data header. This will call error_blink() if it fails.
         write_header(file_name);
     }
+#else
+    status |= SD_CARD_INIT_ERROR;
 #endif
 
 #if LORA
@@ -873,6 +774,8 @@ void setup() {
     rf95.setCodingRate4(CODING_RATE);
     // 10 seconds
     rf95.setCADTimeout(RH_CAD_DEFAULT_TIMEOUT);
+#else
+    status |= RFM95_INIT_ERROR;
 #endif // LORA
 
     // Because the RS Ultra Pro board's native USB won't work with the standby() mode
@@ -915,10 +818,6 @@ void loop() {
                       get_temperature(), get_humidity(), status);
 #endif
 
-    clear_state_pins();
-    set_state_pin(STATE_1);
-    IO(Serial.println("STATE 1"));
-
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval
 
@@ -927,24 +826,12 @@ void loop() {
     send_data_packet(data, RH_BROADCAST_ADDRESS);
     last_tx_time = millis() - last_tx_time;
 
-    set_state_pin(STATE_2);
-    IO(Serial.println("STATE 2"));
-
     read_main_node_reply();
-
-    set_state_pin(STATE_3);
-    IO(Serial.println("STATE 3"));
 #endif
 
     log_data(get_log_filename(), data_packet_to_string(&data, false));
 
-    set_state_pin(STATE_4);
-    IO(Serial.println("STATE 4"));
-
     sleep_node(sample_time);
-
-    set_state_pin(STATE_5);
-    IO(Serial.println("STATE 5"));
 
 #if LORA_DEBUG
     char msg[256];
