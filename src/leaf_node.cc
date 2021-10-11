@@ -31,6 +31,11 @@
 #include "data_packet.h"
 #include "get_battery_voltage.h"
 
+// Exclude some parts of the code for debugging. Zero excludes the code.
+#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
+#define LORA_DEBUG 0 // Send debugging info to the main node using lora
+#include "debug.h"
+
 #define MAIN_NODE_ADDRESS 0
 
 // Define in the platformio file. jhrg 7/31/21
@@ -42,10 +47,6 @@
 #define SERIAL_CONNECT_TRIES 10
 #define SERIAL_CONNECT_INTERVAL 1000 // ms
 
-#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
-#define LORA_DEBUG 1 // Send debugging info to the main node using lora
-
-// Exclude some parts of the code for debugging. Zero excludes the code.
 #define STANDBY_MODE 1 // Use RTC standby mode and not yield()
 
 #if DEBUG && STANDBY_MODE
@@ -58,8 +59,6 @@
 #define SD 1
 #define SPI_SLEEP 1
 #define LORA 1
-
-#include "debug.h"
 
 // Pin assignments
 
@@ -774,13 +773,15 @@ void setup() {
     pinMode(SD_CS, OUTPUT);
     pinMode(RFM95_CS, OUTPUT);
 
+#if 0
     // Initialize USB and attach to host.
     // TODO Not needed. These are called in the arduino main(). jhrg 9/26/21
     USBDevice.init();
     USBDevice.attach();
-
+#endif
+ 
     // Only start the Serial interface when DEBUG is 1
-    IO(Serial.begin(9600));
+    IO(Serial.begin(115200));
     int tries = 0;
     // Wait for serial port to be available
     IO(while ((tries < SERIAL_CONNECT_TRIES) && !Serial) { yield(SERIAL_CONNECT_INTERVAL); ++tries; });

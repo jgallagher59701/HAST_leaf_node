@@ -49,6 +49,7 @@ int get_battery_voltage() {
     // Vref tracks it, so all values of Vbat < 3.3 show up as 3.3V.
     float voltage = 4.3 * (avg_counts / (float)ADC_MAX_VALUE);
 #endif
+
     return (int)roundf((voltage + VOLTAGE_OFFSET) * 100.0); // voltage * 100
 }
 

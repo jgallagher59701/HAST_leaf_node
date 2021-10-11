@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-#include "get_bat_voltage.h"
+#include "get_battery_voltage.h"
 
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
@@ -19,19 +19,20 @@ void setup() {
 #if 1
     Serial.begin(115200);
     while (!Serial)
-        yield();
+        ;
 
     Serial.println("Begin...");
 #endif
 }
 
 void loop() {
+    int v = get_battery_voltage();
+
 #if 1
     Serial.print("get_battery_voltage(): ");
-    Serial.println(get_battery_voltage());
+    Serial.println(v);
 #endif
 
-    get_battery_voltage();
     delay(1000);
 
     digitalWrite(LED_BUILTIN, HIGH);
