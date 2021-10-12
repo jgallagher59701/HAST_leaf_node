@@ -44,19 +44,14 @@
 #endif
 
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
-#define SERIAL_CONNECT_TRIES 10
-#define SERIAL_CONNECT_INTERVAL 1000 // ms
 
-#define STANDBY_MODE 1 // Use RTC standby mode and not yield()
+#define STANDBY_MODE 1 // Use RTC standby mode and not delay()
 
+// If DEBUG (use Serial USB to debug) is set, don't use standby mode
 #if DEBUG && STANDBY_MODE
 #undef STANDBY_MODE
 #define STANDBY_MODE 0
 #endif
-
-// Set to 1 to use delay(), zero to use yield(). There are problems
-// debugging the RocketScream using yield().
-#define USE_DELAY 1
 
 #define TX_LED 1 // 1 == show the LED during operation, 0 == not
 #define SHT30D 1
@@ -76,6 +71,7 @@
 #else
 #define SD_PWR 9 // HIGH == power on SD card; hand built nodes use pin 11 for this
 #endif
+
 #define SD_CS 10 // CS for the SD card, SPI uses dedicated lines
 
 #define STATUS_LED 13
@@ -205,17 +201,22 @@ void yield_spi_bus() {
  * @param to Send to this node
  */
 void lora_debug(const char *msg, uint8_t to) {
-#if LORA && LORA_DEBUG
+#if LORA_DEBUG
+    if (status & RFM95_INIT_ERROR) {
+        return;
+    }
+
     yield_spi_to_rf95();
     rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg) + 1, to);
 #endif
 }
 
+#if 0
+// TODO Remove and use delay(). From debugging it's easy to see that delay()
+//  calls yield(). jhrg 10/11/21
 /**
    @brief delay that enables background tasks
-
    Used for debugging and to enable program upload. See setup().
-
    @note Cannot be used when interrupts are disabled (cf. millis())
 */
 void yield(unsigned long ms_delay) {
@@ -227,6 +228,7 @@ void yield(unsigned long ms_delay) {
         yield();
 #endif
 }
+#endif 
 
 /**
    @brief Get the current epoch from __DATE__ and __TIME__
@@ -414,7 +416,7 @@ void log_data(const char *file_name, const char *data) {
  * Wait for SD_CARD_WAIT seconds before cutting the power.
  */
 void shutdown_sd_card() {
-    // FIXME only do this if the card started. jhrg 9/26/21
+    // Only do this if the card started. jhrg 9/26/21
     if (status & SD_CARD_INIT_ERROR) {
         return;
     }
@@ -424,10 +426,10 @@ void shutdown_sd_card() {
     rtc.setAlarmEpoch(rtc.getEpoch() + SD_CARD_WAIT);
     rtc.enableAlarm(rtc.MATCH_YYMMDDHHMMSS);
     rtc.attachInterrupt(alarmMatch);
-    yield(10);
+    delay(10);
     rtc.standbyMode();
 #else
-    yield(SD_CARD_WAIT * 1000);
+    delay(SD_CARD_WAIT * 1000);
 #endif
 
     digitalWrite(SD_PWR, LOW); // Now, turn off the SD card
@@ -437,7 +439,7 @@ void shutdown_sd_card() {
  * @brief Power on teh SD card and initialize the driver
  */
 void wake_up_sd_card() {
-    // FIXME Only do this if the SD card was initialized. jhrg 9/26/21
+    // Only do this if the SD card was initialized. jhrg 9/26/21
     if (status & SD_CARD_INIT_ERROR) {
         return;
     }
@@ -449,7 +451,7 @@ void wake_up_sd_card() {
     // Calling this here freezes the RS. jhrg 3/24/21
     // noInterrupts();
 
-    yield(SD_POWER_ON_DELAY);
+    delay(SD_POWER_ON_DELAY);
 
     // FIXME If the SD card didn't init, don't try to start it here.
     // OR, maybe we should try if it was a transient problem? Probably
@@ -474,7 +476,10 @@ void wake_up_sd_card() {
  * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
  */
 void send_data_packet(packet_t &data, uint8_t to) {
-#if LORA
+    if (status & RFM95_INIT_ERROR) {
+        return;
+    }
+
     yield_spi_to_rf95();
 
     // This may block for up to CAD_TIMEOUT seconds
@@ -489,7 +494,6 @@ void send_data_packet(packet_t &data, uint8_t to) {
             status |= RFM95_SEND_ERROR;
         }
     }
-#endif
 }
 
 /**
@@ -505,7 +509,10 @@ void send_data_packet(packet_t &data, uint8_t to) {
  * communication with the main node might overlap.
  */
 void read_main_node_reply() {
-#if LORA
+    if (status & RFM95_INIT_ERROR) {
+        return;
+    }
+
     yield_spi_to_rf95();
 
     // Used to hold any reply from the main node
@@ -534,17 +541,18 @@ void read_main_node_reply() {
     } else {
         status |= RFM95_NO_REPLY;
     }
-#endif
 }
 
 /**
  * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
  */
 void radio_silence() {
-#if LORA
+    if (status & RFM95_INIT_ERROR) {
+        return;
+    }
+
     yield_spi_to_rf95();
     rf95.sleep(); // Turn off the LoRa
-#endif
 }
 
 /**
@@ -620,13 +628,13 @@ void sleep_node(unsigned long sample_time) {
     rtc.enableAlarm(rtc.MATCH_YYMMDDHHMMSS);
     rtc.attachInterrupt(alarmMatch);
     // 10ms wait here. jhrg 12/5/20
-    yield(10);
+    delay(10);
     // At this point the node will enter sleep and wake up when the alarm is triggered.
     // Execution resumes in alarmMatch() and then the line following the standbyMode()
     // call.
     rtc.standbyMode();
 #else
-    yield(STANDBY_INTERVAL_S * 1000);
+    delay(STANDBY_INTERVAL_S * 1000);
 #endif
 
 #if SPI_SLEEP
@@ -679,9 +687,8 @@ void setup() {
 
     // Only start the Serial interface when DEBUG is 1
     IO(Serial.begin(115200));
-    int tries = 0;
     // Wait for serial port to be available
-    IO(while ((tries < SERIAL_CONNECT_TRIES) && !Serial) { yield(SERIAL_CONNECT_INTERVAL); ++tries; });
+    IO(while(!Serial););
 
     IO(Serial.println(F("Start LoRa Client")));
 
@@ -690,14 +697,13 @@ void setup() {
     rtc.begin(/*reset*/ true);
     rtc.setEpoch(get_epoch(__DATE__, __TIME__));
 
-    IO(
-        Serial.print(F("Date, Time: "));
+    IO(Serial.print(F("Date, Time: "));
         Serial.print(__DATE__);
         Serial.print(F(", "));
         Serial.println(__TIME__);
         char date_str[32] = {0};
         snprintf(date_str, sizeof(date_str), "%d/%d/%dT%d:%d:%d", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
-                 rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+                    rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
         Serial.print(F("RTC: "));
         Serial.println((const char *)date_str));
 
@@ -723,7 +729,7 @@ void setup() {
     yield_spi_to_sd();
 
     IO(Serial.print(F("Initializing SD card...")));
-    yield(SD_POWER_ON_DELAY);
+    delay(SD_POWER_ON_DELAY);
 
     if (!sd.begin(SD_CS)) {
         IO(Serial.println(F("Couldn't init the SD Card")));
@@ -784,7 +790,7 @@ void setup() {
     // code. Add a 10s delay here so a coordinated reset/upload will work.
     //
     // 'tries' is the number of times the code tries to init the USB serial object.
-    yield(max(0, BOOT_SAFTEY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
+    delay(BOOT_SAFTEY_DELAY);
 
 #if !DEBUG
     // Once past setup(), the USB cannot be used unless DEBUG is on. Then it must
@@ -821,13 +827,11 @@ void loop() {
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval
 
-#if LORA
     last_tx_time = millis();
     send_data_packet(data, RH_BROADCAST_ADDRESS);
     last_tx_time = millis() - last_tx_time;
 
     read_main_node_reply();
-#endif
 
     log_data(get_log_filename(), data_packet_to_string(&data, false));
 
