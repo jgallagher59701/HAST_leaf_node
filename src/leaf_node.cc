@@ -29,7 +29,7 @@
 
 #include "blink.h"
 #include "data_packet.h"
-#include "get_battery_voltage.h"
+#include "battery_voltage.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
@@ -45,7 +45,9 @@
 
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 
+// TODO remove when standby_time.cc is done
 #define STANDBY_MODE 1 // Use RTC standby mode and not delay()
+#define SECONDS_PER_NODE 4 // s, Each leaf node is given this time window
 
 // If DEBUG (use Serial USB to debug) is set, don't use standby mode
 #if DEBUG && STANDBY_MODE
@@ -159,6 +161,7 @@ SdFat sd; // File system object.
 
 uint8_t status = STATUS_OK;
 
+// TODO Moved?
 /** 
  * @brief Call back for the sleep alarm
  */
@@ -210,25 +213,6 @@ void lora_debug(const char *msg, uint8_t to) {
     rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg) + 1, to);
 #endif
 }
-
-#if 0
-// TODO Remove and use delay(). From debugging it's easy to see that delay()
-//  calls yield(). jhrg 10/11/21
-/**
-   @brief delay that enables background tasks
-   Used for debugging and to enable program upload. See setup().
-   @note Cannot be used when interrupts are disabled (cf. millis())
-*/
-void yield(unsigned long ms_delay) {
-#if USE_DELAY
-    delay(ms_delay);
-#else
-    unsigned long start = millis();
-    while ((millis() - start) < ms_delay)
-        yield();
-#endif
-}
-#endif 
 
 /**
    @brief Get the current epoch from __DATE__ and __TIME__
@@ -627,8 +611,7 @@ void sleep_node(unsigned long sample_time) {
     rtc.setAlarmEpoch(wake_up_time);
     rtc.enableAlarm(rtc.MATCH_YYMMDDHHMMSS);
     rtc.attachInterrupt(alarmMatch);
-    // 10ms wait here. jhrg 12/5/20
-    delay(10);
+    delay(10);  // 10ms wait here. jhrg 12/5/20
     // At this point the node will enter sleep and wake up when the alarm is triggered.
     // Execution resumes in alarmMatch() and then the line following the standbyMode()
     // call.
@@ -814,15 +797,10 @@ void loop() {
 
     ++message;
 
-// New packet encoding.
-// TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
-#if 0
-    build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_bat_v(), (uint16_t)last_tx_time,
-                      get_temperature(), get_humidity(), status);
-#else
+    // New packet encoding.
+    // TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
     build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_battery_voltage(), (uint16_t)last_tx_time,
                       get_temperature(), get_humidity(), status);
-#endif
 
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval

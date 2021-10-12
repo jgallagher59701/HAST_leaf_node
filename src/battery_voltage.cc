@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 
-#include "get_battery_voltage.h"
+#include "battery_voltage.h"
 
 #define USE_AREF_2V23 1
 #define V_BAT A1 // A5
