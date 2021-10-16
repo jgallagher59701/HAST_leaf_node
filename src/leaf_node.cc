@@ -635,6 +635,8 @@ void sleep_node(unsigned long sample_time) {
 #endif
 }
 
+#ifndef UNIT_TEST
+
 void setup() {
     // Blanket pin mode settings
     // Switch unused pins as input and enabled built-in pullup
@@ -821,3 +823,4 @@ void loop() {
     lora_debug(msg, MAIN_NODE_ADDRESS);
 #endif
 }
+#endif // UNIT_TEST
