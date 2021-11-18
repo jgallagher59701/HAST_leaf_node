@@ -2,7 +2,6 @@
 #ifndef standby_time_h
 #define standby_time_h
 
-// #include <Arduino.h>
 //#include <RTCZero.h>
 
 extern uint8_t next_sample_time[];
