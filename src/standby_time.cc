@@ -1,5 +1,5 @@
 //
-// Functions to set the standby times. 
+// Functions to set the standby times.
 //
 // James Gallagher <jgallagher@opendap.org>
 // 10/11/21
@@ -52,8 +52,7 @@ uint8_t next_sample_time[MINUTES_PER_HOUR] = {0};
  * evenly divide 60
  * @return true if called with a value interval, false otherwise
  */
-bool compute_samples(uint8_t minutes_interval)
-{
+bool compute_samples(uint8_t minutes_interval) {
     if (minutes_interval <= 0 || minutes_interval > 60 || (minutes_interval % 60 != 0))
         return false;
 
@@ -67,12 +66,14 @@ bool compute_samples(uint8_t minutes_interval)
 /**
  * @brief Set the minute-mark standby time based on clock time. Calls stadnbyMode().
  * 
+ * This function is used to enter the sleep mode for N minutes at a time. See 
+ * standby_hour_interval() for a function that will sleep until the next hour.
+ * 
  * @param rtc The real time clode object.
  * @param alarm_minute_interval The minute marker for the alarm.
  */
-void standby_minutes_interval(RTCZero rtc, uint8_t alarm_minute_interval)
-{
-    // Get teh current time to make sure the alarm iis in the future.
+void standby_minutes_interval(RTCZero rtc, uint8_t alarm_minute_interval) {
+    // Get the current time to make sure the alarm iis in the future.
     uint8_t mm = rtc.getMinutes();
 
     // The alarm time is fixed at 'alarm_minute_interval' points around the
@@ -94,7 +95,7 @@ void standby_minutes_interval(RTCZero rtc, uint8_t alarm_minute_interval)
 
     rtc.attachInterrupt(alarmMatch);
 
-    delay(10);  // 10ms wait here. jhrg 12/5/20
+    delay(10); // 10ms wait here. jhrg 12/5/20
     // At this point the node will enter sleep and wake up when the alarm is triggered.
     // Execution resumes in alarmMatch() and then the line following the standbyMode()
     // call.
@@ -103,11 +104,15 @@ void standby_minutes_interval(RTCZero rtc, uint8_t alarm_minute_interval)
 
 /**
  * @brief Set the hourly standby time based on clock time. Calls stadnbyMode().
+ * 
+ * @todo Write tests for this code
  */
-void standby_hour_interval(RTCZero rtc, uint8_t alarm_minute_interval)
-{
-    // FIXME Make this correct.
-    // Get teh current time to make sure the alarm iis in the future.
+void standby_hour_interval(RTCZero rtc, uint8_t alarm_minute_interval) {
+    // FIXME This function should make sure that the alarm will realy be set
+    // . for the next hour.
+
+    // Get the current time to make sure the alarm iis in the future.
+    uint8_t hh = rtc.getHours();
     uint8_t mm = rtc.getMinutes();
     uint8_t ss = rtc.getSeconds();
 
@@ -125,7 +130,7 @@ void standby_hour_interval(RTCZero rtc, uint8_t alarm_minute_interval)
 
     rtc.attachInterrupt(alarmMatch);
 
-    delay(10);  // 10ms wait here. jhrg 12/5/20
+    delay(10); // 10ms wait here. jhrg 12/5/20
     // At this point the node will enter sleep and wake up when the alarm is triggered.
     // Execution resumes in alarmMatch() and then the line following the standbyMode()
     // call.
