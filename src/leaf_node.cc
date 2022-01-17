@@ -55,7 +55,7 @@
 #define STANDBY_MODE 0
 #endif
 
-#define TX_LED 1 // 1 == show the LED during operation, 0 == not
+#define TX_LED 0 // 1 == show the LED during operation, 0 == not
 #define SHT30D 1
 #define SD 1
 #define SPI_SLEEP 1
@@ -101,7 +101,7 @@
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
 #endif
 
-#define BOOT_SAFTEY_DELAY 10000 // 10s
+#define BOOT_SAFETY_DELAY 10000 // 10s
 
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
 #define SD_POWER_ON_DELAY 200 // ms
@@ -577,9 +577,7 @@ uint16_t get_humidity() {
  */
 
 void sleep_node(unsigned long sample_time) {
-#if TX_LED
     digitalWrite(STATUS_LED, LOW);
-#endif
 
 #if LORA
     // low-power configuration. There is no corresponding wake up
@@ -775,12 +773,12 @@ void setup() {
     // code. Add a 10s delay here so a coordinated reset/upload will work.
     //
     // 'tries' is the number of times the code tries to init the USB serial object.
-    delay(BOOT_SAFTEY_DELAY);
+    delay(BOOT_SAFETY_DELAY);
 
 #if !DEBUG
     // Once past setup(), the USB cannot be used unless DEBUG is on. Then it must
     // be toggled during the sleep period.
-    // NB: I cnnot get the SerialUSB class to work after the RS has woken from its
+    // NB: I cannot get the SerialUSB class to work after the RS has woken from its
     // StandbyMode.
     USBDevice.detach();
 #endif
