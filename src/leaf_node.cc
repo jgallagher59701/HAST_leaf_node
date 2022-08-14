@@ -55,6 +55,10 @@
 #define STANDBY_MODE 0
 #endif
 
+#ifndef TRY_SD_CARD_ANYWAY
+#define TRY_SD_CARD_ANYWAY 0
+#endif
+
 #define TX_LED 0 // 1 == show the LED during operation, 0 == not
 #define SHT30D 1
 #define SD 1
@@ -175,7 +179,9 @@ void alarmMatch() {
     @brief RF95 off the SPI bus to enable SD card access
 */
 void yield_spi_to_sd() {
+    #if 0
     digitalWrite(RFM95_CS, HIGH);
+    #endif
     // digitalWrite(FLASH_CS, HIGH);
     // Setting the SD card SS LOW seems to break things. Let the
     // SdFat library code control when to set SS to LOW.
@@ -185,7 +191,9 @@ void yield_spi_to_sd() {
     @brief SD card off the SPI bus to enable RFM95 access
 */
 void yield_spi_to_rf95() {
+    #if 0
     digitalWrite(SD_CS, HIGH);
+    #endif
     // digitalWrite(FLASH_CS, HIGH);
 }
 
@@ -193,8 +201,10 @@ void yield_spi_to_rf95() {
  * @brief Remove everything from the SPI bus
  */
 void yield_spi_bus() {
+    #if 0
     digitalWrite(SD_CS, HIGH);
     digitalWrite(RFM95_CS, HIGH);
+    #endif
     // FLASH_CS is always off the bus digitalWrite(FLASH_CS, HIGH);
 }
 
@@ -401,7 +411,7 @@ void log_data(const char *file_name, const char *data) {
  */
 void shutdown_sd_card() {
     // Only do this if the card started. jhrg 9/26/21
-    if (status & SD_CARD_INIT_ERROR) {
+    if (!TRY_SD_CARD_ANYWAY && status & SD_CARD_INIT_ERROR) {
         return;
     }
 
@@ -424,7 +434,7 @@ void shutdown_sd_card() {
  */
 void wake_up_sd_card() {
     // Only do this if the SD card was initialized. jhrg 9/26/21
-    if (status & SD_CARD_INIT_ERROR) {
+    if (!TRY_SD_CARD_ANYWAY && status & SD_CARD_INIT_ERROR) {
         return;
     }
 
@@ -437,9 +447,6 @@ void wake_up_sd_card() {
 
     delay(SD_POWER_ON_DELAY);
 
-    // FIXME If the SD card didn't init, don't try to start it here.
-    // OR, maybe we should try if it was a transient problem? Probably
-    // a problem at boot time is real and should not be ignored. jhrg 9/25/21
     if (!sd.begin(SD_CS)) {
         status |= SD_CARD_WAKEUP_ERROR;
     }
@@ -719,6 +726,11 @@ void setup() {
         blink(STATUS_LED, SD_BEGIN_FAIL, ERROR_TIMES);
         digitalWrite(STATUS_LED, HIGH);
         status |= SD_CARD_INIT_ERROR;
+        // If the card fails to init, turn off the power. Even
+        // though the sd card sleep/wake functions are called
+        // if the card fails to init they do nothing, including
+        // power on/off the card.
+        digitalWrite(SD_PWR, LOW); // Power off the card
     } else {
         const char *file_name = get_new_log_filename();
         IO(Serial.println(file_name));
