@@ -32,7 +32,7 @@
 #include "get_battery_voltage.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
+#define DEBUG 1      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node using lora
 #include "debug.h"
 
@@ -51,7 +51,7 @@
 
 #if DEBUG && STANDBY_MODE
 #undef STANDBY_MODE
-#define STANDBY_MODE 0
+#define STANDBY_MODE 1  // 0 hack 6/17/23
 #endif
 
 #define TX_LED 1 // 1 == show the LED during operation, 0 == not
@@ -679,7 +679,7 @@ void sleep_node(unsigned long sample_time) {
 #endif
 
     // TODO Fix this so that the times are on the hour.
-    //  Use setAlaramTime(h, m, s) and rtc.MATCH_MMSS for every hour or MATCH_SS for
+    //  Use setAlarmTime(h, m, s) and rtc.MATCH_MMSS for every hour or MATCH_SS for
     //  every minute. Update the m and s values using 'time + n mod 60'.
     //  https://www.arduino.cc/en/Reference/RTC
 
@@ -883,10 +883,10 @@ void setup() {
     // 'tries' is the number of times the code tries to init the USB serial object.
     yield(max(0, BOOT_SAFTEY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
 
-#if !DEBUG
+#if STANDBY_MODE  // !DEBUG jhrg 6/17/23
     // Once past setup(), the USB cannot be used unless DEBUG is on. Then it must
     // be toggled during the sleep period.
-    // NB: I cnnot get the SerialUSB class to work after the RS has woken from its
+    // NB: I cannot get the SerialUSB class to work after the RS has woken from its
     // StandbyMode.
     USBDevice.detach();
 #endif
