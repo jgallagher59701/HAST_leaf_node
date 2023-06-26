@@ -1,6 +1,6 @@
 //
 // Read the battery voltage for the Leaf node using a 1M | 1M voltage
-// divider and the RoscketScream/M0 ADC.
+// divider and the RocketScream/M0 ADC.
 //
 // James Gallagher <jgallagher@opendap.org>
 // 9/26/21
