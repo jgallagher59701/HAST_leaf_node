@@ -32,7 +32,7 @@
 #include "get_battery_voltage.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 1      // Requires USB; Will not work with STANDBY_MODE
+#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node using lora
 #include "debug.h"
 
@@ -47,11 +47,8 @@
 #define SERIAL_CONNECT_TRIES 10
 #define SERIAL_CONNECT_INTERVAL 1000 // ms
 
-#define STANDBY_MODE 1 // Use RTC standby mode and not yield()
-
-#if DEBUG && STANDBY_MODE
-#undef STANDBY_MODE
-#define STANDBY_MODE 1  // 0 hack 6/17/23
+#ifndef STANDBY_MODE
+#define STANDBY_MODE 1
 #endif
 
 #define TX_LED 1 // 1 == show the LED during operation, 0 == not
@@ -109,7 +106,7 @@
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
 #endif
 
-#define BOOT_SAFTEY_DELAY 10000 // 10s
+#define BOOT_SAFETY_DELAY 10000  // 10s
 
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
 #define SD_POWER_ON_DELAY 200 // ms
@@ -565,17 +562,22 @@ void send_data_packet(packet_t &data, uint8_t to) {
 
 /**
  * @brief Read the time time code reply from the main node
- * 
+ *
  * Once a packet is sent to the main node, expect a reply (even
  * when broadcasting the packet). Read the time code and update
  * the local node's RTC.
  *
  * This must be called within 5000ms of the expected reply.
  *
+ * @return 0 if no time adjustment made, the new value of the RTC if
+ * the time was adjusted.
+ *
  * @todo This needs to be changed for configurations where nodes'
  * communication with the main node might overlap.
  */
-void read_main_node_reply() {
+uint32_t read_main_node_reply() {
+    uint32_t new_node_time = 0;
+
 #if LORA
     yield_spi_to_rf95();
 
@@ -592,11 +594,20 @@ void read_main_node_reply() {
             uint32_t main_node_time = 0;
             if (len == sizeof(uint32_t)) { // time code?
                 memcpy(&main_node_time, rf95_buf, sizeof(uint32_t));
+                int32_t delta_time = main_node_time - rtc.getEpoch();
+
+                IO(Serial.print("Time from main node: "));
+                IO(Serial.print(main_node_time));
+                IO(Serial.print(", Time from this node: "));
+                IO(Serial.print(rtc.getEpoch()));
+                IO(Serial.print(", Delta: "));
+                IO(Serial.println(delta_time));
+
                 // cast in abs() needed to resolve ambiguity
-                uint32_t delta_time = main_node_time - rtc.getEpoch();
                 // update the time if the delta is more than a second
-                if (abs(long(delta_time)) > 1) {
-                    rtc.setEpoch(main_node_time);
+                if (abs(delta_time) > 1) {
+                    new_node_time = main_node_time;
+                    rtc.setEpoch(new_node_time);
                 }
             }
         } else {
@@ -606,6 +617,8 @@ void read_main_node_reply() {
         status |= RFM95_NO_REPLY;
     }
 #endif
+
+    return new_node_time;
 }
 
 /**
@@ -779,12 +792,24 @@ void setup() {
     USBDevice.init();
     USBDevice.attach();
 #endif
- 
+
+#if 1
     // Only start the Serial interface when DEBUG is 1
     IO(Serial.begin(115200));
     int tries = 0;
     // Wait for serial port to be available
     IO(while ((tries < SERIAL_CONNECT_TRIES) && !Serial) { yield(SERIAL_CONNECT_INTERVAL); ++tries; });
+#else
+    // Always start the serial interface since it seems to be needed by the SD library.
+    // jhrg 10/9/23
+    Serial.begin(115200);
+    int tries = 0;
+    // Wait for serial port to be available
+    while ((tries < SERIAL_CONNECT_TRIES) && !Serial) {
+        yield(SERIAL_CONNECT_INTERVAL);
+        ++tries;
+    };
+#endif
 
     IO(Serial.println(F("Start LoRa Client")));
 
@@ -794,7 +819,7 @@ void setup() {
     rtc.setEpoch(get_epoch(__DATE__, __TIME__));
 
     IO(
-        Serial.print(F("Date, Time: "));
+        Serial.print(F("Initial Date, Time: "));
         Serial.print(__DATE__);
         Serial.print(F(", "));
         Serial.println(__TIME__);
@@ -806,6 +831,8 @@ void setup() {
 
     // Initialize the temp/humidity sensor
 #if SHT30D
+    IO(Serial.print(F("Initializing SHT30D...")));
+
     if (!sht30d.begin(0x44)) { // Set to 0x45 for alternate i2c addr
         IO(Serial.println(F("Couldn't find SHT30D")));
         blink(STATUS_LED, SHT31_BEGIN_FAIL, ERROR_TIMES);
@@ -815,6 +842,8 @@ void setup() {
 
     // The SHT30D temp/humidity sensor has a heater; turn it off
     sht30d.heater(false);
+
+    IO(Serial.println(F(" Done.")));
 #endif // SHT30D
 
     // Not disabling interrupts here since the RFM 95 is not yet running
@@ -823,7 +852,7 @@ void setup() {
     // Initialize the SD card
     yield_spi_to_sd();
 
-    IO(Serial.print(F("Initializing SD card...")));
+    IO(Serial.print(F("Initializing SD card... ")));
     yield(SD_POWER_ON_DELAY);
 
     if (!sd.begin(SD_CS)) {
@@ -833,15 +862,19 @@ void setup() {
         status |= SD_CARD_INIT_ERROR;
     } else {
         const char *file_name = get_new_log_filename();
-        IO(Serial.println(file_name));
+        IO(Serial.print(file_name));
 
         // Write data header. This will call error_blink() if it fails.
         write_header(file_name);
     }
+
+    IO(Serial.println(F(" Done.")));
 #endif
 
 #if LORA
     yield_spi_to_rf95();
+
+    IO(Serial.print(F("Initializing LORA...")));
 
     if (!rf95_manager.init()) {
         IO(Serial.println(F("LoRa init failed.")));
@@ -873,6 +906,8 @@ void setup() {
     rf95.setCodingRate4(CODING_RATE);
     // 10 seconds
     rf95.setCADTimeout(RH_CAD_DEFAULT_TIMEOUT);
+
+    IO(Serial.println(F(" Done.")));
 #endif // LORA
 
     // Because the RS Ultra Pro board's native USB won't work with the standby() mode
@@ -881,7 +916,7 @@ void setup() {
     // code. Add a 10s delay here so a coordinated reset/upload will work.
     //
     // 'tries' is the number of times the code tries to init the USB serial object.
-    yield(max(0, BOOT_SAFTEY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
+    yield(max(0, BOOT_SAFETY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
 
 #if STANDBY_MODE  // !DEBUG jhrg 6/17/23
     // Once past setup(), the USB cannot be used unless DEBUG is on. Then it must
@@ -891,7 +926,7 @@ void setup() {
     USBDevice.detach();
 #endif
 
-    // Exit setup() with the status LED lit.
+    IO(Serial.println(F("Setup complete.")));
 }
 
 void loop() {
@@ -930,7 +965,9 @@ void loop() {
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
 
-    read_main_node_reply();
+    uint32_t new_node_time = read_main_node_reply();
+    IO(Serial.print("New node time: "));
+    IO(Serial.println(new_node_time));
 
     set_state_pin(STATE_3);
     IO(Serial.println("STATE 3"));
@@ -941,7 +978,10 @@ void loop() {
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
 
-    sleep_node(sample_time);
+    if (new_node_time > 0)
+        sleep_node(new_node_time);
+    else
+        sleep_node(sample_time);
 
     set_state_pin(STATE_5);
     IO(Serial.println("STATE 5"));
