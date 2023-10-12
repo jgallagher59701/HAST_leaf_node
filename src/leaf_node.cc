@@ -30,6 +30,7 @@
 #include "blink.h"
 #include "data_packet.h"
 #include "get_battery_voltage.h"
+#include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
@@ -560,6 +561,25 @@ void send_data_packet(packet_t &data, uint8_t to) {
 #endif
 }
 
+void send_data_packet(data_message_t &data, uint8_t to) {
+#if LORA
+    yield_spi_to_rf95();
+
+    // This may block for up to CAD_TIMEOUT seconds
+    if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_PACKET_SIZE, to)) {
+        status |= RFM95_SEND_ERROR;
+    }
+
+    // This is not needed if the 'TO' address above is a specific node. If
+    // RH_BROADCAST_ADDRESS is used, then we should wait
+    if (to == RH_BROADCAST_ADDRESS) {
+        if (!rf95_manager.waitPacketSent(WAIT_AVAILABLE)) {
+            status |= RFM95_SEND_ERROR;
+        }
+    }
+#endif
+}
+
 /**
  * @brief Read the time time code reply from the main node
  *
@@ -934,7 +954,9 @@ void loop() {
     static unsigned long message = 0;
 
     // The data sent to the main node
-    packet_t data;
+    // packet_t data;
+
+    data_message_t data;
 
     unsigned long sample_time = rtc.getEpoch();
 
@@ -943,11 +965,15 @@ void loop() {
 // New packet encoding.
 // TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
 #if 0
-    build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_bat_v(), (uint16_t)last_tx_time,
-                      get_temperature(), get_humidity(), status);
-#else
     build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_battery_voltage(), (uint16_t)last_tx_time,
                       get_temperature(), get_humidity(), status);
+#else
+    //void build_data_message(data_message_t * data, const uint8_t node, const uint32_t message, const uint32_t time,
+    //                        const uint16_t battery, const uint16_t last_tx_duration,
+    //                        const int16_t temp, const uint16_t humidity, const uint8_t status);
+
+    build_data_message(&data, NODE_ADDRESS, message, sample_time, (uint16_t)get_battery_voltage(), (uint16_t)last_tx_time,
+                       get_temperature(), get_humidity(), status);
 #endif
 
     clear_state_pins();
@@ -973,7 +999,7 @@ void loop() {
     IO(Serial.println("STATE 3"));
 #endif
 
-    log_data(get_log_filename(), data_packet_to_string(&data, false));
+    log_data(get_log_filename(), data_message_to_string(&data, false));
 
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
