@@ -580,6 +580,25 @@ void send_data(data_message_t &data, uint8_t to) {
 #endif
 }
 
+void send_message(uint8_t *data, uint8_t to, uint32_t size) {
+#if LORA
+    yield_spi_to_rf95();
+
+    // This may block for up to CAD_TIMEOUT seconds
+    if (!rf95_manager.sendtoWait(data, size, to)) {
+        status |= RFM95_SEND_ERROR;
+    }
+
+    // This is not needed if the 'TO' address above is a specific node. If
+    // RH_BROADCAST_ADDRESS is used, then we should wait
+    if (to == RH_BROADCAST_ADDRESS) {
+        if (!rf95_manager.waitPacketSent(WAIT_AVAILABLE)) {
+            status |= RFM95_SEND_ERROR;
+        }
+    }
+#endif
+}
+
 /**
  * @brief Read the time time code reply from the main node
  *
@@ -985,23 +1004,28 @@ void loop() {
 
 #if LORA
     last_tx_time = millis();
+#if 0
     send_data(data, RH_BROADCAST_ADDRESS);
+#endif
+    send_message((uint8_t *)&data, RH_BROADCAST_ADDRESS, DATA_MESSAGE_SIZE);
     last_tx_time = millis() - last_tx_time;
 
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
 
-#if 0
-    uint32_t new_node_time = read_main_node_reply();
-    IO(Serial.print("New node time: "));
-    IO(Serial.println(new_node_time));
-#endif
+    log_data(get_log_filename(), data_message_to_string(&data, false));
+
+    if (message % 2) {
+        // send time request
+        delay(2000); // FIXME Hack
+        time_request_t request;
+        build_time_request(&request, NODE_ADDRESS);
+        send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
+    }
 
     set_state_pin(STATE_3);
     IO(Serial.println("STATE 3"));
 #endif
-
-    log_data(get_log_filename(), data_message_to_string(&data, false));
 
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
