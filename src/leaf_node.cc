@@ -542,7 +542,7 @@ void wake_up_sd_card() {
  * @param data The data packet to send
  * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
  */
-void send_data_packet(packet_t &data, uint8_t to) {
+void send_data(packet_t &data, uint8_t to) {
 #if LORA
     yield_spi_to_rf95();
 
@@ -561,12 +561,12 @@ void send_data_packet(packet_t &data, uint8_t to) {
 #endif
 }
 
-void send_data_packet(data_message_t &data, uint8_t to) {
+void send_data(data_message_t &data, uint8_t to) {
 #if LORA
     yield_spi_to_rf95();
 
     // This may block for up to CAD_TIMEOUT seconds
-    if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_PACKET_SIZE, to)) {
+    if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_MESSAGE_SIZE, to)) {
         status |= RFM95_SEND_ERROR;
     }
 
@@ -985,15 +985,17 @@ void loop() {
 
 #if LORA
     last_tx_time = millis();
-    send_data_packet(data, RH_BROADCAST_ADDRESS);
+    send_data(data, RH_BROADCAST_ADDRESS);
     last_tx_time = millis() - last_tx_time;
 
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
 
+#if 0
     uint32_t new_node_time = read_main_node_reply();
     IO(Serial.print("New node time: "));
     IO(Serial.println(new_node_time));
+#endif
 
     set_state_pin(STATE_3);
     IO(Serial.println("STATE 3"));
@@ -1004,10 +1006,14 @@ void loop() {
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
 
+    sleep_node(sample_time);
+
+#if 0
     if (new_node_time > 0)
         sleep_node(new_node_time);
     else
         sleep_node(sample_time);
+#endif
 
     set_state_pin(STATE_5);
     IO(Serial.println("STATE 5"));
