@@ -1004,9 +1004,6 @@ void loop() {
 
 #if LORA
     last_tx_time = millis();
-#if 0
-    send_data(data, RH_BROADCAST_ADDRESS);
-#endif
     send_message((uint8_t *)&data, RH_BROADCAST_ADDRESS, DATA_MESSAGE_SIZE);
     last_tx_time = millis() - last_tx_time;
 
