@@ -107,6 +107,10 @@
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
 #endif
 
+#ifndef TIME_REQUEST_SAMPLE_PERIOD
+#define TIME_REQUEST_SAMPLE_PERIOD 24  // Ask the time once for every N data samples
+#endif
+
 #define BOOT_SAFETY_DELAY 10000  // 10s
 
 #define WAIT_AVAILABLE 5000   // ms to wait for reply from main node
@@ -600,6 +604,70 @@ void send_message(uint8_t *data, uint8_t to, uint32_t size) {
 }
 
 /**
+ * Read a message. Each time this is called, the static storage used to hold
+ * the message is cleared. This function waits for 5s (see WAIT_AVAILABLE)
+ * for a message to appear.
+ *
+ * If no message is received, the global 'status' is set with the code
+ * RFM95_NO_REPLY.
+ *
+ * @return The message, held in static storage. Returns nullptr if no message
+ * was received.
+ */
+uint8_t *receive_message() {
+#if LORA
+    yield_spi_to_rf95();
+
+    // Used to hold any reply from the main node
+    static uint8_t rf95_buf[RH_RF95_MAX_MESSAGE_LEN];
+    memset(rf95_buf, 0, sizeof(rf95_buf));
+
+    // Now wait for a reply
+    uint8_t len = sizeof(rf95_buf);
+    uint8_t from;
+
+    // Should be a reply message for us now
+    if (rf95_manager.waitAvailableTimeout(WAIT_AVAILABLE)) {
+        if (rf95_manager.recvfromAck(rf95_buf, &len, &from)) {
+            return rf95_buf;
+        } else {
+            status |= RFM95_NO_REPLY;
+        }
+    } else {
+        status |= RFM95_NO_REPLY;
+    }
+#endif
+
+    return nullptr;
+}
+
+/**
+ * Update the node's time using 'main_node_time' if the difference between
+ * the two times is greater than one second.
+ *
+ * @param main_node_time The unix time from the main node
+ * @return True if the time was updated, false if not.
+ */
+bool update_time(uint32_t main_node_time) {
+    int32_t delta_time = main_node_time - rtc.getEpoch();
+
+    IO(Serial.print("Time from main node: "));
+    IO(Serial.print(main_node_time));
+    IO(Serial.print(", Time from this node: "));
+    IO(Serial.print(rtc.getEpoch()));
+    IO(Serial.print(", Delta: "));
+    IO(Serial.println(delta_time));
+
+    // update the time if the delta is more than a second
+    if (abs(delta_time) > 1) {
+        rtc.setEpoch(main_node_time);
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * @brief Read the time time code reply from the main node
  *
  * Once a packet is sent to the main node, expect a reply (even
@@ -981,19 +1049,8 @@ void loop() {
 
     ++message;
 
-// New packet encoding.
-// TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
-#if 0
-    build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_battery_voltage(), (uint16_t)last_tx_time,
-                      get_temperature(), get_humidity(), status);
-#else
-    //void build_data_message(data_message_t * data, const uint8_t node, const uint32_t message, const uint32_t time,
-    //                        const uint16_t battery, const uint16_t last_tx_duration,
-    //                        const int16_t temp, const uint16_t humidity, const uint8_t status);
-
     build_data_message(&data, NODE_ADDRESS, message, sample_time, (uint16_t)get_battery_voltage(), (uint16_t)last_tx_time,
                        get_temperature(), get_humidity(), status);
-#endif
 
     clear_state_pins();
     set_state_pin(STATE_1);
@@ -1006,35 +1063,43 @@ void loop() {
     last_tx_time = millis();
     send_message((uint8_t *)&data, RH_BROADCAST_ADDRESS, DATA_MESSAGE_SIZE);
     last_tx_time = millis() - last_tx_time;
+#endif
 
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
 
     log_data(get_log_filename(), data_message_to_string(&data, false));
 
-    if (message % 2) {
+    if (message % TIME_REQUEST_SAMPLE_PERIOD == 0) {
+        set_state_pin(STATE_3);
+        IO(Serial.println("STATE 3"));
+#if LORA
         // send time request
-        delay(2000); // FIXME Hack
         time_request_t request;
         build_time_request(&request, NODE_ADDRESS);
         send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
-    }
 
-    set_state_pin(STATE_3);
-    IO(Serial.println("STATE 3"));
+        // get the time response
+        uint8_t *response = receive_message();
+        MessageType mt = get_message_type(response);
+        if (mt == time_response) {
+            uint8_t node;
+            uint32_t time;
+            parse_time_response((time_response_t *)response, &node, &time);
+
+            if (update_time(time)) {
+                sample_time = time;  // ensure the correct time is used to set the sleep interval
+            }
+        } else {
+            status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
+        }
 #endif
+    }
 
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
 
     sleep_node(sample_time);
-
-#if 0
-    if (new_node_time > 0)
-        sleep_node(new_node_time);
-    else
-        sleep_node(sample_time);
-#endif
 
     set_state_pin(STATE_5);
     IO(Serial.println("STATE 5"));
