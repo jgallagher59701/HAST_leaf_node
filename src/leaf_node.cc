@@ -33,7 +33,7 @@
 #include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
+#define DEBUG 1      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node using lora
 #include "debug.h"
 
@@ -534,6 +534,7 @@ void wake_up_sd_card() {
     // See above. interrupts();
 }
 
+#if 0
 /**
  * @brief Send a data packet.
  * 
@@ -565,6 +566,7 @@ void send_data(packet_t &data, uint8_t to) {
 #endif
 }
 
+
 void send_data(data_message_t &data, uint8_t to) {
 #if LORA
     yield_spi_to_rf95();
@@ -583,6 +585,7 @@ void send_data(data_message_t &data, uint8_t to) {
     }
 #endif
 }
+#endif
 
 void send_message(uint8_t *data, uint8_t to, uint32_t size) {
 #if LORA
@@ -631,9 +634,11 @@ uint8_t *receive_message() {
         if (rf95_manager.recvfromAck(rf95_buf, &len, &from)) {
             return rf95_buf;
         } else {
+            IO(Serial.println("Message available, but ack failure."));
             status |= RFM95_NO_REPLY;
         }
     } else {
+        IO(Serial.println("No message available."));
         status |= RFM95_NO_REPLY;
     }
 #endif
@@ -1033,6 +1038,26 @@ void setup() {
     USBDevice.detach();
 #endif
 
+#if LORA
+    // send time request
+    time_request_t request;
+    build_time_request(&request, NODE_ADDRESS);
+    send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
+
+    // get the time response
+    uint8_t *response = receive_message();
+    MessageType mt = get_message_type(response);
+    if (mt == time_response) {
+        uint8_t node;
+        uint32_t time;
+        parse_time_response((time_response_t *)response, &node, &time);
+
+        update_time(time);
+    } else {
+        status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
+    }
+#endif
+
     IO(Serial.println(F("Setup complete.")));
 }
 
@@ -1065,6 +1090,9 @@ void loop() {
     last_tx_time = millis() - last_tx_time;
 #endif
 
+    IO(Serial.print("Data msg: "));
+    IO(Serial.println(data_message_to_string((data_message_t *)&data, true)));
+        
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
 
@@ -1079,6 +1107,8 @@ void loop() {
         build_time_request(&request, NODE_ADDRESS);
         send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
 
+        IO(Serial.print("Sent time request... "));
+
         // get the time response
         uint8_t *response = receive_message();
         MessageType mt = get_message_type(response);
@@ -1086,11 +1116,14 @@ void loop() {
             uint8_t node;
             uint32_t time;
             parse_time_response((time_response_t *)response, &node, &time);
+            
+            IO(Serial.println(time_response_to_string((time_response_t *)&response, true)));
 
             if (update_time(time)) {
                 sample_time = time;  // ensure the correct time is used to set the sleep interval
             }
         } else {
+            IO(Serial.println("No response."));
             status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
         }
 #endif
