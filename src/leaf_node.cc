@@ -101,8 +101,6 @@
 
 // RH_CAD_DEFAULT_TIMEOUT 10seconds
 
-#define EXPECT_REPLY 1
-
 #ifndef STANDBY_INTERVAL_S
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
 #endif
@@ -356,7 +354,7 @@ char file_name[13] = FILE_BASE_NAME "00.csv";
  * 
  * @note Only call this from setup(), never from loop() and never if
  * the SD library has not been initialized correctly and never after
- * the radiohead library (RFM95) has been initialized.
+ * the Radiohead library (RFM95) has been initialized.
  * 
  * @return A pointer to the new file name. Global static storage.
  * @see get_log_filename()
@@ -1047,14 +1045,21 @@ void setup() {
     // get the time response
     uint8_t *response = receive_message();
     MessageType mt = get_message_type(response);
-    if (mt == time_response) {
-        uint8_t node;
-        uint32_t time;
-        parse_time_response((time_response_t *)response, &node, &time);
+    switch (mt) {
+        case time_response: {
+            uint8_t node;
+            uint32_t time;
+            parse_time_response((time_response_t *)response, &node, &time);
 
-        update_time(time);
-    } else {
-        status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
+            update_time(time);
+            break;
+        }
+
+        default: {
+            IO(Serial.print(F("Unexpected response type: ")));
+            IO(Serial.println(get_message_type_string(mt)));
+            status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
+        }
     }
 #endif
 
