@@ -670,6 +670,9 @@ bool update_time(uint32_t main_node_time) {
     return false;
 }
 
+// Dead code: superseded by receive_message() + update_time(), which are used
+// in setup() and loop() instead. jhrg 9/11/26
+#if 0
 /**
  * @brief Read the time time code reply from the main node
  *
@@ -730,6 +733,7 @@ uint32_t read_main_node_reply() {
 
     return new_node_time;
 }
+#endif // 0 - read_main_node_reply() dead code
 
 /**
  * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
@@ -1122,7 +1126,7 @@ void loop() {
             uint32_t time;
             parse_time_response((time_response_t *)response, &node, &time);
             
-            IO(Serial.println(time_response_to_string((time_response_t *)&response, true)));
+            IO(Serial.println(time_response_to_string((time_response_t *)response, true)));
 
             if (update_time(time)) {
                 sample_time = time;  // ensure the correct time is used to set the sleep interval
