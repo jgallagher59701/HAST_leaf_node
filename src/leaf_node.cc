@@ -275,75 +275,6 @@ get_epoch(const char *date, const char *time) {
     return mktime(&t);
 }
 
-#if 0
-#define VALUES_TO_AVG 10
-
-/**
-   @note this version assumes that a voltage divider reduces Vbat by 1/4.3
-   @return The battery voltage x 100 as an int
-*/
-int get_bat_v() {
-#if 1
-    // TODO modify to take one sample, discard it, then 10 samples
-    // and return their average. Time delays, etc., can be set in
-    // setup() using ADC calls. See:
-    // https://blog.thea.codes/getting-the-most-out-of-the-samd21-adc/
-
-    (void)analogRead(V_BAT); // discard the first read
-
-    int raw = 0;
-    int total = 0;
-    for (int i = 0; i < VALUES_TO_AVG; ++i) {
-        raw = analogRead(V_BAT);
-        total += raw;
-    }
-
-    total /= VALUES_TO_AVG;
-
-#if USE_AREF_2V23
-    float voltage = 4.46 * (total / (float)ADC_MAX_VALUE);
-#else
-    float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
-#endif
-    return (int)(voltage * 100.0); // voltage * 100
-
-#else
-
-    // let the ADC 'settle.' This, along with the loop below makes the values
-    // correct from the start and maybe needed for correctness after wakeup.
-    // jhrg 8/8/21
-    yield(100);
-
-    int raw = analogRead(V_BAT);
-    int delta;
-    int i = 1;
-    do {
-        yield(100);
-        int raw2 = analogRead(V_BAT);
-        delta = raw - raw2;
-        ++i;
-        raw = raw2;
-    } while (delta > 1);
-
-#if LORA_DEBUG
-    char msg[256];
-    snprintf(msg, 256, "get_bat_v(), raw: %d, samples: %d \n", raw, i);
-    lora_debug(msg, MAIN_NODE_ADDRESS);
-#endif
-
-    // raw += 70;
-
-#if USE_AREF_2V23
-    float voltage = 4.46 * (raw / (float)ADC_MAX_VALUE);
-#else
-    float voltage = 4.3 * (raw / (float)ADC_MAX_VALUE);
-#endif
-    return (int)(voltage * 100.0); // voltage * 100
-
-#endif
-}
-#endif
-
 /// Use get_log_filename() and get_new_log_filename()
 char file_name[13] = FILE_BASE_NAME "00.csv";
 
@@ -532,59 +463,6 @@ void wake_up_sd_card() {
     // See above. interrupts();
 }
 
-#if 0
-/**
- * @brief Send a data packet.
- * 
- * Send the packet to a node and wait for a reply from that node. If
- * the 'to' address is RH_BROADCAST_ADDRESS, wait until the packet is
- * sent (but not for an ACK).
- * 
- * If an error is detected, set the 'status.'
- * 
- * @param data The data packet to send
- * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
- */
-void send_data(packet_t &data, uint8_t to) {
-#if LORA
-    yield_spi_to_rf95();
-
-    // This may block for up to CAD_TIMEOUT seconds
-    if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_PACKET_SIZE, to)) {
-        status |= RFM95_SEND_ERROR;
-    }
-
-    // This is not needed if the 'TO' address above is a specific node. If
-    // RH_BROADCAST_ADDRESS is used, then we should wait
-    if (to == RH_BROADCAST_ADDRESS) {
-        if (!rf95_manager.waitPacketSent(WAIT_AVAILABLE)) {
-            status |= RFM95_SEND_ERROR;
-        }
-    }
-#endif
-}
-
-
-void send_data(data_message_t &data, uint8_t to) {
-#if LORA
-    yield_spi_to_rf95();
-
-    // This may block for up to CAD_TIMEOUT seconds
-    if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_MESSAGE_SIZE, to)) {
-        status |= RFM95_SEND_ERROR;
-    }
-
-    // This is not needed if the 'TO' address above is a specific node. If
-    // RH_BROADCAST_ADDRESS is used, then we should wait
-    if (to == RH_BROADCAST_ADDRESS) {
-        if (!rf95_manager.waitPacketSent(WAIT_AVAILABLE)) {
-            status |= RFM95_SEND_ERROR;
-        }
-    }
-#endif
-}
-#endif
-
 void send_message(uint8_t *data, uint8_t to, uint32_t size) {
 #if LORA
     yield_spi_to_rf95();
@@ -669,71 +547,6 @@ bool update_time(uint32_t main_node_time) {
 
     return false;
 }
-
-// Dead code: superseded by receive_message() + update_time(), which are used
-// in setup() and loop() instead. jhrg 9/11/26
-#if 0
-/**
- * @brief Read the time time code reply from the main node
- *
- * Once a packet is sent to the main node, expect a reply (even
- * when broadcasting the packet). Read the time code and update
- * the local node's RTC.
- *
- * This must be called within 5000ms of the expected reply.
- *
- * @return 0 if no time adjustment made, the new value of the RTC if
- * the time was adjusted.
- *
- * @todo This needs to be changed for configurations where nodes'
- * communication with the main node might overlap.
- */
-uint32_t read_main_node_reply() {
-    uint32_t new_node_time = 0;
-
-#if LORA
-    yield_spi_to_rf95();
-
-    // Used to hold any reply from the main node
-    uint8_t rf95_buf[RH_RF95_MAX_MESSAGE_LEN];
-
-    // Now wait for a reply
-    uint8_t len = sizeof(rf95_buf);
-    uint8_t from;
-
-    // Should be a reply message for us now
-    if (rf95_manager.waitAvailableTimeout(WAIT_AVAILABLE)) {
-        if (rf95_manager.recvfromAck(rf95_buf, &len, &from)) {
-            uint32_t main_node_time = 0;
-            if (len == sizeof(uint32_t)) { // time code?
-                memcpy(&main_node_time, rf95_buf, sizeof(uint32_t));
-                int32_t delta_time = main_node_time - rtc.getEpoch();
-
-                IO(Serial.print("Time from main node: "));
-                IO(Serial.print(main_node_time));
-                IO(Serial.print(", Time from this node: "));
-                IO(Serial.print(rtc.getEpoch()));
-                IO(Serial.print(", Delta: "));
-                IO(Serial.println(delta_time));
-
-                // cast in abs() needed to resolve ambiguity
-                // update the time if the delta is more than a second
-                if (abs(delta_time) > 1) {
-                    new_node_time = main_node_time;
-                    rtc.setEpoch(new_node_time);
-                }
-            }
-        } else {
-            status |= RFM95_NO_REPLY;
-        }
-    } else {
-        status |= RFM95_NO_REPLY;
-    }
-#endif
-
-    return new_node_time;
-}
-#endif // 0 - read_main_node_reply() dead code
 
 /**
  * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
@@ -900,30 +713,11 @@ void setup() {
     pinMode(SD_CS, OUTPUT);
     pinMode(RFM95_CS, OUTPUT);
 
-#if 0
-    // Initialize USB and attach to host.
-    // TODO Not needed. These are called in the arduino main(). jhrg 9/26/21
-    USBDevice.init();
-    USBDevice.attach();
-#endif
-
-#if 1
     // Only start the Serial interface when DEBUG is 1
     IO(Serial.begin(115200));
     int tries = 0;
     // Wait for serial port to be available
     IO(while ((tries < SERIAL_CONNECT_TRIES) && !Serial) { yield(SERIAL_CONNECT_INTERVAL); ++tries; });
-#else
-    // Always start the serial interface since it seems to be needed by the SD library.
-    // jhrg 10/9/23
-    Serial.begin(115200);
-    int tries = 0;
-    // Wait for serial port to be available
-    while ((tries < SERIAL_CONNECT_TRIES) && !Serial) {
-        yield(SERIAL_CONNECT_INTERVAL);
-        ++tries;
-    };
-#endif
 
     IO(Serial.println(F("Start LoRa Client")));
 
