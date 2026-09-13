@@ -30,9 +30,10 @@
 #include "blink.h"
 #include "data_packet.h"
 #include "get_battery_voltage.h"
+#include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
+#define DEBUG 1      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node using lora
 #include "debug.h"
 
@@ -100,10 +101,12 @@
 
 // RH_CAD_DEFAULT_TIMEOUT 10seconds
 
-#define EXPECT_REPLY 1
-
 #ifndef STANDBY_INTERVAL_S
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
+#endif
+
+#ifndef TIME_REQUEST_SAMPLE_PERIOD
+#define TIME_REQUEST_SAMPLE_PERIOD 24  // Ask the time once for every N data samples
 #endif
 
 #define BOOT_SAFETY_DELAY 10000  // 10s
@@ -351,7 +354,7 @@ char file_name[13] = FILE_BASE_NAME "00.csv";
  * 
  * @note Only call this from setup(), never from loop() and never if
  * the SD library has not been initialized correctly and never after
- * the radiohead library (RFM95) has been initialized.
+ * the Radiohead library (RFM95) has been initialized.
  * 
  * @return A pointer to the new file name. Global static storage.
  * @see get_log_filename()
@@ -529,6 +532,7 @@ void wake_up_sd_card() {
     // See above. interrupts();
 }
 
+#if 0
 /**
  * @brief Send a data packet.
  * 
@@ -541,7 +545,7 @@ void wake_up_sd_card() {
  * @param data The data packet to send
  * @param to Send to this node. If RH_BROADCAST_ADDRESS, send to all nodes.
  */
-void send_data_packet(packet_t &data, uint8_t to) {
+void send_data(packet_t &data, uint8_t to) {
 #if LORA
     yield_spi_to_rf95();
 
@@ -560,6 +564,115 @@ void send_data_packet(packet_t &data, uint8_t to) {
 #endif
 }
 
+
+void send_data(data_message_t &data, uint8_t to) {
+#if LORA
+    yield_spi_to_rf95();
+
+    // This may block for up to CAD_TIMEOUT seconds
+    if (!rf95_manager.sendtoWait((uint8_t *)&data, DATA_MESSAGE_SIZE, to)) {
+        status |= RFM95_SEND_ERROR;
+    }
+
+    // This is not needed if the 'TO' address above is a specific node. If
+    // RH_BROADCAST_ADDRESS is used, then we should wait
+    if (to == RH_BROADCAST_ADDRESS) {
+        if (!rf95_manager.waitPacketSent(WAIT_AVAILABLE)) {
+            status |= RFM95_SEND_ERROR;
+        }
+    }
+#endif
+}
+#endif
+
+void send_message(uint8_t *data, uint8_t to, uint32_t size) {
+#if LORA
+    yield_spi_to_rf95();
+
+    // This may block for up to CAD_TIMEOUT seconds
+    if (!rf95_manager.sendtoWait(data, size, to)) {
+        status |= RFM95_SEND_ERROR;
+    }
+
+    // This is not needed if the 'TO' address above is a specific node. If
+    // RH_BROADCAST_ADDRESS is used, then we should wait
+    if (to == RH_BROADCAST_ADDRESS) {
+        if (!rf95_manager.waitPacketSent(WAIT_AVAILABLE)) {
+            status |= RFM95_SEND_ERROR;
+        }
+    }
+#endif
+}
+
+/**
+ * Read a message. Each time this is called, the static storage used to hold
+ * the message is cleared. This function waits for 5s (see WAIT_AVAILABLE)
+ * for a message to appear.
+ *
+ * If no message is received, the global 'status' is set with the code
+ * RFM95_NO_REPLY.
+ *
+ * @return The message, held in static storage. Returns nullptr if no message
+ * was received.
+ */
+uint8_t *receive_message() {
+#if LORA
+    yield_spi_to_rf95();
+
+    // Used to hold any reply from the main node
+    static uint8_t rf95_buf[RH_RF95_MAX_MESSAGE_LEN];
+    memset(rf95_buf, 0, sizeof(rf95_buf));
+
+    // Now wait for a reply
+    uint8_t len = sizeof(rf95_buf);
+    uint8_t from;
+
+    // Should be a reply message for us now
+    if (rf95_manager.waitAvailableTimeout(WAIT_AVAILABLE)) {
+        if (rf95_manager.recvfromAck(rf95_buf, &len, &from)) {
+            return rf95_buf;
+        } else {
+            IO(Serial.println("Message available, but ack failure."));
+            status |= RFM95_NO_REPLY;
+        }
+    } else {
+        IO(Serial.println("No message available."));
+        status |= RFM95_NO_REPLY;
+    }
+#endif
+
+    return nullptr;
+}
+
+/**
+ * Update the node's time using 'main_node_time' if the difference between
+ * the two times is greater than one second.
+ *
+ * @param main_node_time The unix time from the main node
+ * @return True if the time was updated, false if not.
+ */
+bool update_time(uint32_t main_node_time) {
+    int32_t delta_time = main_node_time - rtc.getEpoch();
+
+    IO(Serial.print("Time from main node: "));
+    IO(Serial.print(main_node_time));
+    IO(Serial.print(", Time from this node: "));
+    IO(Serial.print(rtc.getEpoch()));
+    IO(Serial.print(", Delta: "));
+    IO(Serial.println(delta_time));
+
+    // update the time if the delta is more than a second
+    if (abs(delta_time) > 1) {
+        rtc.setEpoch(main_node_time);
+        return true;
+    }
+
+    return false;
+}
+
+// Dead code: superseded by receive_message() + update_time(), which are used
+// in setup() and loop() instead. jhrg 9/11/26
+#if 0
 /**
  * @brief Read the time time code reply from the main node
  *
@@ -620,6 +733,7 @@ uint32_t read_main_node_reply() {
 
     return new_node_time;
 }
+#endif // 0 - read_main_node_reply() dead code
 
 /**
  * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
@@ -926,6 +1040,33 @@ void setup() {
     USBDevice.detach();
 #endif
 
+#if LORA
+    // send time request
+    time_request_t request;
+    build_time_request(&request, NODE_ADDRESS);
+    send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
+
+    // get the time response
+    uint8_t *response = receive_message();
+    MessageType mt = get_message_type(response);
+    switch (mt) {
+        case time_response: {
+            uint8_t node;
+            uint32_t time;
+            parse_time_response((time_response_t *)response, &node, &time);
+
+            update_time(time);
+            break;
+        }
+
+        default: {
+            IO(Serial.print(F("Unexpected response type: ")));
+            IO(Serial.println(get_message_type_string(mt)));
+            status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
+        }
+    }
+#endif
+
     IO(Serial.println(F("Setup complete.")));
 }
 
@@ -934,21 +1075,16 @@ void loop() {
     static unsigned long message = 0;
 
     // The data sent to the main node
-    packet_t data;
+    // packet_t data;
+
+    data_message_t data;
 
     unsigned long sample_time = rtc.getEpoch();
 
     ++message;
 
-// New packet encoding.
-// TODO Could drop NODE_ADDRESS and status if using RH Datagrams.
-#if 0
-    build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_bat_v(), (uint16_t)last_tx_time,
-                      get_temperature(), get_humidity(), status);
-#else
-    build_data_packet(&data, NODE_ADDRESS, message, sample_time, get_battery_voltage(), (uint16_t)last_tx_time,
-                      get_temperature(), get_humidity(), status);
-#endif
+    build_data_message(&data, NODE_ADDRESS, message, sample_time, (uint16_t)get_battery_voltage(), (uint16_t)last_tx_time,
+                       get_temperature(), get_humidity(), status);
 
     clear_state_pins();
     set_state_pin(STATE_1);
@@ -959,29 +1095,53 @@ void loop() {
 
 #if LORA
     last_tx_time = millis();
-    send_data_packet(data, RH_BROADCAST_ADDRESS);
+    send_message((uint8_t *)&data, RH_BROADCAST_ADDRESS, DATA_MESSAGE_SIZE);
     last_tx_time = millis() - last_tx_time;
+#endif
 
+    IO(Serial.print("Data msg: "));
+    IO(Serial.println(data_message_to_string((data_message_t *)&data, true)));
+        
     set_state_pin(STATE_2);
     IO(Serial.println("STATE 2"));
 
-    uint32_t new_node_time = read_main_node_reply();
-    IO(Serial.print("New node time: "));
-    IO(Serial.println(new_node_time));
+    log_data(get_log_filename(), data_message_to_string(&data, false));
 
-    set_state_pin(STATE_3);
-    IO(Serial.println("STATE 3"));
+    if (message % TIME_REQUEST_SAMPLE_PERIOD == 0) {
+        set_state_pin(STATE_3);
+        IO(Serial.println("STATE 3"));
+#if LORA
+        // send time request
+        time_request_t request;
+        build_time_request(&request, NODE_ADDRESS);
+        send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
+
+        IO(Serial.print("Sent time request... "));
+
+        // get the time response
+        uint8_t *response = receive_message();
+        MessageType mt = get_message_type(response);
+        if (mt == time_response) {
+            uint8_t node;
+            uint32_t time;
+            parse_time_response((time_response_t *)response, &node, &time);
+            
+            IO(Serial.println(time_response_to_string((time_response_t *)response, true)));
+
+            if (update_time(time)) {
+                sample_time = time;  // ensure the correct time is used to set the sleep interval
+            }
+        } else {
+            IO(Serial.println("No response."));
+            status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
+        }
 #endif
-
-    log_data(get_log_filename(), data_packet_to_string(&data, false));
+    }
 
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
 
-    if (new_node_time > 0)
-        sleep_node(new_node_time);
-    else
-        sleep_node(sample_time);
+    sleep_node(sample_time);
 
     set_state_pin(STATE_5);
     IO(Serial.println("STATE 5"));
