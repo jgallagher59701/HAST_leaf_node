@@ -33,7 +33,7 @@
 #include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 1      // Requires USB; Will not work with STANDBY_MODE
+#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
 #define LORA_DEBUG 0 // Send debugging info to the main node using lora
 #include "debug.h"
 
@@ -102,11 +102,35 @@
 // RH_CAD_DEFAULT_TIMEOUT 10seconds
 
 #ifndef STANDBY_INTERVAL_S
-#define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission
+#define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission; only used when STANDBY_MODE is 0
 #endif
 
 #ifndef TIME_REQUEST_SAMPLE_PERIOD
 #define TIME_REQUEST_SAMPLE_PERIOD 24  // Ask the time once for every N data samples
+#endif
+
+// Normal operation: wake once per hour, at WAKE_UP_MINUTE:WAKE_UP_SECOND, using
+// the RTC's recurring MATCH_MMSS alarm (matches every hour; day/month/year are
+// ignored). Because the match is on minute/second only, it is unaffected by a
+// time_request/time_response clock correction applied before the node sleeps -
+// unlike an absolute wake-up epoch, this alarm can never end up already in the
+// past.
+#ifndef WAKE_UP_MINUTE
+#define WAKE_UP_MINUTE 0 // minute of the hour to wake up and sample, 0-59
+#endif
+
+#ifndef WAKE_UP_SECOND
+#define WAKE_UP_SECOND 0 // second of that minute to wake up and sample, 0-59
+#endif
+
+// For testing: sample once per minute, at SAMPLE_SECOND, using the RTC's
+// recurring MATCH_SS alarm, instead of once per hour.
+#ifndef SAMPLE_ONCE_PER_MINUTE
+#define SAMPLE_ONCE_PER_MINUTE 0
+#endif
+
+#ifndef SAMPLE_SECOND
+#define SAMPLE_SECOND 0 // second of each minute to wake up and sample, 0-59; only used when SAMPLE_ONCE_PER_MINUTE is 1
 #endif
 
 #define BOOT_SAFETY_DELAY 10000  // 10s
@@ -587,15 +611,14 @@ uint16_t get_humidity() {
  * Enter the sleep mode. Wake up after an interrupt. This
  * handles shutting down the peripherals and puts the RS to
  * sleep with an interrupt handler set to trigger wakeup.
- * The sleep time period is set by the compile-time constant
- * STANDBY_INTERVAL_S, which due to a time rounding error, is
- * one less than the number of seconds the node will actually
- * sleep.
  *
- * @param sample_time Unix time the last sample was taken.
+ * The wake-up time is a recurring RTC alarm rather than an absolute
+ * epoch: once per hour, at WAKE_UP_MINUTE:WAKE_UP_SECOND, or - when
+ * SAMPLE_ONCE_PER_MINUTE is set - once per minute at SAMPLE_SECOND,
+ * for testing. See the definitions of those macros above.
  */
 
-void sleep_node(unsigned long sample_time) {
+void sleep_node() {
 #if TX_LED
     digitalWrite(STATUS_LED, LOW);
 #endif
@@ -618,17 +641,14 @@ void sleep_node(unsigned long sample_time) {
     IO(Serial.println("SPI shutdown"));
 #endif
 
-    // TODO Fix this so that the times are on the hour.
-    //  Use setAlarmTime(h, m, s) and rtc.MATCH_MMSS for every hour or MATCH_SS for
-    //  every minute. Update the m and s values using 'time + n mod 60'.
-    //  https://www.arduino.cc/en/Reference/RTC
-
 #if STANDBY_MODE
-    unsigned long wake_up_time = sample_time + STANDBY_INTERVAL_S;
-    if (wake_up_time < rtc.getEpoch() + 2)
-        wake_up_time = rtc.getEpoch() + 2;
-    rtc.setAlarmEpoch(wake_up_time);
-    rtc.enableAlarm(rtc.MATCH_YYMMDDHHMMSS);
+#if SAMPLE_ONCE_PER_MINUTE
+    rtc.setAlarmSeconds(SAMPLE_SECOND);
+    rtc.enableAlarm(rtc.MATCH_SS);
+#else
+    rtc.setAlarmTime(0, WAKE_UP_MINUTE, WAKE_UP_SECOND);
+    rtc.enableAlarm(rtc.MATCH_MMSS);
+#endif
     rtc.attachInterrupt(alarmMatch);
     // 10ms wait here. jhrg 12/5/20
     yield(10);
@@ -923,7 +943,7 @@ void loop() {
             IO(Serial.println(time_response_to_string((time_response_t *)response, true)));
 
             if (update_time(time)) {
-                sample_time = time;  // ensure the correct time is used to set the sleep interval
+                sample_time = time;  // for the elapsed-time debug output below
             }
         } else {
             IO(Serial.println("No response."));
@@ -935,7 +955,7 @@ void loop() {
     set_state_pin(STATE_4);
     IO(Serial.println("STATE 4"));
 
-    sleep_node(sample_time);
+    sleep_node();
 
     set_state_pin(STATE_5);
     IO(Serial.println("STATE 5"));
