@@ -203,35 +203,6 @@ void alarmMatch() {
     rtc.detachInterrupt();
 }
 
-// TODO: Are these functions that set the SPI bus CS lines HIGH needed?
-
-/**
-    @brief RF95 off the SPI bus to enable SD card access
-*/
-void yield_spi_to_sd() {
-    digitalWrite(RFM95_CS, HIGH);
-    // digitalWrite(FLASH_CS, HIGH);
-    // Setting the SD card SS LOW seems to break things. Let the
-    // SdFat library code control when to set SS to LOW.
-}
-
-/**
-    @brief SD card off the SPI bus to enable RFM95 access
-*/
-void yield_spi_to_rf95() {
-    digitalWrite(SD_CS, HIGH);
-    // digitalWrite(FLASH_CS, HIGH);
-}
-
-/**
- * @brief Remove everything from the SPI bus
- */
-void yield_spi_bus() {
-    digitalWrite(SD_CS, HIGH);
-    digitalWrite(RFM95_CS, HIGH);
-    // FLASH_CS is always off the bus digitalWrite(FLASH_CS, HIGH);
-}
-
 /**
  * @brief Send a short message for debugging using the LoRa
  * @param msg The message; null terminated string
@@ -239,7 +210,6 @@ void yield_spi_bus() {
  */
 void lora_debug(const char *msg, uint8_t to) {
 #if LORA && LORA_DEBUG
-    yield_spi_to_rf95();
     rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg) + 1, to);
 #endif
 }
@@ -352,7 +322,6 @@ get_log_filename() {
 /**
    @brief Write a header for the new log file.
    @param file_name open/create this file, append if it exists
-   @note Claim the SPI bus
    @note Never call this if the SD card initialization fails.
 */
 void write_header(const char *file_name) {
@@ -360,8 +329,6 @@ void write_header(const char *file_name) {
     if (status & SD_CARD_INIT_ERROR) {
         return;
     }
-
-    yield_spi_to_sd();
 
     // disable interrupts
     noInterrupts();
@@ -400,15 +367,12 @@ void write_header(const char *file_name) {
    write data to the log, append a new line
    @param file_name open for append
    @param data write this char string
-   @note Claim the SPI bus (calls yield_spi_to_sd).
 */
 void log_data(const char *file_name, const char *data) {
 #if SD
     if (status & SD_CARD_INIT_ERROR) {
         return;
     }
-
-    yield_spi_to_sd();
 
     // disable interrupts
     noInterrupts();
@@ -468,8 +432,6 @@ void shutdown_sd_card() {
  */
 void wake_up_sd_card() {
     // FIXME Only do this if the SD card was initialized. jhrg 9/26/21
-    yield_spi_to_sd();
-
     digitalWrite(SD_PWR, HIGH);
 
     // Calling this here freezes the RS. jhrg 3/24/21
@@ -489,8 +451,6 @@ void wake_up_sd_card() {
 
 void send_message(uint8_t *data, uint8_t to, uint32_t size) {
 #if LORA
-    yield_spi_to_rf95();
-
     // This may block for up to CAD_TIMEOUT seconds
     if (!rf95_manager.sendtoWait(data, size, to)) {
         status |= RFM95_SEND_ERROR;
@@ -519,8 +479,6 @@ void send_message(uint8_t *data, uint8_t to, uint32_t size) {
  */
 uint8_t *receive_message() {
 #if LORA
-    yield_spi_to_rf95();
-
     // Used to hold any reply from the main node
     static uint8_t rf95_buf[RH_RF95_MAX_MESSAGE_LEN];
     memset(rf95_buf, 0, sizeof(rf95_buf));
@@ -577,7 +535,6 @@ bool update_time(uint32_t main_node_time) {
  */
 void radio_silence() {
 #if LORA
-    yield_spi_to_rf95();
     rf95.sleep(); // Turn off the LoRa
 #endif
 }
@@ -729,9 +686,15 @@ void setup() {
     pinMode(SD_PWR, OUTPUT);
     digitalWrite(SD_PWR, HIGH); // Power on the card
 
-    // SPI bus control
+    // SPI bus control. Deselect both devices explicitly rather than relying
+    // on the DOUT bit carried over from the INPUT_PULLUP pass above - each
+    // device's own driver (RadioHead, SdFat) only asserts its CS for the
+    // duration of its own transactions, so nothing else keeps these pins
+    // deselected between transactions. jhrg 9/14/26
     pinMode(SD_CS, OUTPUT);
+    digitalWrite(SD_CS, HIGH);
     pinMode(RFM95_CS, OUTPUT);
+    digitalWrite(RFM95_CS, HIGH);
 
     // Only start the Serial interface when DEBUG is 1
     IO(Serial.begin(115200));
@@ -778,8 +741,6 @@ void setup() {
 
 #if SD
     // Initialize the SD card
-    yield_spi_to_sd();
-
     IO(Serial.print(F("Initializing SD card... ")));
     yield(SD_POWER_ON_DELAY);
 
@@ -800,8 +761,6 @@ void setup() {
 #endif
 
 #if LORA
-    yield_spi_to_rf95();
-
     IO(Serial.print(F("Initializing LORA...")));
 
     if (!rf95_manager.init()) {
