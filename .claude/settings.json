@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(./docs/**)",
+      "Read(./plans/**)",
+      "Edit(./docs/**)",
+      "Edit(./plans/**)"
+    ]
+  }
+}
