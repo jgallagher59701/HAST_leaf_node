@@ -59,6 +59,53 @@ regression. Full investigation: `docs/deep-dives/leaf-node-cc.md`.
 
 ---
 
+## BUG-002 — `parse_join_response` checks for the wrong `MessageType`
+
+**Severity:** Low
+**Status:** Fix Planned
+**Reported:** 2026-09-19
+**Related requirements:** None found. No `FR`/`NFR`/`UC`/`IC` documents a join/handshake
+process at all — the entire `SUPPORT_JOIN` feature (join request/response messages,
+node registration by EUI) exists in `lib/soil_sensor_common` with no requirement ever
+having been written for it, in either direction (not documented as planned, not
+documented as deprecated).
+
+**Reproduction steps:**
+1. In `lib/soil_sensor_common/messages.cc:150-160`, `parse_join_response` is defined
+   to unpack a `join_response_t` message.
+2. Its guard on line 151 reads `if (data->type != join_request) return false;` — it
+   checks the message against `join_request`, not `join_response`.
+3. Call `parse_join_response()` with a `join_response_t` whose `type` field is
+   correctly set to `join_response` (as `build_join_response()`, messages.cc:143-147,
+   sets it): the guard's condition (`join_response != join_request`) is true, so the
+   function returns `false` and refuses to parse a validly-typed join response.
+   Conversely, a buffer mistakenly holding a `join_request_t` (type `join_request`)
+   would pass this check and be misparsed as a join response.
+4. This code path is currently unreachable in both `HAST_leaf_node` and
+   `HAST_lora_main`: `messages.h:18` does `#undef SUPPORT_JOIN` unconditionally, and
+   neither repo's `platformio.ini` redefines it, so none of the `#ifdef SUPPORT_JOIN`
+   code compiles into either firmware today. It does, however, block
+   `HAST_lora_main/test/native/test_messages/join_messages_test.cc` from compiling
+   whenever that guard is lifted, since that test exercises the join API.
+
+**Expected behavior:** `parse_join_response` should validate that the message it's
+given is actually a `join_response_t` by checking `data->type != join_response`, and
+return `true`/populate its out-parameters only for a correctly-typed join response.
+
+**Actual behavior:** It checks against `join_request` instead, so it rejects valid
+join responses and would silently accept a mistyped buffer holding a join request.
+
+**Root cause:** Copy-paste from a sibling parse function (e.g. `parse_join_request`
+or `parse_time_request`, which correctly check their own type) without updating the
+enum value being compared against. Confirmed by direct code inspection
+(`lib/soil_sensor_common/messages.cc:150-160`); no further investigation needed — this
+is a narrow, single-line defect, not a subsystem-level issue. Full context on the
+surrounding library: `docs/deep-dives/soil-sensor-common.md`.
+
+**Fix plan:** `plans/bugfix-join-response-type-check-plan.md`
+
+---
+
 <!-- Add new bugs via /fix-bug, or by hand — keep the section format: metadata lines,
      then Reproduction / Expected / Actual / Root Cause. A bug with no reproduction
      steps yet is a symptom report, not a bug entry — get concrete steps before

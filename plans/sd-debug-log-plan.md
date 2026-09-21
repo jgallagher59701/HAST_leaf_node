@@ -1,0 +1,198 @@
+# Plan: SD-card debug log
+
+**Status:** Draft
+**Created:** 2026-09-20
+
+## Summary
+
+Add an append-only, timestamped debug log file on the SD card that captures the leaf
+node's diagnostic output — information useful for understanding program flow/timing
+during testing, without the execution-halting cost of a debug probe — when debug
+mode is enabled. `loop()`-time USB-serial output is dropped entirely in favor of
+this; `setup()`-time serial output is kept, under debug-probe-safe initialization.
+FR-008's LoRa-routing clause turns out to describe a different, unrelated behavior
+(real-time *error* reporting to the main node, not debug tracing) that this plan
+leaves functionally untouched, renaming only the function that does it to remove the
+naming collision with the new "debug" concept.
+
+## Requirements traced
+
+- FR-009 — Leaf node writes debug diagnostics to a log file on the SD card when
+  debug mode is enabled
+- FR-008 — marked `Superseded by FR-009`, but this plan finds that only its
+  serial-routing clause is actually replaced. Its LoRa-routing clause turns out to
+  describe `lora_debug()`, which on inspection reports genuine SD-card/hardware
+  errors to the main node, not debug diagnostics — that behavior is kept, only
+  renamed (Phase 2). **Flag:** FR-008's `Superseded by FR-009` status may not be
+  fully accurate once this ships — the LoRa error-reporting behavior it named
+  continues to exist under a different name, outside FR-009's scope, and currently
+  has no requirement of its own describing it (worth a `/new-requirement` for
+  "leaf node reports hardware/SD errors to the main node over LoRa" once this lands,
+  rather than leaving it undocumented behavior). Not resolved in this plan — a
+  requirements-doc decision, not an implementation one.
+- UC-001 — main flow step 4 (SD logging) and the "Debug mode enabled" alternate
+  flow are both touched by this change
+
+## Constraints considered
+
+- **IC-001** (SAMD21, ~32 KB RAM, no dynamic allocation after `setup()`): the new
+  debug-log write path must reuse fixed-size buffers, the same way
+  `data_message_to_string`'s static `decoded_string` buffers and `log_data()`'s
+  stack-based `error_info[256]` already do. No `String`, no `new`/`malloc`.
+- **IC-003** (battery-only, unattended field deployment): the debug log must not add
+  meaningful SD-write time/power when debug mode is *off* — the default, field
+  configuration. Since the mechanism is gated behind a compile-time flag exactly like
+  today's `DEBUG`/`LORA_DEBUG`, a non-debug build should see zero additional SD
+  activity. This needs to hold in practice, not just in principle — see Phase 3.
+  This plan does not add a way to enable debug mode at runtime, which would
+  conflict with IC-003's unattended-deployment premise (no path for a technician to
+  toggle it without physically reflashing or re-provisioning the node).
+- **IC-004** (no radio besides LoRa to the main node): removing `lora_debug()` means
+  debug output no longer competes with the primary reliable-datagram traffic for the
+  radio. This is a net alignment improvement with IC-004's intent (LoRa is for the
+  main-node protocol, not a side channel), not a conflict.
+
+No constraint is violated by this plan.
+
+## Phases
+
+### Phase 1 — Add the debug log file and a `debug_log()` write function
+
+**Goal:** A single, fixed-name SD file (e.g. `Debug.log`, opened `O_APPEND` —
+*not* the numbered-rollover scheme `DataNN.csv` uses) that diagnostic output can be
+appended to across boots.
+**Satisfies:** FR-009
+
+Steps:
+1. Add a fixed debug-log filename constant (e.g. `#define DEBUG_LOG_FILE_NAME
+   "Debug.log"`). No unused-filename search, no per-boot rollover — every boot
+   appends to the same file, unlike `get_new_log_filename()`'s `DataNN.csv` scheme.
+2. Add `void debug_log(const char *msg)` as its own function, distinct from
+   `log_data()`: they write to different files for different purposes
+   (`log_data()` → the numbered sensor-data CSV; `debug_log()` → the single
+   append-only debug file), and `debug_log()` is expected to gain call-site-specific
+   behavior over time (e.g. timestamps — see step 3) that `log_data()` shouldn't
+   carry. Structurally it still follows `log_data()`'s open/write/close-per-call
+   pattern (safe across the standby/wake cycle, since neither file is held open
+   during sleep).
+3. `debug_log()` prepends a date/time stamp to each line, read from the RTC (already
+   running and synced per FR-005) — e.g. the same `%d/%d/%dT%d:%d:%d` format
+   `setup()` already builds into `date_str` (`src/leaf_node.cc:718`), into a fixed
+   stack buffer, followed by the message. This is what makes the log useful for
+   understanding timing/ordering during testing without a debug probe.
+4. Gated on whatever macro replaces `DEBUG` (see Phase 3): a non-debug build should
+   never open or write this file.
+
+**Risks:** A second SD file means a second point of write failure per cycle. Needs
+its own status bit or reuse of `SD_FILE_ENTRY_WRITE_ERROR` — minor, not blocking.
+
+### Phase 2 — Rename `lora_debug()` to remove the naming collision with the new debug log
+
+**Goal:** Keep `lora_debug()`'s actual behavior — reporting real errors (e.g. an SD
+write failure) to the main node over LoRa — unchanged; only its name changes, since
+"debug" now collides with the unrelated concept this plan introduces.
+**Satisfies:** FR-009 (clarifies, does not touch, FR-008's error-reporting behavior
+— see correction below)
+
+**Correction from initial draft:** the `lora_debug()` call inside `log_data()`'s
+SD-write-failure branch is not a debug message and is out of scope for FR-008/FR-009
+— it is real-time error reporting to the main node, which this plan does not change.
+Treating its removal as blocked on "can we safely write to the SD card that just
+failed" was a red herring: nothing about this plan requires touching that call site's
+behavior, only its name.
+
+Steps:
+1. Rename `lora_debug()` to something that reflects what it actually does, e.g.
+   `report_error_to_main_node()` (exact name: open question below — not load-bearing,
+   easy to pick at implementation time).
+2. Update its one call site in `log_data()` accordingly. No behavior change.
+3. `LORA_DEBUG` (the build flag gating it) can keep its name or be renamed to match;
+   low stakes either way since it's a single local `#define`, not a shared constant.
+
+**Risks:** None — pure rename, no behavior change, single call site.
+
+### Phase 3 — Redirect `loop()` diagnostics to the debug log; drop Serial except in `setup()`
+
+**Goal:** All `IO(Serial...)` call sites in `loop()` (and the helper functions it
+calls, e.g. `send_message`/`receive_message`) move to `debug_log()`. Serial output
+is dropped entirely there. `setup()`-time `IO(Serial...)` calls are kept, but only
+under a debug-probe-safe serial initialization — not the assumption that a USB host
+is listening.
+**Satisfies:** FR-009 (supersedes FR-008's serial-routing clause for `loop()`;
+narrows, rather than fully replaces, it for `setup()`)
+
+Steps:
+1. Repoint every `IO(Serial...)` call site inside `loop()` (state prints, message
+   contents, elapsed-time output, the `time_response` switch's default case, etc.)
+   at `debug_log(...)`.
+2. Keep `IO(Serial...)` call sites inside `setup()` as Serial output, but require
+   they only run under the existing bounded, non-blocking connection sequence
+   already present at `src/leaf_node.cc:700-706`: `Serial.begin()`, then a
+   *bounded* `while (!Serial)` loop capped at `SERIAL_CONNECT_TRIES` iterations of
+   `SERIAL_CONNECT_INTERVAL` ms, never an unbounded wait. This is the "debug-probe
+   safe" property: `setup()` must complete (and eventually reach `USBDevice.detach()`
+   under `STANDBY_MODE`) whether or not a USB terminal is actually attached — e.g.
+   when running under the `env:debugZeroUSB` SWD/jlink target
+   (`platformio.ini:77-88`), which attaches via SWD, not USB-serial, and must not
+   hang waiting on a serial connection that will never come. No behavior change here
+   versus today — this phase confirms/keeps the existing pattern rather than
+   introducing a new one, and is called out explicitly so it isn't accidentally
+   deleted while dropping `loop()`-time serial.
+3. Update the boot-error `blink()`/status-bit path (`SHT31_BEGIN_FAIL`,
+   `SD_BEGIN_FAIL`, etc.) to also write to the debug log where the SD card is
+   confirmed working (i.e. not the `SD_BEGIN_FAIL` case itself) — in addition to,
+   not instead of, the `setup()`-time Serial output.
+
+**Risks:** Call-site volume (~30 sites total, split between `setup()` and `loop()`)
+makes this the largest phase; low individual risk since each `loop()` site is a
+mechanical destination swap. Main risk is accidentally weakening the bounded-wait
+Serial init while touching this code — step 2 is a "leave alone" instruction, not a
+rewrite, precisely to avoid that.
+
+### Phase 4 — Update comments/build-flag documentation
+
+**Goal:** `src/leaf_node.cc`'s `DEBUG`/`LORA_DEBUG` comment block (lines 35-38)
+reflects the new behavior; no `platformio.ini` changes needed since these flags are
+`#define`d in-file, not passed as build flags.
+**Satisfies:** FR-009
+
+Steps:
+1. Update the comment at `src/leaf_node.cc:35-38` describing what the (possibly
+   renamed) debug flag now does.
+
+**Risks:** None — documentation only.
+
+## Open questions
+
+- **What should `debug_log()`'s siblings be called, and should `IO()`/`DEBUG` be
+  renamed too, now that "debug" is a more specific term than it used to be?** Not
+  load-bearing, but worth picking deliberately given three related-but-distinct
+  things (`debug_log()`, the renamed `lora_debug()`, and the surviving `setup()`-only
+  `IO()`/`DEBUG`) will otherwise all read as "the same debug thing." Blocks:
+  nothing functionally; a naming-consistency pass before Phase 4.
+- **What exact name replaces `lora_debug()`?** e.g. `report_error_to_main_node()` vs.
+  something shorter. Cosmetic, doesn't block anything — can be decided at
+  implementation time.
+
+## Follow-up (outside this plan)
+
+- **Run `/new-requirement` to give the LoRa error-reporting behavior (currently
+  `lora_debug()`, renamed in Phase 2) its own requirement.** It was previously
+  described only as part of FR-008 ("route diagnostics... over LoRa"), which this
+  plan establishes was a mischaracterization — it reports hardware/SD errors to the
+  main node, not debug diagnostics, and is being kept, not superseded. Once FR-009
+  ships, FR-008's `Superseded by FR-009` status will be misleading unless this
+  follow-up requirement exists to actually own that behavior. Not done as part of
+  this plan — a separate requirements-doc decision.
+
+## Out of scope
+
+- Any change to the data-sample CSV log (`DataNN.csv`, FR-002) — untouched by this
+  plan.
+- A runtime (non-compile-time) way to toggle debug mode in the field — would need
+  its own requirement and conflicts with IC-003's unattended-deployment premise
+  unless carefully designed; not assumed here.
+- Changes to `HAST_lora_main` (the main node) — FR-008/FR-009 are leaf-node-only
+  requirements; the main node's own debug/logging behavior (`TFTDisplay`, etc.) is
+  untouched.
+- `lib/soil_sensor_common` changes — this plan only touches `src/leaf_node.cc`.
