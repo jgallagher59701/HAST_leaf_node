@@ -19,17 +19,14 @@ naming collision with the new "debug" concept.
 
 - FR-009 — Leaf node writes debug diagnostics to a log file on the SD card when
   debug mode is enabled
-- FR-008 — marked `Superseded by FR-009`, but this plan finds that only its
-  serial-routing clause is actually replaced. Its LoRa-routing clause turns out to
-  describe `lora_debug()`, which on inspection reports genuine SD-card/hardware
-  errors to the main node, not debug diagnostics — that behavior is kept, only
-  renamed (Phase 2). **Flag:** FR-008's `Superseded by FR-009` status may not be
-  fully accurate once this ships — the LoRa error-reporting behavior it named
-  continues to exist under a different name, outside FR-009's scope, and currently
-  has no requirement of its own describing it (worth a `/new-requirement` for
-  "leaf node reports hardware/SD errors to the main node over LoRa" once this lands,
-  rather than leaving it undocumented behavior). Not resolved in this plan — a
-  requirements-doc decision, not an implementation one.
+- FR-010 — Leaf node reports hardware/SD-card errors to the main node over LoRa when
+  they occur. Newly added to cover `lora_debug()`'s actual behavior, which FR-008 had
+  miscategorized as "debug diagnostics." This plan keeps that behavior unchanged,
+  renaming only the function (Phase 2).
+- FR-008 — marked `Superseded by FR-009`. This plan finds that only its
+  serial-routing clause is actually replaced by FR-009; its LoRa-routing clause is
+  now covered by FR-010 instead, since on inspection it reports genuine SD-card/
+  hardware errors to the main node, not debug diagnostics.
 - UC-001 — main flow step 4 (SD logging) and the "Debug mode enabled" alternate
   flow are both touched by this change
 
@@ -47,10 +44,12 @@ naming collision with the new "debug" concept.
   This plan does not add a way to enable debug mode at runtime, which would
   conflict with IC-003's unattended-deployment premise (no path for a technician to
   toggle it without physically reflashing or re-provisioning the node).
-- **IC-004** (no radio besides LoRa to the main node): removing `lora_debug()` means
-  debug output no longer competes with the primary reliable-datagram traffic for the
-  radio. This is a net alignment improvement with IC-004's intent (LoRa is for the
-  main-node protocol, not a side channel), not a conflict.
+- **IC-004** (no radio besides LoRa to the main node): `lora_debug()` (renamed under
+  FR-010, not removed) is the correct use of the single LoRa link for genuine error
+  reporting; moving actual debug tracing off of LoRa and onto the SD log (FR-009)
+  keeps that link free for the primary reliable-datagram protocol and FR-010's error
+  reports, rather than competing with them. Consistent with IC-004's intent, not a
+  conflict.
 
 No constraint is violated by this plan.
 
@@ -91,8 +90,8 @@ its own status bit or reuse of `SD_FILE_ENTRY_WRITE_ERROR` — minor, not blocki
 **Goal:** Keep `lora_debug()`'s actual behavior — reporting real errors (e.g. an SD
 write failure) to the main node over LoRa — unchanged; only its name changes, since
 "debug" now collides with the unrelated concept this plan introduces.
-**Satisfies:** FR-009 (clarifies, does not touch, FR-008's error-reporting behavior
-— see correction below)
+**Satisfies:** FR-010 (clarifies naming only; behavior is unchanged) — see
+correction below for why this isn't FR-009
 
 **Correction from initial draft:** the `lora_debug()` call inside `log_data()`'s
 SD-write-failure branch is not a debug message and is out of scope for FR-008/FR-009
@@ -176,14 +175,10 @@ Steps:
 
 ## Follow-up (outside this plan)
 
-- **Run `/new-requirement` to give the LoRa error-reporting behavior (currently
-  `lora_debug()`, renamed in Phase 2) its own requirement.** It was previously
-  described only as part of FR-008 ("route diagnostics... over LoRa"), which this
-  plan establishes was a mischaracterization — it reports hardware/SD errors to the
-  main node, not debug diagnostics, and is being kept, not superseded. Once FR-009
-  ships, FR-008's `Superseded by FR-009` status will be misleading unless this
-  follow-up requirement exists to actually own that behavior. Not done as part of
-  this plan — a separate requirements-doc decision.
+- **Done:** FR-010 ("Leaf node reports hardware/SD-card errors to the main node over
+  LoRa when they occur") was added via `/new-requirement` to own the
+  `lora_debug()` behavior FR-008 had miscategorized as debug diagnostics. Phase 2 now
+  satisfies FR-010, not FR-009.
 
 ## Out of scope
 
