@@ -33,8 +33,9 @@
 #include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 0      // Requires USB; Will not work with STANDBY_MODE
-#define LORA_DEBUG 0 // Send debugging info to the main node using lora
+#define DEBUG 0             // setup()-time diagnostics over USB serial; requires USB (FR-008)
+#define DEBUG_LOG 0         // Write loop()-time diagnostics to a debug log file on the SD card (FR-009)
+#define LORA_ERROR_REPORT 0 // Report hardware/SD-card errors to the main node over LoRa (FR-010)
 #include "debug.h"
 
 #define MAIN_NODE_ADDRESS 0
@@ -143,6 +144,9 @@
 
 // Log file name.
 #define FILE_BASE_NAME "Data"
+// Fixed name, appended to across boots - unlike FILE_BASE_NAME's numbered
+// DataNN.csv rollover scheme, there is only ever one debug log (FR-009).
+#define DEBUG_LOG_FILE_NAME "Debug.log"
 // To avoid a race condition when using 'standby mode' this must be >= 2.
 #define SD_CARD_WAIT 2 // seconds to wait after last write before power off
 
@@ -204,12 +208,12 @@ void alarmMatch() {
 }
 
 /**
- * @brief Send a short message for debugging using the LoRa
+ * @brief Report a hardware/SD-card error to the main node over LoRa (FR-010)
  * @param msg The message; null terminated string
  * @param to Send to this node
  */
-void lora_debug(const char *msg, uint8_t to) {
-#if LORA && LORA_DEBUG
+void report_error_to_main_node(const char *msg, uint8_t to) {
+#if LORA && LORA_ERROR_REPORT
     rf95_manager.sendtoWait((uint8_t *)msg, strlen(msg) + 1, to);
 #endif
 }
@@ -398,12 +402,31 @@ void log_data(const char *file_name, const char *data) {
 
         interrupts(); // enable interrupts for the rfm95
 
-        lora_debug(error_info, MAIN_NODE_ADDRESS);
+        report_error_to_main_node(error_info, MAIN_NODE_ADDRESS);
     }
 
     // enable interrupts
     interrupts();
 #endif
+}
+
+/**
+ * @brief Append a timestamped line to the SD-card debug log (FR-009)
+ *
+ * For information useful to understand program flow/timing while testing -
+ * not needed during normal operation - without the execution-halting cost of
+ * a debug probe. Reuses log_data()'s file I/O and error handling (including
+ * reporting a write failure to the main node via report_error_to_main_node()),
+ * against the single append-only DEBUG_LOG_FILE_NAME file rather than the
+ * numbered data-sample log.
+ * @param msg Null-terminated diagnostic message; a date/time stamp is prepended
+ */
+void debug_log(const char *msg) {
+    char line[320];
+    snprintf(line, sizeof(line), "%d/%d/%dT%d:%d:%d %s", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
+             rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), msg);
+
+    log_data(DEBUG_LOG_FILE_NAME, line);
 }
 
 /**
@@ -492,11 +515,11 @@ uint8_t *receive_message() {
         if (rf95_manager.recvfromAck(rf95_buf, &len, &from)) {
             return rf95_buf;
         } else {
-            IO(Serial.println("Message available, but ack failure."));
+            IO_LOG(debug_log("Message available, but ack failure."));
             status |= RFM95_NO_REPLY;
         }
     } else {
-        IO(Serial.println("No message available."));
+        IO_LOG(debug_log("No message available."));
         status |= RFM95_NO_REPLY;
     }
 #endif
@@ -514,12 +537,11 @@ uint8_t *receive_message() {
 bool update_time(uint32_t main_node_time) {
     int32_t delta_time = main_node_time - rtc.getEpoch();
 
-    IO(Serial.print("Time from main node: "));
-    IO(Serial.print(main_node_time));
-    IO(Serial.print(", Time from this node: "));
-    IO(Serial.print(rtc.getEpoch()));
-    IO(Serial.print(", Delta: "));
-    IO(Serial.println(delta_time));
+    IO_LOG(
+        char msg[128];
+        snprintf(msg, sizeof(msg), "Time from main node: %lu, Time from this node: %lu, Delta: %ld",
+                 (unsigned long)main_node_time, (unsigned long)rtc.getEpoch(), (long)delta_time);
+        debug_log(msg));
 
     // update the time if the delta is more than a second
     if (abs(delta_time) > 1) {
@@ -585,17 +607,25 @@ void sleep_node() {
     // function since the first use of the LoRa module cancels
     // its sleep mode.
     radio_silence();
-    IO(Serial.println("Radio silence"));
+    IO_LOG(debug_log("Radio silence"));
+#endif
+
+    // Log once, before the SD card is powered off: debug_log() needs the card
+    // up (and, below, SPI active) to write to it. shutdown_sd_card() cuts SD
+    // power internally (after its own settle wait) and SPI.end() drops the
+    // bus, so neither a "SD shutdown" nor a "SPI shutdown" message logged
+    // *after* those calls could actually reach the debug log - there is no
+    // safe point between them to split this into two messages. jhrg 9/21/26
+#if SD || SPI_SLEEP
+    IO_LOG(debug_log("SD/SPI shutdown"));
 #endif
 
 #if SD
     shutdown_sd_card();
-    IO(Serial.println("SD shutdown"));
 #endif
 
 #if SPI_SLEEP
     SPI.end();
-    IO(Serial.println("SPI shutdown"));
 #endif
 
 #if STANDBY_MODE
@@ -619,12 +649,16 @@ void sleep_node() {
 
 #if SPI_SLEEP
     SPI.begin();
-    IO(Serial.println("SPI up"));
 #endif
 
 #if SD
     wake_up_sd_card();
-    IO(Serial.println("SD card up"));
+#endif
+
+    // Symmetric with the shutdown message above: only safe to log once SPI is
+    // back and wake_up_sd_card() has re-initialized the card. jhrg 9/21/26
+#if SD || SPI_SLEEP
+    IO_LOG(debug_log("SPI/SD up"));
 #endif
 
 #if TX_LED
@@ -765,6 +799,8 @@ void setup() {
 
     if (!rf95_manager.init()) {
         IO(Serial.println(F("LoRa init failed.")));
+        // SD is confirmed working by this point in setup(), unlike SD_BEGIN_FAIL. jhrg 9/21/26
+        IO_LOG(debug_log("LoRa init failed."));
         error_blink(STATUS_LED, RFM95_INIT_FAIL);
         digitalWrite(STATUS_LED, HIGH);
         status |= RFM95_INIT_ERROR;
@@ -777,6 +813,7 @@ void setup() {
     // Setup ISM frequency
     if (!rf95.setFrequency(FREQUENCY)) {
         IO(Serial.println(F("LoRa frequency out of range.")));
+        IO_LOG(debug_log("LoRa frequency out of range."));
         blink(STATUS_LED, RFM95_SET_FREQ_FAIL, ERROR_TIMES);
         digitalWrite(STATUS_LED, HIGH);
         status |= RFM95_INIT_ERROR;
@@ -861,7 +898,7 @@ void loop() {
 
     clear_state_pins();
     set_state_pin(STATE_1);
-    IO(Serial.println("STATE 1"));
+    IO_LOG(debug_log("STATE 1"));
 
     // Preserve the 4 high bits of the status byte - the initialization errors.
     status = status & 0xF0; // clear status low nyble for the next sample interval
@@ -872,24 +909,26 @@ void loop() {
     last_tx_time = millis() - last_tx_time;
 #endif
 
-    IO(Serial.print("Data msg: "));
-    IO(Serial.println(data_message_to_string((data_message_t *)&data, true)));
-        
+    IO_LOG(
+        char msg[300];
+        snprintf(msg, sizeof(msg), "Data msg: %s", data_message_to_string((data_message_t *)&data, true));
+        debug_log(msg));
+
     set_state_pin(STATE_2);
-    IO(Serial.println("STATE 2"));
+    IO_LOG(debug_log("STATE 2"));
 
     log_data(get_log_filename(), data_message_to_string(&data, false));
 
     if (message % TIME_REQUEST_SAMPLE_PERIOD == 0) {
         set_state_pin(STATE_3);
-        IO(Serial.println("STATE 3"));
+        IO_LOG(debug_log("STATE 3"));
 #if LORA
         // send time request
         time_request_t request;
         build_time_request(&request, NODE_ADDRESS);
         send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
 
-        IO(Serial.print("Sent time request... "));
+        IO_LOG(debug_log("Sent time request..."));
 
         // get the time response
         uint8_t *response = receive_message();
@@ -898,30 +937,31 @@ void loop() {
             uint8_t node;
             uint32_t time;
             parse_time_response((time_response_t *)response, &node, &time);
-            
-            IO(Serial.println(time_response_to_string((time_response_t *)response, true)));
+
+            IO_LOG(debug_log(time_response_to_string((time_response_t *)response, true)));
 
             if (update_time(time)) {
                 sample_time = time;  // for the elapsed-time debug output below
             }
         } else {
-            IO(Serial.println("No response."));
+            IO_LOG(debug_log("No response."));
             status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
         }
 #endif
     }
 
     set_state_pin(STATE_4);
-    IO(Serial.println("STATE 4"));
+    IO_LOG(debug_log("STATE 4"));
 
     sleep_node();
 
     set_state_pin(STATE_5);
-    IO(Serial.println("STATE 5"));
+    IO_LOG(debug_log("STATE 5"));
 
-#if LORA_DEBUG
-    char msg[256];
-    snprintf(msg, 256, "t: %ld, o: %d \n", (unsigned long)rtc.getEpoch() - sample_time, STANDBY_INTERVAL_S);
-    lora_debug(msg, MAIN_NODE_ADDRESS);
-#endif
+    // Elapsed-wake-time diagnostic - moved off LoRa (FR-010 is for errors, not
+    // this) and onto the debug log (FR-009) where it belongs. jhrg 9/21/26
+    IO_LOG(
+        char msg[64];
+        snprintf(msg, sizeof(msg), "t: %ld, o: %d", (unsigned long)rtc.getEpoch() - sample_time, STANDBY_INTERVAL_S);
+        debug_log(msg));
 }

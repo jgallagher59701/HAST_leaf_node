@@ -1,6 +1,8 @@
 # Plan: SD-card debug log
 
-**Status:** Draft
+**Status:** In Progress (implemented in `src/leaf_node.cc`/`include/debug.h`; builds
+clean for `env:zeroUSB` with debug flags both on and off; not yet verified on
+hardware, so `FR-009`'s status is left as the user's call to bump to `Implemented`)
 **Created:** 2026-09-20
 
 ## Summary
@@ -36,11 +38,17 @@ naming collision with the new "debug" concept.
   debug-log write path must reuse fixed-size buffers, the same way
   `data_message_to_string`'s static `decoded_string` buffers and `log_data()`'s
   stack-based `error_info[256]` already do. No `String`, no `new`/`malloc`.
-- **IC-003** (battery-only, unattended field deployment): the debug log must not add
-  meaningful SD-write time/power when debug mode is *off* — the default, field
-  configuration. Since the mechanism is gated behind a compile-time flag exactly like
-  today's `DEBUG`/`LORA_DEBUG`, a non-debug build should see zero additional SD
-  activity. This needs to hold in practice, not just in principle — see Phase 3.
+- **IC-003** (battery-only, unattended field deployment): IC-003 itself has no
+  overhead threshold to satisfy — it's the boundary condition (no mains power) that
+  makes SD-write time/power relevant at all, feeding the actual measurable targets
+  in NFR-001/NFR-002 (>1yr / >2yr battery life). Given that, the debug log should add
+  no SD-write activity when debug mode is *off* — the default, field configuration.
+  Since the mechanism is gated behind a compile-time flag exactly like today's
+  `DEBUG`/`LORA_DEBUG`, a non-debug build should see zero additional SD activity.
+  This needs to hold in practice, not just in principle — see Phase 3. (Confirmed
+  post-implementation: `env:zeroUSB` RAM/flash usage is byte-identical with the new
+  code present but its flags off — evidence the default build carries no added SD
+  activity, not a measurement of actual field battery life against NFR-001/002.)
   This plan does not add a way to enable debug mode at runtime, which would
   conflict with IC-003's unattended-deployment premise (no path for a technician to
   toggle it without physically reflashing or re-provisioning the node).
