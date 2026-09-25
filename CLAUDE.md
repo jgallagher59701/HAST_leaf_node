@@ -100,6 +100,25 @@ when explicitly asked to review history on an item, or when resuming work on it
 after a gap. Don't let a growing work log inflate the context cost of routine
 planning.
 
+## Branch & working-tree discipline
+
+Before making any change for a plan, task, or bug — a new plan file, a BUG-LOG or
+TASK-LOG entry, a work-log entry, or code — the working tree must be clean and the
+change must happen on its own branch, never directly on `main`. This applies
+uniformly to docs and code: drafting a plan, logging a bug/task, and implementing
+one all happen on that item's branch.
+
+- **Check first:** run `git status` before touching anything. If there are
+  uncommitted edits, stop and ask the user whether to commit, stash, or discard
+  them — don't layer new work on top of an already-dirty tree.
+- **One branch per item:** before the first edit, confirm whether an existing
+  branch already covers this item or a new one is needed. Name new branches
+  `jhrg/<slug>`, matching the existing convention (e.g. `jhrg/sd-debug-log`) — a
+  short kebab-case description of the plan/task/bug, not the raw ID.
+- **Always ask before creating or switching branches** and confirm the name with
+  the user first, even when the tree is clean — creating/switching branches
+  changes shared git state, so it's never done silently.
+
 ## Custom commands available in this repo
 
 | Command | Does |
