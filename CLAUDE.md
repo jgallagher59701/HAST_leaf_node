@@ -72,6 +72,34 @@ plan — don't rely on what they said earlier in the session, they may have chan
   explicitly** and ask how to proceed. Don't silently comply with the constraint by
   redesigning around it without flagging the tension, and don't silently ignore it.
 
+## Work logging
+
+Every plan, task, or bug touched in response to a user prompt gets a work-log
+entry: a date/time stamp, the prompt that drove the work, and a short summary of
+the reasoning behind what was concluded or decided. One entry per prompt — don't
+merge several prompts into one entry, and don't skip an entry because nothing
+changed (say so in the summary instead).
+
+**Where the entry lives — per-item, not one running file:**
+- Plan work → a `## Work Log` section at the bottom of that plan's file in
+  `plans/`.
+- Bug work → a `**Work Log**` subsection inside that bug's own entry in
+  `docs/bugs/BUG-LOG.md`.
+- Task work → a `**Work Log**` subsection inside that task's own entry in
+  `docs/tasks/TASK-LOG.md`.
+
+**Entry format:**
+```
+**YYYY-MM-DD HH:MM** — <the user's prompt, verbatim or lightly trimmed for length>
+<2-4 sentence summary of the reasoning: what was concluded/decided and why>
+```
+
+**Read policy:** these work logs are *not* part of the "read in full before
+planning" list above — they're historical record, not requirements. Open one only
+when explicitly asked to review history on an item, or when resuming work on it
+after a gap. Don't let a growing work log inflate the context cost of routine
+planning.
+
 ## Custom commands available in this repo
 
 | Command | Does |
