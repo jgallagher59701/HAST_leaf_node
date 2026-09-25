@@ -87,8 +87,9 @@ Steps:
    `setup()` already builds into `date_str` (`src/leaf_node.cc:718`), into a fixed
    stack buffer, followed by the message. This is what makes the log useful for
    understanding timing/ordering during testing without a debug probe.
-4. Gated on whatever macro replaces `DEBUG` (see Phase 3): a non-debug build should
-   never open or write this file.
+4. Gated on `DEBUG_LOG` (via `IO_LOG(...)`, distinct from the setup()-time
+   `SERIAL_DIAG`/`IO(...)` flag — see Phase 3): a non-debug build should never open
+   or write this file.
 
 **Risks:** A second SD file means a second point of write failure per cycle. Needs
 its own status bit or reuse of `SD_FILE_ENTRY_WRITE_ERROR` — minor, not blocking.
@@ -158,9 +159,12 @@ rewrite, precisely to avoid that.
 
 ### Phase 4 — Update comments/build-flag documentation
 
-**Goal:** `src/leaf_node.cc`'s `DEBUG`/`LORA_DEBUG` comment block (lines 35-38)
-reflects the new behavior; no `platformio.ini` changes needed since these flags are
-`#define`d in-file, not passed as build flags.
+**Goal:** `src/leaf_node.cc`'s debug-flag comment block (lines 35-38) reflects the
+new behavior, naming `SERIAL_DIAG` (renamed from `DEBUG`), `DEBUG_LOG`, and
+`LORA_ERROR_REPORT` (the flag behind `report_error_to_main_node()`). `platformio.ini`
+also passes these as build flags (`-D SERIAL_DIAG=0`, etc.) and has already been
+updated to the new name; the in-file `#ifndef`/`#define` block is only the
+fallback default when a flag isn't supplied at build time.
 **Satisfies:** FR-009
 
 Steps:
@@ -171,15 +175,15 @@ Steps:
 
 ## Open questions
 
-- **What should `debug_log()`'s siblings be called, and should `IO()`/`DEBUG` be
-  renamed too, now that "debug" is a more specific term than it used to be?** Not
-  load-bearing, but worth picking deliberately given three related-but-distinct
-  things (`debug_log()`, the renamed `lora_debug()`, and the surviving `setup()`-only
-  `IO()`/`DEBUG`) will otherwise all read as "the same debug thing." Blocks:
-  nothing functionally; a naming-consistency pass before Phase 4.
-- **What exact name replaces `lora_debug()`?** e.g. `report_error_to_main_node()` vs.
-  something shorter. Cosmetic, doesn't block anything — can be decided at
-  implementation time.
+Both naming questions below are resolved:
+
+- **What should `debug_log()`'s siblings be called?** `debug_log()` and `IO_LOG()`
+  keep their names. The `setup()`-only serial-diagnostics flag is renamed `DEBUG` →
+  `SERIAL_DIAG` (its macro `IO()` keeps its name); `lora_debug()`'s flag renamed to
+  `LORA_ERROR_REPORT` to match its FR-010 rename below. The three are now distinct
+  by name as well as behavior: `debug_log()`/`DEBUG_LOG` → SD log, `SERIAL_DIAG`/
+  `IO()` → Serial at boot, `LORA_ERROR_REPORT` → main node over LoRa.
+- **What exact name replaces `lora_debug()`?** `report_error_to_main_node()`.
 
 ## Follow-up (outside this plan)
 

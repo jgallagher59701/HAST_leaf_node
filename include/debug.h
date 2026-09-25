@@ -5,9 +5,9 @@
 #ifndef SOIL_SENSOR_DEBUG_H
 #define SOIL_SENSOR_DEBUG_H
 
-// IO(x): compiled in only when DEBUG is non-zero. Historically routed setup()-time
+// IO(x): compiled in only when SERIAL_DIAG is non-zero. Historically routed setup()-time
 // diagnostics to Serial; leaf_node.cc now uses it only inside setup() (FR-008).
-#if DEBUG
+#if SERIAL_DIAG
 #define IO(x) \
     do {      \
         x;    \

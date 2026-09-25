@@ -33,9 +33,18 @@
 #include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
-#define DEBUG 0             // setup()-time diagnostics over USB serial; requires USB (FR-008)
-#define DEBUG_LOG 0         // Write loop()-time diagnostics to a debug log file on the SD card (FR-009)
+#ifndef SERIAL_DIAG
+#define SERIAL_DIAG 0
+#endif
+
+#ifndef DEBUG_LOG
+#define DEBUG_LOG 0   
+#endif
+
+#ifndef LORA_ERROR_REPORT
 #define LORA_ERROR_REPORT 0 // Report hardware/SD-card errors to the main node over LoRa (FR-010)
+#endif  
+
 #include "debug.h"
 
 #define MAIN_NODE_ADDRESS 0
@@ -71,6 +80,7 @@
 #else
 #define SD_PWR 9 // HIGH == power on SD card; hand built nodes use pin 11 for this
 #endif
+
 #define SD_CS 10 // CS for the SD card, SPI uses dedicated lines
 
 #define STATUS_LED 13
@@ -352,7 +362,6 @@ void write_header(const char *file_name) {
     if (status & SD_FILE_ENTRY_WRITE_ERROR) {
         char error_info[256];
         int error = sd.sdErrorCode();
-        // sd.errorPrint(error_info);
         snprintf(error_info, 256, "SD Card error: 0x%02x, node status: 0x%02x.", error, status);
 
         IO(Serial.println(F("Couldn't write file header")));
@@ -397,7 +406,6 @@ void log_data(const char *file_name, const char *data) {
     if (status & SD_FILE_ENTRY_WRITE_ERROR) {
         char error_info[256];
         int error = sd.sdErrorCode();
-        // sd.errorPrint(error_info);
         snprintf(error_info, 256, "SD Card error: 0x%02x, node status: 0x%02x.", error, status);
 
         interrupts(); // enable interrupts for the rfm95
@@ -730,7 +738,7 @@ void setup() {
     pinMode(RFM95_CS, OUTPUT);
     digitalWrite(RFM95_CS, HIGH);
 
-    // Only start the Serial interface when DEBUG is 1
+    // Only start the Serial interface when SERIAL_DIAG is 1
     IO(Serial.begin(115200));
     int tries = 0;
     // Wait for serial port to be available
@@ -842,8 +850,8 @@ void setup() {
     // 'tries' is the number of times the code tries to init the USB serial object.
     yield(max(0, BOOT_SAFETY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
 
-#if STANDBY_MODE  // !DEBUG jhrg 6/17/23
-    // Once past setup(), the USB cannot be used unless DEBUG is on. Then it must
+#if STANDBY_MODE  // !SERIAL_DIAG jhrg 6/17/23
+    // Once past setup(), the USB cannot be used unless SERIAL_DIAG is on. Then it must
     // be toggled during the sleep period.
     // NB: I cannot get the SerialUSB class to work after the RS has woken from its
     // StandbyMode.
