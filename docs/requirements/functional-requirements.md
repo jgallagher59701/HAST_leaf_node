@@ -18,7 +18,7 @@ Priority: `Must` / `Should` / `Could` (MoSCoW). Status: `Proposed` / `Approved` 
 | FR-006 | Leaf node reports battery voltage alongside sensor data | Should | UC-001 | Implemented |
 | FR-007 | Each leaf node has a unique, compile-time node address distinguishing it from other leaf nodes and from the main node | Must | UC-001 | Implemented |
 | FR-008 | Leaf node supports a debug mode that can route diagnostics over USB serial or over LoRa | Could | | Superseded by FR-009 |
-| FR-009 | Leaf node writes debug diagnostics to a log file on the SD card when debug mode is enabled | Must | UC-001 | Proposed |
+| FR-009 | Leaf node writes debug diagnostics to a log file on the SD card when debug mode is enabled | Must | UC-001 | Implemented |
 | FR-010 | Leaf node reports hardware/SD-card errors to the main node over LoRa when they occur | Should | UC-001 | Proposed |
 
 <!-- Add new rows via /new-requirement, or by hand — keep the table format. Each

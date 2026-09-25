@@ -1,8 +1,10 @@
 # Plan: SD-card debug log
 
-**Status:** In Progress (implemented in `src/leaf_node.cc`/`include/debug.h`; builds
-clean for `env:zeroUSB` with debug flags both on and off; not yet verified on
-hardware, so `FR-009`'s status is left as the user's call to bump to `Implemented`)
+**Status:** Complete (implemented in `src/leaf_node.cc`/`include/debug.h`; builds
+clean for `env:zeroUSB` with debug flags both on and off; hardware-verified —
+`debug_log()` confirmed writing to the correct SD-card file, and `setup()`'s USB
+serial output confirmed working. `FR-009`'s status is the user's call to bump to
+`Implemented`)
 **Created:** 2026-09-20
 
 ## Summary
@@ -169,7 +171,8 @@ fallback default when a flag isn't supplied at build time.
 
 Steps:
 1. Update the comment at `src/leaf_node.cc:35-38` describing what the (possibly
-   renamed) debug flag now does.
+   renamed) debug flag now does. **Done** — each of `SERIAL_DIAG`, `DEBUG_LOG`, and
+   `LORA_ERROR_REPORT` now has its own inline comment.
 
 **Risks:** None — documentation only.
 

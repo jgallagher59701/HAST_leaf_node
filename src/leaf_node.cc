@@ -34,16 +34,16 @@
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #ifndef SERIAL_DIAG
-#define SERIAL_DIAG 0
+#define SERIAL_DIAG 0 // setup()-time diagnostics over USB serial; requires USB, setup()-only (FR-008)
 #endif
 
 #ifndef DEBUG_LOG
-#define DEBUG_LOG 0   
+#define DEBUG_LOG 0 // Write loop()-time diagnostics to the SD-card debug log (FR-009)
 #endif
 
 #ifndef LORA_ERROR_REPORT
 #define LORA_ERROR_REPORT 0 // Report hardware/SD-card errors to the main node over LoRa (FR-010)
-#endif  
+#endif
 
 #include "debug.h"
 

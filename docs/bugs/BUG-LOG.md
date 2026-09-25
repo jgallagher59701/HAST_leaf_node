@@ -106,6 +106,50 @@ surrounding library: `docs/deep-dives/soil-sensor-common.md`.
 
 ---
 
+## BUG-003 — SD card init failure is never reported to the main node over LoRa
+
+**Severity:** Low
+**Status:** Fix Planned
+**Reported:** 2026-09-24
+**Fix plan:** `plans/bugfix-sd-init-error-report-plan.md`
+**Related requirements:** FR-010 ("Leaf node reports hardware/SD-card errors to the
+main node over LoRa when they occur", status `Proposed`) — an SD init failure is
+exactly this kind of hardware error, yet no dedicated LoRa report is ever sent for it.
+
+**Reproduction steps:**
+1. Cause `sd.begin(SD_CS)` to fail in `setup()` (e.g. disconnect/remove the SD card
+   before power-on) — `src/leaf_node.cc:789-793` then runs `blink(STATUS_LED,
+   SD_BEGIN_FAIL, ERROR_TIMES)` and sets `status |= SD_CARD_INIT_ERROR` (`0x20`).
+2. Let the node continue running normally through `loop()`.
+3. Observe the main node's radio traffic from this leaf node over several cycles.
+
+**Expected behavior:** Per FR-010, a hardware/SD-card error like this should produce
+a dedicated LoRa error-report message to the main node (via
+`report_error_to_main_node()`).
+
+**Actual behavior:** No dedicated error-report message is ever sent. The `0x20` bit
+does show up in the main node's regular periodic data message (`build_data_message()`
+→ `send_message()` in `loop()`, unconditional every cycle), but that's the ordinary
+telemetry channel, not FR-010's error-report path — confirmed via hardware testing by
+the user (2026-09-24): status byte arrives correctly, but the message
+`report_error_to_main_node()` would send never shows up.
+
+**Root cause:** `log_data()` (`src/leaf_node.cc:384-419`), called once per `loop()`
+iteration, returns immediately at line 386-388 whenever `status & SD_CARD_INIT_ERROR`
+is set — before ever reaching the `SD_FILE_ENTRY_WRITE_ERROR` branch (lines 406-414)
+that calls `report_error_to_main_node()`. That branch is therefore only reachable for
+a *write* failure on a card that initialized successfully (e.g. card removed
+mid-run, card full) — never for the init failure itself, which is set once in
+`setup()` at line 793.
+Moving the report call to the SD-init-failure site itself isn't a drop-in fix: at
+that point in `setup()` (line 789-793), `rf95_manager.init()` hasn't run yet — LoRa
+init happens later, at line 808 — so the radio isn't up yet and
+`report_error_to_main_node()` would call `sendtoWait()` on an uninitialized radio
+manager. There's no existing point in `setup()`, before this bug, where both "SD
+failed" and "LoRa is up" are simultaneously known.
+
+---
+
 <!-- Add new bugs via /fix-bug, or by hand — keep the section format: metadata lines,
      then Reproduction / Expected / Actual / Root Cause. A bug with no reproduction
      steps yet is a symptom report, not a bug entry — get concrete steps before
