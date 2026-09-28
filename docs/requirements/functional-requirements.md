@@ -20,6 +20,8 @@ Priority: `Must` / `Should` / `Could` (MoSCoW). Status: `Proposed` / `Approved` 
 | FR-008 | Leaf node supports a debug mode that can route diagnostics over USB serial or over LoRa | Could | | Superseded by FR-009 |
 | FR-009 | Leaf node writes debug diagnostics to a log file on the SD card when debug mode is enabled | Must | UC-001 | Implemented |
 | FR-010 | Leaf node reports hardware/SD-card errors to the main node over LoRa when they occur | Should | UC-001 | Proposed |
+| FR-011 | Leaf node N (NODE_ADDRESS 1–15) performs its hourly LoRa exchange with the main node within a 5 s slot starting at minute N−1, second 0 of the hour (staggered schedule) | Should | UC-001 | Proposed |
+| FR-012 | Leaf node N (NODE_ADDRESS 1–15) performs its hourly LoRa exchange with the main node within a 5 s slot starting 5·(N−1) s after a common start time in the hour, so all 15 slots fall within one 75 s window (grouped schedule) | TBD | UC-001 | Proposed |
 
 <!-- Add new rows via /new-requirement, or by hand — keep the table format. Each
      requirement should be a single testable statement, not a paragraph. If it needs

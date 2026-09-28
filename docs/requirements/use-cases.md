@@ -25,9 +25,12 @@ card and LoRa transceiver present and functioning; main node is reachable over L
 3. Leaf node reads its battery voltage (FR-006)
 4. Leaf node logs the reading to the SD card (FR-002)
 5. Leaf node transmits the reading to the main node as a reliable LoRa datagram
-   (FR-003), tagged with its node address (FR-007)
+   (FR-003), tagged with its node address (FR-007), within the transmit slot
+   assigned by its node address (FR-011 staggered schedule; FR-012 grouped
+   schedule once adopted)
 6. Leaf node periodically synchronizes its clock from the main node via a time
-   request/response exchange (FR-005)
+   request/response exchange (FR-005), inside the same transmit slot (FR-011,
+   FR-012)
 7. Leaf node returns to standby until the next scheduled wake
 
 **Alternate / exception flows:**
@@ -42,8 +45,8 @@ the main node (subject to the delivery-reliability target); leaf node is back in
 standby, drawing minimal power until the next wake
 
 **Related requirements:** FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007,
-FR-008, NFR-001, NFR-002, NFR-003, NFR-004, NFR-005, NFR-006, IC-001, IC-002, IC-003,
-IC-004
+FR-008, FR-011, FR-012, NFR-001, NFR-002, NFR-003, NFR-004, NFR-005, NFR-006, IC-001,
+IC-002, IC-003, IC-004, IC-005
 
 ---
 
