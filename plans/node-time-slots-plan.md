@@ -1,6 +1,6 @@
 # Plan: Node-address-based transmit time slots
 
-**Status:** Draft
+**Status:** In Progress (phase 1 implemented and verified)
 **Created:** 2026-09-27
 
 ## Summary
@@ -91,15 +91,22 @@ Steps:
      uint16_t *start_s)` — Staggered: `(node−1)·60`; Grouped:
      `grouped_start_s + 5·(node−1)`. Returns `false` if the node is outside 1–15 or the
      slot would cross the end of the hour.
-   - `void slot_to_mmss(uint16_t start_s, uint8_t *mm, uint8_t *ss)` for the RTC alarm.
+   - `bool slot_to_mmss(uint16_t start_s, uint8_t *mm, uint8_t *ss)` for the RTC alarm
+     (returns `false` for `start_s >= 3600`; changed from `void` during implementation).
+   - `constexpr bool slot_is_valid(...)` so `leaf_node.cc` can check the configured slot
+     at compile time.
 2. Build flags (in `leaf_node.cc` with `#ifndef` defaults, same pattern as today):
-   `SLOT_SCHEDULE` (default Staggered), `GROUPED_START_S` (open question 3), and
-   `SLOT_LEAD_GUARD_MS` (phase 3).
-3. `static_assert(NODE_ADDRESS >= 1 && NODE_ADDRESS <= 15)` in `leaf_node.cc`. The
-   current `platformio.ini` value (5) already passes.
-4. Native test `test/native_slot_schedule/`: nodes 1, 12, 13, 15 in both layouts; 0 and
-   16 are rejected; a grouped start that would run past :59:59 is rejected; mm/ss
-   conversion.
+   `SLOT_SCHEDULE` (default 0 = Staggered) and `GROUPED_START_S` (placeholder 0,
+   open question 3). `SLOT_LEAD_GUARD_MS` moves to phase 3, where it is first used.
+3. `static_assert` in `leaf_node.cc`: `NODE_ADDRESS` in 1–15 and the configured slot
+   is valid. The explicit range test also catches values that would wrap in the
+   `uint8_t` parameter (e.g. 260 → 4). The current `platformio.ini` value (5) passes.
+4. Native test `test/test_native_slot_schedule/` (this PlatformIO version's
+   `list_test_names()` requires the `test_` prefix on the directory; `test_filter`
+   is `test_native_*` to match): nodes 1, 12, 13, 15 in both layouts; 0 and 16 are
+   rejected; a grouped start that would run past :59:59 is rejected; mm/ss conversion.
+5. `env:native` gets `-Wall -Wextra` and `build_src_filter = -<*> +<slot_schedule.cc>`,
+   so the host build doesn't try to compile the Arduino-dependent sources.
 
 **Risks:** Low. The main node must use the same numbers; if it grows its own copy,
 the two can drift apart (open question 4).
@@ -236,6 +243,14 @@ Steps:
    ignores node number. 15 × 5 s doesn't fit in a minute, so a per-minute
    version of the slot layout isn't possible as-is.
 6. **Blocks phase 5.** How many nodes are available for the v1 run, and for how long?
+7. **Blocks building existing hardware with this code.** `NODE_ADDRESS` also carries
+   hardware identity: addresses below 3 select `SD_PWR` pin 11 (hand-built units), and
+   the `platformio.ini` comment says PCB nodes have been numbered from 10 upward. With
+   the 1–15 limit (FR-011, IC-005), any existing node numbered above 15 must be
+   renumbered to build. Only 10–15 (six addresses) keep their current numbers, and
+   a renumbered node below 3 would get the wrong SD power pin. Should the pin
+   selection get its own build flag (e.g. `HAND_BUILT`), separate from the address?
+   That would be a TASK, not part of this plan.
 
 ## Out of scope
 
@@ -259,3 +274,28 @@ defers the time sync, flagged as a decision against FR-005. NFR-006 is deliberat
 left unchanged: the staggered v1 is run as a measurement campaign (drift per sync,
 exchange duration) whose results feed a later NFR-006 revision and an ADR.
 BUG-001 is a prerequisite because timing without ACKs would understate slot use.
+
+**2026-09-28 22:17** — "Implement phase one of the plan"
+Added `include/slot_schedule.h` / `src/slot_schedule.cc` (Arduino-free, C++11 because
+the SAMD core builds with gnu++11), the `SLOT_SCHEDULE`/`GROUPED_START_S` flags, a
+compile-time address/slot check in `leaf_node.cc`, and `test/native_slot_schedule/`.
+Verified: `pio run -e zeroUSB` succeeds; the `static_assert` rejects addresses 0, 16 and
+260 and accepts 15; `pio check` reports only two "unused function" notices, which go
+away when phase 2 wires the functions in; `pio test -e native` passes all 9 cases
+(9/9), once the Xcode license was accepted and the test suite directory was renamed
+to `test_native_slot_schedule` (this PlatformIO version's `list_test_names()`
+requires suite directories to start with `test_`, or it silently falls back to
+building the whole `test/` tree as one suite named `*` and finds nothing under
+`test_build_src`'s src filter - not documented anywhere in this repo before now).
+While implementing, I found the `NODE_ADDRESS` / SD-pin coupling and added it as
+open question 7.
+
+**2026-09-28 22:45** — (continued) "xcode is now installed"
+User accepted the Xcode license, unblocking `pio test -e native`. Running it
+surfaced a second issue: the test suite directory must start with `test_`
+(`platformio/test/helpers.py:list_test_names`), not just match `test_filter`;
+`native_slot_schedule` was silently never being discovered. Renamed the directory
+to `test_native_slot_schedule`, updated `test_filter` to `test_native_*` in
+`platformio.ini`, and reran - all 9 test cases pass. Re-ran the board build and
+`pio check` afterward to confirm the `platformio.ini` fix didn't disturb them.
+Phase 1 is now fully implemented and verified.

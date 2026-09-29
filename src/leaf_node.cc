@@ -31,6 +31,7 @@
 #include "data_packet.h"
 #include "get_battery_voltage.h"
 #include "messages.h"
+#include "slot_schedule.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
 #ifndef SERIAL_DIAG
@@ -53,6 +54,24 @@
 #ifndef NODE_ADDRESS
 #define NODE_ADDRESS 4
 #endif
+
+// Transmit-slot layout (see slot_schedule.h). 0 = staggered, node N at minute
+// N-1 (FR-011); 1 = grouped, node N at GROUPED_START_S + 5 * (N-1) s (FR-012).
+#ifndef SLOT_SCHEDULE
+#define SLOT_SCHEDULE 0
+#endif
+
+// Seconds past the hour where the grouped window starts; only used when
+// SLOT_SCHEDULE is 1. Not yet decided (plans/node-time-slots-plan.md, open
+// question 3) - 0 is a placeholder.
+#ifndef GROUPED_START_S
+#define GROUPED_START_S 0
+#endif
+
+// The explicit range test catches values the uint8_t parameter would wrap (e.g. 260 -> 4).
+static_assert(NODE_ADDRESS >= 1 && NODE_ADDRESS <= MAX_LEAF_NODES
+                  && slot_is_valid(NODE_ADDRESS, static_cast<SlotSchedule>(SLOT_SCHEDULE), GROUPED_START_S),
+              "NODE_ADDRESS must be 1-15 (IC-005) and its slot must end within the hour");
 
 #define Serial SerialUSB // Needed for RS. jhrg 7/26/20
 #define SERIAL_CONNECT_TRIES 10
