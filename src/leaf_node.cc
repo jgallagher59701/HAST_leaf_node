@@ -139,18 +139,23 @@ static_assert(NODE_ADDRESS >= 1 && NODE_ADDRESS <= MAX_LEAF_NODES
 #define TIME_REQUEST_SAMPLE_PERIOD 24  // Ask the time once for every N data samples
 #endif
 
-// Normal operation: wake once per hour, at WAKE_UP_MINUTE:WAKE_UP_SECOND, using
-// the RTC's recurring MATCH_MMSS alarm (matches every hour; day/month/year are
+// Normal operation: wake once per hour, at the node's slot start (computed from
+// NODE_ADDRESS/SLOT_SCHEDULE/GROUPED_START_S - see slot_schedule.h), using the
+// RTC's recurring MATCH_MMSS alarm (matches every hour; day/month/year are
 // ignored). Because the match is on minute/second only, it is unaffected by a
 // time_request/time_response clock correction applied before the node sleeps -
 // unlike an absolute wake-up epoch, this alarm can never end up already in the
 // past.
-#ifndef WAKE_UP_MINUTE
-#define WAKE_UP_MINUTE 0 // minute of the hour to wake up and sample, 0-59
+//
+// WAKE_UP_MINUTE/WAKE_UP_SECOND (FR-004) are obsolete: the wake time is now the
+// slot start, not a hand-set minute/second. Fail the build instead of silently
+// ignoring an old platformio.ini that still sets them.
+#ifdef WAKE_UP_MINUTE
+#error "WAKE_UP_MINUTE is obsolete (FR-004) - remove it from platformio.ini; the wake time comes from the node's slot (slot_schedule.h) now."
 #endif
 
-#ifndef WAKE_UP_SECOND
-#define WAKE_UP_SECOND 0 // second of that minute to wake up and sample, 0-59
+#ifdef WAKE_UP_SECOND
+#error "WAKE_UP_SECOND is obsolete (FR-004) - remove it from platformio.ini; the wake time comes from the node's slot (slot_schedule.h) now."
 #endif
 
 // For testing: sample once per minute, at SAMPLE_SECOND, using the RTC's
@@ -619,8 +624,8 @@ uint16_t get_humidity() {
  * sleep with an interrupt handler set to trigger wakeup.
  *
  * The wake-up time is a recurring RTC alarm rather than an absolute
- * epoch: once per hour, at WAKE_UP_MINUTE:WAKE_UP_SECOND, or - when
- * SAMPLE_ONCE_PER_MINUTE is set - once per minute at SAMPLE_SECOND,
+ * epoch: once per hour, at the node's slot start (slot_schedule.h), or -
+ * when SAMPLE_ONCE_PER_MINUTE is set - once per minute at SAMPLE_SECOND,
  * for testing. See the definitions of those macros above.
  */
 
@@ -660,7 +665,13 @@ void sleep_node() {
     rtc.setAlarmSeconds(SAMPLE_SECOND);
     rtc.enableAlarm(rtc.MATCH_SS);
 #else
-    rtc.setAlarmTime(0, WAKE_UP_MINUTE, WAKE_UP_SECOND);
+    // NODE_ADDRESS/SLOT_SCHEDULE/GROUPED_START_S already passed slot_is_valid()
+    // in the static_assert above, so these two calls cannot fail here.
+    uint16_t slot_start_seconds;
+    slot_start_s(NODE_ADDRESS, static_cast<SlotSchedule>(SLOT_SCHEDULE), GROUPED_START_S, &slot_start_seconds);
+    uint8_t slot_minute, slot_second;
+    slot_to_mmss(slot_start_seconds, &slot_minute, &slot_second);
+    rtc.setAlarmTime(0, slot_minute, slot_second);
     rtc.enableAlarm(rtc.MATCH_MMSS);
 #endif
     rtc.attachInterrupt(alarmMatch);

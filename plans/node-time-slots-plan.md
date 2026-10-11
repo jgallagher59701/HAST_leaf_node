@@ -1,6 +1,6 @@
 # Plan: Node-address-based transmit time slots
 
-**Status:** In Progress (phase 1 implemented and verified)
+**Status:** In Progress (phases 1-2 implemented and verified)
 **Created:** 2026-09-27
 
 ## Summary
@@ -117,17 +117,34 @@ the two can drift apart (open question 4).
 **Satisfies:** FR-004, FR-011, UC-001 step 1
 
 Steps:
-1. In `sleep_node()` (`src/leaf_node.cc` ~L640–645), replace
+1. **Done.** In `sleep_node()` (`src/leaf_node.cc`), replaced
    `setAlarmTime(0, WAKE_UP_MINUTE, WAKE_UP_SECOND)` with the mm:ss from
    `slot_start_s()`/`slot_to_mmss()`, still `MATCH_MMSS`.
-2. Remove `WAKE_UP_MINUTE`/`WAKE_UP_SECOND` from `leaf_node.cc` and `platformio.ini`.
-   Add an `#error` if either is still defined, so an old build config fails loudly
-   instead of being silently ignored.
-3. Leave `SAMPLE_ONCE_PER_MINUTE` test mode unchanged for now (open question 5).
-4. Check the wake → start-of-TX latency: in `loop()` the data message is built and
-   sent right after waking. Confirm on hardware (state pins already exist:
-   `STATE_1`) that this stays well under 100 ms with `DEBUG_LOG=0`. Also measure it
-   with `DEBUG_LOG=1`, since the `IO_LOG` SD writes before the send may add delay.
+2. **Done.** Removed `WAKE_UP_MINUTE`/`WAKE_UP_SECOND` from `leaf_node.cc` and
+   `platformio.ini`. Added `#error`s that fire if either is still defined, so an
+   old build config fails loudly instead of being silently ignored. Verified: a
+   build with `WAKE_UP_MINUTE` reinstated fails at `leaf_node.cc:154` with that
+   message; without it, `pio run -e zeroUSB` succeeds.
+3. **Done, unchanged.** `SAMPLE_ONCE_PER_MINUTE` test mode left as-is (open
+   question 5).
+4. **Done, confirmed on hardware 2026-10-11.** Wake → start-of-TX latency checked
+   via `STATE_1`, well under 100 ms with both `DEBUG_LOG=0` and `DEBUG_LOG=1`.
+
+**Incidental finding, fixed in this phase:** `pio check` was false-flagging
+`slot_start_s()`/`slot_to_mmss()` as `unusedFunction` even after being wired into
+`leaf_node.cc`, because PlatformIO's cppcheck invocation never passes `-Iinclude`
+(confirmed with a manual cppcheck run with `-Iinclude`: usage resolves and the
+warning disappears). Inline `cppcheck-suppress` comments don't work for
+`unusedFunction` in this cppcheck version - it isn't suppressible per-line, only
+by file via the command line - so added a targeted `check_flags =
+cppcheck: --suppress=unusedFunction:*/slot_schedule.cc` in `platformio.ini`
+(`common_env_data`, inherited by both board envs), with a comment explaining why.
+This same gap also produces false positives for `error_blink()` and
+`get_battery_voltage()`/`get_battery_voltage_setup()` (both pre-existing, both
+genuinely called elsewhere, unrelated to this plan) - left alone here since fixing
+the gap generally (e.g. adding `-Iinclude` project-wide) is out of this phase's
+scope; worth its own TASK if it's worth fixing properly instead of file-by-file
+suppression.
 
 **Risks:** The slot start depends on the leaf RTC being set correctly at boot. Today
 `setup()` seeds it from `__DATE__/__TIME__` and then asks the main node for the time.
@@ -243,14 +260,16 @@ Steps:
    ignores node number. 15 × 5 s doesn't fit in a minute, so a per-minute
    version of the slot layout isn't possible as-is.
 6. **Blocks phase 5.** How many nodes are available for the v1 run, and for how long?
-7. **Blocks building existing hardware with this code.** `NODE_ADDRESS` also carries
-   hardware identity: addresses below 3 select `SD_PWR` pin 11 (hand-built units), and
-   the `platformio.ini` comment says PCB nodes have been numbered from 10 upward. With
+7. **Resolved 2026-09-30, doesn't block.** `NODE_ADDRESS` also carries hardware
+   identity: addresses below 3 select `SD_PWR` pin 11 (hand-built units), and the
+   `platformio.ini` comment says PCB nodes have been numbered from 10 upward. With
    the 1–15 limit (FR-011, IC-005), any existing node numbered above 15 must be
-   renumbered to build. Only 10–15 (six addresses) keep their current numbers, and
-   a renumbered node below 3 would get the wrong SD power pin. Should the pin
-   selection get its own build flag (e.g. `HAND_BUILT`), separate from the address?
-   That would be a TASK, not part of this plan.
+   renumbered to build, and a node renumbered below 3 would get the wrong SD power
+   pin. Decision: the hand-built units (addresses 1–2) are retired and out of use,
+   so this doesn't need a fix in this plan — nodes keep the `NODE_ADDRESS < 3` ⇒
+   pin 11 coupling as-is, and the 1–15 range simply isn't exercised below 3 for now.
+   If those addresses are ever reassigned to new hardware, the SD-pin coupling would
+   need its own build flag (e.g. `HAND_BUILT`) then — a TASK, not part of this plan.
 
 ## Out of scope
 
@@ -274,6 +293,36 @@ defers the time sync, flagged as a decision against FR-005. NFR-006 is deliberat
 left unchanged: the staggered v1 is run as a measurement campaign (drift per sync,
 exchange duration) whose results feed a later NFR-006 revision and an ADR.
 BUG-001 is a prerequisite because timing without ACKs would understate slot use.
+
+**2026-09-30 (session start)** — "Continue with the plan, phase 2. For question 7, about nodes below 3, we can ignore that - those nodes are no longer used. It does limit this code a bit, but it should be simple enough to shift the set of 15 node ids to other values later. For this version of the code, skipping node 1 and 2 is not a problem."
+Resolved open question 7: since the hand-built units (`NODE_ADDRESS` 1-2) are
+retired, the `NODE_ADDRESS < 3` -> `SD_PWR` pin-11 coupling doesn't need its own
+build flag in this plan - it's accepted as a known limit of the current 1-15
+range, revisited as a TASK only if those addresses are ever reassigned.
+Implemented phase 2 steps 1-3: `sleep_node()` now computes its wake mm:ss from
+`slot_start_s()`/`slot_to_mmss()` instead of `WAKE_UP_MINUTE`/`WAKE_UP_SECOND`,
+which are now build-time errors if still defined; removed them from
+`platformio.ini`. Step 4 (measuring wake-to-TX latency) needs real hardware and
+wasn't done. While verifying with `pio check`, found that PlatformIO's cppcheck
+invocation can't see `slot_start_s()`/`slot_to_mmss()` being called from
+`leaf_node.cc` (missing `-Iinclude`), producing a false `unusedFunction` warning;
+fixed with a targeted, commented `check_flags` suppression rather than papering
+over it silently. Verified: `pio run -e zeroUSB` succeeds; reinstating
+`WAKE_UP_MINUTE` fails the build with the new `#error`; `pio check -e zeroUSB`
+passes clean of the two false positives (unrelated pre-existing ones in
+`blink.cc`/`get_battery_voltage.cc` left as-is, out of this phase's scope);
+`pio test -e native` still passes all 9 cases.
+
+**2026-10-11** — "Back to implementing the plan Phase 2 step 4 confirmed. Complete the plan up to Phase 5, which I will need to do with real hareware. At the end of each phase, commit once complete."
+Marked phase 2 step 4 done: user confirmed on hardware that wake-to-TX latency is
+well under 100 ms for both `DEBUG_LOG=0` and `DEBUG_LOG=1`. Phase 2 is now fully
+complete; committing it before moving on. Phase 3 depends on open question 1
+(defer vs. shorten vs. accept an overrun when the time request won't fit in the
+slot), which the plan itself flags as needing a decision, so that's being
+confirmed with the user before phase 3 code changes start. Phase 5 requires
+deploying real hardware and is explicitly the user's task, not something this
+session can do; phase 6 is gated on phase 5's output. Plan is phases 3-4 get
+implemented and committed here; phase 5 is left for the user to run.
 
 **2026-09-28 22:17** — "Implement phase one of the plan"
 Added `include/slot_schedule.h` / `src/slot_schedule.cc` (Arduino-free, C++11 because
