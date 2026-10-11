@@ -13,7 +13,6 @@
 #include <Arduino.h>
 
 #include <string.h>
-#include <time.h>
 
 #include <SPI.h>
 #include <Wire.h>
@@ -30,6 +29,7 @@
 #include "blink.h"
 #include "data_packet.h"
 #include "get_battery_voltage.h"
+#include "leaf_node_logic.h"
 #include "messages.h"
 #include "slot_schedule.h"
 
@@ -300,39 +300,8 @@ void yield(unsigned long ms_delay) {
 #endif
 }
 
-/**
-   @brief Get the current epoch from __DATE__ and __TIME__
-
-   This function returns the time in seconds since 1 Jan 1970
-   using the string values of the compile-time constants
-   __DATE__ and __TIME_. The formats of these are: mmm dd yyyy
-   (e.g. "Jan 14 2012") and hh::mm::ss in 24 hour time
-   (e.g. "22:29:12")
-
-   @note input must be formatted correctly
-   @param data The value of __DATE__ or the equiv
-   @param time The value of __TIME__ or the equiv
-   @return Seconds since Jan 1, 1970
-*/
-time_t
-get_epoch(const char *date, const char *time) {
-    char s_month[5];
-    struct tm t = {0};
-    static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-    sscanf(date, "%s %d %d", s_month, &t.tm_mday, &t.tm_year);
-
-    // pointer math
-    int month = (strstr(month_names, s_month) - month_names) / 3;
-
-    t.tm_mon = month;
-    t.tm_year -= 1900;
-    t.tm_isdst = -1;
-
-    sscanf(time, "%d:%d:%d", &t.tm_hour, &t.tm_min, &t.tm_sec);
-
-    return mktime(&t);
-}
+// get_epoch() (parses __DATE__/__TIME__ into a unix epoch) moved to
+// leaf_node_logic.cc - no Arduino dependency, TASK-001.
 
 /// Use get_log_filename() and get_new_log_filename()
 char file_name[13] = FILE_BASE_NAME "00.csv";
@@ -362,12 +331,7 @@ get_new_log_filename() {
 
     // Look for a BASE_NAME00.csv. if all are taken return BASE_NAME99.csv
     while (sd.exists(file_name)) {
-        if (file_name[BASE_NAME_SIZE + 1] != '9') {
-            file_name[BASE_NAME_SIZE + 1]++;
-        } else if (file_name[BASE_NAME_SIZE] != '9') {
-            file_name[BASE_NAME_SIZE + 1] = '0';
-            file_name[BASE_NAME_SIZE]++;
-        } else {
+        if (!bump_log_file_name(file_name, BASE_NAME_SIZE)) {
             status |= SD_NO_MORE_NAMES;
             break;
         }
@@ -585,6 +549,43 @@ uint8_t *receive_message() {
 
     return nullptr;
 }
+
+#if 0
+/**
+ * Update the node's time using 'main_node_time' if the difference between
+ * the two times is greater than one second.
+ *
+ * @param main_node_time The unix time from the main node
+ * @return True if the time was updated, false if not.
+ */
+bool update_time(uint32_t main_node_time) {
+    uint32_t local_time = rtc.getEpoch();
+    int32_t delta_time;
+    bool resync = should_resync_time(main_node_time, local_time, &delta_time);
+
+    IO_LOG(
+        char msg[128];
+        snprintf(msg, sizeof(msg), "Time from main node: %lu, Time from this node: %lu, Delta: %ld",
+                 (unsigned long)main_node_time, (unsigned long)local_time, (long)delta_time);
+        debug_log(msg));
+
+    if (resync) {
+        rtc.setEpoch(main_node_time);
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
+ */
+void radio_silence() {
+#if LORA
+    rf95.sleep(); // Turn off the LoRa
+#endif
+}
+#endif
 
 /**
  * @brief Get the temperature from the SHT-30D
@@ -987,8 +988,7 @@ void loop() {
     set_state_pin(STATE_1);
     IO_LOG(debug_log("STATE 1"));
 
-    // Preserve the 4 high bits of the status byte - the initialization errors.
-    status = status & 0xF0; // clear status low nyble for the next sample interval
+    status = clear_transient_status(status);
 
 #if LORA
     last_tx_time = millis();
@@ -1010,45 +1010,42 @@ void loop() {
     // not dropped, and not a reduced retry count).
     bool time_request_deferred = false;
 
-    if (message % TIME_REQUEST_SAMPLE_PERIOD == 0) {
-        unsigned long elapsed_ms = millis() - wake_time_ms;
-        if (fits_in_slot(elapsed_ms, TIME_REQUEST_BUDGET_MS, SLOT_TRAILING_GUARD_MS)) {
-            set_state_pin(STATE_3);
-            IO_LOG(debug_log("STATE 3"));
+    if (should_request_time(message, TIME_REQUEST_SAMPLE_PERIOD)) {
+        set_state_pin(STATE_3);
+        IO_LOG(debug_log("STATE 3"));
 #if LORA
-            // send time request
-            time_request_t request;
-            build_time_request(&request, NODE_ADDRESS);
-            send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
+        // send time request
+        time_request_t request;
+        build_time_request(&request, NODE_ADDRESS);
+        send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
 
-            IO_LOG(debug_log("Sent time request..."));
+        IO_LOG(debug_log("Sent time request..."));
 
-            // get the time response
-            uint8_t *response = receive_message();
-            MessageType mt = get_message_type(response);
-            if (mt == time_response) {
-                uint8_t node;
-                uint32_t time;
-                parse_time_response((time_response_t *)response, &node, &time);
+        // get the time response
+        uint8_t *response = receive_message();
+        MessageType mt = get_message_type(response);
+        if (mt == time_response) {
+            uint8_t node;
+            uint32_t time;
+            parse_time_response((time_response_t *)response, &node, &time);
 
-                IO_LOG(debug_log(time_response_to_string((time_response_t *)response, true)));
+            IO_LOG(debug_log(time_response_to_string((time_response_t *)response, true)));
 
-                // update_time() now always applies the correction (phase 4), so this
-                // always runs when a response was parsed.
-                update_time(time);
-                sample_time = time;  // for the elapsed-time debug output below
-            } else {
-                IO_LOG(debug_log("No response."));
-                status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
-            }
-#endif
+            // update_time() now always applies the correction (phase 4), so this
+            // always runs when a response was parsed.
+            update_time(time);
+            sample_time = time;  // for the elapsed-time debug output below
         } else {
-            time_request_deferred = true;
-            IO_LOG(debug_log("Time request deferred: no room left in the slot."));
+            IO_LOG(debug_log("No response."));
+            status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
         }
+#endif
+    } else {
+        time_request_deferred = true;
+        IO_LOG(debug_log("Time request deferred: no room left in the slot."));
     }
 
-    set_state_pin(STATE_4);
+set_state_pin(STATE_4);
     IO_LOG(debug_log("STATE 4"));
 
     // SD write happens last, after both LoRa exchanges (phase 3 step 1), so a

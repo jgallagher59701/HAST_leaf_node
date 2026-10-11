@@ -1,7 +1,7 @@
 # Task Plan: Extract Arduino-free logic layer out of `src/leaf_node.cc`
 
 **Task:** TASK-001
-**Status:** Draft
+**Status:** Done, implemented and verified 2026-10-11
 **Created:** 2026-09-22
 
 ## Summary
@@ -227,3 +227,44 @@ under native. This is a single, self-contained change to `[env:native]` in
 more filter entry each time a new Arduino-dependent file is added to `src/` —
 a small, visible maintenance cost, and step 1 below should call this filter
 out explicitly so it isn't forgotten on the next new `src/` file.
+
+## Work Log
+
+**2026-10-11** — "implement the task plans/task-leaf-node-logic-extraction-plan.md. Commit once complete and tests pass."
+Found an uncommitted `Draft` -> `Approved` status edit already sitting on
+`jhrg/node-time-slots` (an unrelated branch); confirmed with the user to commit
+it first, on its own new branch (`jhrg/leaf-node-logic-extraction`) based on
+`main` rather than on the unrelated branch. Implemented all six extractions in
+the order the plan lists (epoch parsing, cadence check, status-nibble clear,
+log-filename rollover, time-sync delta/threshold split, ADC-to-centivolts
+split), each with a native test written against the pre-extraction behavior
+first, verified with `pio test -e native` + `pio run -e zeroUSB` after every
+step per the plan's loop. `get_battery_voltage.cc`'s long-dead, already-broken
+`#else` branch (references an undefined `avg_counts` variable, unreachable
+since `USE_AREF_2V23` is hardcoded to 1 in that file) was left untouched rather
+than extracted or fixed - out of this task's stated scope (only the live
+formula is item 4), and not something this extraction caused. Hit the same
+`pio check`/cppcheck `-Iinclude` gap found during the node-time-slots plan's
+phase 2 (false `unusedFunction` positives for the 5 new cross-file calls);
+fixed the same way, a targeted `check_flags` suppression scoped to
+`leaf_node_logic.cc` with a comment explaining why. Also applied the
+node-time-slots plan's test-suite-directory-naming lesson (`test_` prefix
+required, not just `test_filter` matching) since this plan's draft predated
+that discovery and specified a non-`test_`-prefixed directory name.
+
+Verified: `pio test -e native` passes 14/14; `pio run -e zeroUSB` and
+`-e debugZeroUSB` both build clean; `pio check -e zeroUSB` passes clean (no new
+warnings beyond the targeted, justified suppression; all remaining warnings
+confirmed pre-existing via a baseline `pio check` run before this task's code
+changes); manual diff review of `leaf_node.cc`/`get_battery_voltage.cc`
+confirms each extracted block was replaced with a call, not duplicated;
+`grep -l "Arduino.h"` (literal string, including comments) returns nothing for
+`leaf_node_logic.cc`/`leaf_node_logic.h`. The on-target smoke test (upload +
+observe one wake/sleep/LoRa cycle) was not done - no hardware access in this
+session; flagged to the user as the one unverified item from the plan's
+Verification section.
+
+I fixed a remaining out-of-scope issues in get_battery_voltage.cc and
+ran the smoke test with real hardware by hand, which was the one open
+item from the plan's verification section. Note that the plan said to 
+use the serial, but the debug log is a better option.
