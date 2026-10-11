@@ -1,7 +1,7 @@
 # Task Plan: Extract Arduino-free logic layer out of `src/leaf_node.cc`
 
 **Task:** TASK-001
-**Status:** Draft
+**Status:** Approved
 **Created:** 2026-09-22
 
 ## Summary
