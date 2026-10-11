@@ -1,7 +1,7 @@
 # Bugfix Plan: `parse_join_response` checks for the wrong `MessageType`
 
 **Bug:** BUG-002
-**Status:** Draft
+**Status:** Approved
 **Created:** 2026-09-19
 
 ## Summary
@@ -11,6 +11,8 @@ incoming `join_response_t` against `join_request` instead of `join_response`. Th
 fix is a one-line correction to compare against the right enum value.
 
 ## Root cause
+
+NB: I fixed the root cause 2026-10-11. However, the tests/verification steps remain todo.
 
 Line 151 reads `if (data->type != join_request) return false;`. It should read
 `if (data->type != join_response) return false;`. This is almost certainly a
