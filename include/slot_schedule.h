@@ -42,4 +42,12 @@ bool slot_start_s(uint8_t node, SlotSchedule schedule, uint16_t grouped_start_s,
 /// Split seconds past the hour into minute and second for the RTC alarm; false if start_s >= 3600.
 bool slot_to_mmss(uint16_t start_s, uint8_t *mm, uint8_t *ss);
 
+/// True if an operation taking needed_ms, starting elapsed_ms after the slot began, still
+/// leaves trailing_guard_ms before the slot ends (FR-003/FR-005 tension, phase 3). Used to
+/// decide whether the periodic time request still fits after the data exchange, or should be
+/// deferred to the next cycle instead.
+constexpr bool fits_in_slot(uint32_t elapsed_ms, uint32_t needed_ms, uint32_t trailing_guard_ms) {
+    return elapsed_ms + needed_ms + trailing_guard_ms <= (uint32_t)SLOT_LENGTH_S * 1000UL;
+}
+
 #endif

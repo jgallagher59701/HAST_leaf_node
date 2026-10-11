@@ -1,6 +1,6 @@
 # Plan: Node-address-based transmit time slots
 
-**Status:** In Progress (phases 1-2 implemented and verified)
+**Status:** In Progress (phases 1-3 implemented and verified)
 **Created:** 2026-09-27
 
 ## Summary
@@ -158,24 +158,46 @@ v1, only missed windows.
 recorded.
 **Satisfies:** FR-011, FR-003, FR-005, NFR-001, NFR-005
 
+**Resolved 2026-10-11 (open question 1):** confirmed with the user - defer the time
+request to the next cycle when it won't fit, rather than reducing retries or
+accepting an overrun. This is the behavior implemented below.
+
 Steps:
-1. Reorder `loop()` so both LoRa exchanges happen back to back at the start of the
-   slot: data message, then (when due) the time request, then `log_data()` to SD.
-   Today the SD write sits between them (`src/leaf_node.cc` ~L928–930).
-2. Add a pure helper to `slot_schedule`:
-   `bool fits_in_slot(uint32_t elapsed_ms, uint32_t needed_ms)` against
-   `SLOT_LENGTH_S·1000 − trailing guard`. Before the time request, `loop()` checks
-   the time elapsed since waking (`millis()`). If the request won't fit, it's
-   deferred to the next cycle instead of dropped (pending decision on open question 1).
-3. Leading guard: `SLOT_LEAD_GUARD_MS` holds off the first send after waking, so that a
-   leaf running slightly *fast* doesn't transmit before the main node is listening.
-   Provisional default is 0 in v1, since the main node is always awake today. Its
-   real value comes from phase 5.
-4. Log slot use on every cycle: elapsed ms at the end of the exchange, and whether the
-   time request was deferred. This goes to the SD data log, not only the debug log.
-   `last_tx_duration` already sends the data-exchange time to the main node one cycle
-   late; keep it.
-5. Native tests for `fits_in_slot()` edges.
+1. **Done.** Reordered `loop()` so both LoRa exchanges happen back to back at the
+   start of the slot: data message, then (when due and it fits) the time request,
+   then `log_data()` to SD. The SD write (both the data-message row and the new
+   slot-use row, step 4) now happens after both exchanges instead of sitting
+   between them.
+2. **Done.** Added `constexpr bool fits_in_slot(uint32_t elapsed_ms, uint32_t
+   needed_ms, uint32_t trailing_guard_ms)` to `slot_schedule.h` (header-only, like
+   `slot_is_valid()` - pure and simple enough not to need a `.cc` definition).
+   Three args rather than the two sketched above, so the trailing guard is
+   tunable/testable like the leading guard instead of a hardcoded constant inside
+   the function. `loop()` calls it before the time request with the elapsed time
+   since waking (`millis() - wake_time_ms`) and a new `TIME_REQUEST_BUDGET_MS`
+   build flag (provisional 1000 ms nominal round-trip estimate, distinct from
+   `WAIT_AVAILABLE`'s 5000 ms hard ceiling). If it doesn't fit, the request is
+   skipped this cycle (`time_request_deferred = true`) and retried next cycle,
+   per the resolved open question 1.
+3. **Done.** `SLOT_LEAD_GUARD_MS` build flag (provisional 0) added; `loop()` calls
+   `yield(SLOT_LEAD_GUARD_MS)` as its first action after waking, before building or
+   sending the data message.
+4. **Done.** Every cycle now appends a `# SLOT, <node>, <message>, <elapsed_ms>,
+   <deferred>` line to the SD data log (not just the debug log - written
+   unconditionally, not through `IO_LOG`/`DEBUG_LOG`), right after the data-message
+   row. `#`-prefixed like `write_header()`'s `"# Start Log"` marker, so a reader
+   skipping comment lines sees only data rows. `last_tx_duration` (already sent to
+   the main node in the data message, one cycle late) is unchanged.
+5. **Done.** Added `test_fits_in_slot_within_budget`/`test_fits_in_slot_over_budget`
+   to `test/test_native_slot_schedule/`, covering the exact-boundary case and each
+   of the three inputs individually pushing the total over `SLOT_LENGTH_S * 1000`.
+
+Verified: `pio run -e zeroUSB` succeeds; `pio check -e zeroUSB` passes clean (one
+new warning surfaced during development - a `%u`/signed-`NODE_ADDRESS` format
+mismatch in the new slot-use log line - was fixed with an explicit cast, not
+suppressed; all other warnings are the same pre-existing ones from phase 2);
+`pio test -e native` passes 11/11 (9 from phase 1 plus the 2 new `fits_in_slot()`
+cases).
 
 **Risks:** Deferring syncs lets drift grow between corrections; phase 4 measures how
 much. Reducing `setRetries` would also make it fit, but costs delivery (NFR-005), so
@@ -243,10 +265,9 @@ Steps:
 
 ## Open questions
 
-1. **Blocks phase 3.** When the data exchange runs long and the time request won't fit
-   in the slot, should the sync be deferred to the next cycle (proposed), should the
-   node reduce retries, or is overrunning the slot acceptable in v1 (slots are a
-   minute apart)?
+1. **Resolved 2026-10-11, implemented in phase 3.** When the data exchange runs long
+   and the time request won't fit in the slot, the sync is deferred to the next
+   cycle rather than reducing retries or accepting an overrun.
 2. **Doesn't block v1; may block v2.** Is whole-second sync accurate enough, or do we
    need sub-second sync? That could mean compensating for time in the air, or the main
    node answering on a second boundary. This depends on phase 5 data.

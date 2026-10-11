@@ -104,6 +104,20 @@ void test_slot_to_mmss_rejects_bad_input() {
     TEST_ASSERT_FALSE(slot_to_mmss(0, &mm, nullptr));
 }
 
+// Phase 3 (FR-003/FR-005): the periodic time request only goes out if it still
+// fits before the slot ends, given how much of the slot the data exchange used.
+void test_fits_in_slot_within_budget() {
+    TEST_ASSERT_TRUE(fits_in_slot(0, 1000, 0));
+    TEST_ASSERT_TRUE(fits_in_slot(3500, 500, 0));
+    TEST_ASSERT_TRUE(fits_in_slot(4000, 500, 500));  // exactly SLOT_LENGTH_S * 1000
+}
+
+void test_fits_in_slot_over_budget() {
+    TEST_ASSERT_FALSE(fits_in_slot(4600, 500, 0));  // 5100 ms > 5000 ms slot
+    TEST_ASSERT_FALSE(fits_in_slot(0, 5001, 0));
+    TEST_ASSERT_FALSE(fits_in_slot(3000, 500, 1501));  // 1 ms past, via the trailing guard
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_staggered_layout);
@@ -115,5 +129,7 @@ int main() {
     RUN_TEST(test_slot_is_valid_is_constexpr);
     RUN_TEST(test_slot_to_mmss);
     RUN_TEST(test_slot_to_mmss_rejects_bad_input);
+    RUN_TEST(test_fits_in_slot_within_budget);
+    RUN_TEST(test_fits_in_slot_over_budget);
     return UNITY_END();
 }

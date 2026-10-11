@@ -139,6 +139,29 @@ static_assert(NODE_ADDRESS >= 1 && NODE_ADDRESS <= MAX_LEAF_NODES
 #define TIME_REQUEST_SAMPLE_PERIOD 24  // Ask the time once for every N data samples
 #endif
 
+// Phase 3 (FR-003/FR-005): nominal time needed to send a time request and get a
+// prompt reply (no retry) - not the same as WAIT_AVAILABLE below, which is the
+// hard ceiling used while actually waiting for the response. fits_in_slot() uses
+// this to decide whether the request still fits after the data exchange, or
+// should be deferred to the next cycle. Provisional until phase 4/5 measurements
+// give a real number.
+#ifndef TIME_REQUEST_BUDGET_MS
+#define TIME_REQUEST_BUDGET_MS 1000
+#endif
+
+// Phase 3: holds off the first send after waking, so a leaf running slightly
+// fast doesn't transmit before the main node is listening. Provisional 0 in v1 -
+// the main node is always awake today; a real value comes from phase 5.
+#ifndef SLOT_LEAD_GUARD_MS
+#define SLOT_LEAD_GUARD_MS 0
+#endif
+
+// Phase 3: margin fits_in_slot() keeps before the slot ends. Provisional 0 in
+// v1, like SLOT_LEAD_GUARD_MS; a real value comes from phase 5.
+#ifndef SLOT_TRAILING_GUARD_MS
+#define SLOT_TRAILING_GUARD_MS 0
+#endif
+
 // Normal operation: wake once per hour, at the node's slot start (computed from
 // NODE_ADDRESS/SLOT_SCHEDULE/GROUPED_START_S - see slot_schedule.h), using the
 // RTC's recurring MATCH_MMSS alarm (matches every hour; day/month/year are
@@ -922,6 +945,13 @@ void loop() {
     static unsigned long last_tx_time = 0;
     static unsigned long message = 0;
 
+    // Start of this wake cycle, for fits_in_slot() below (phase 3, FR-003/FR-005).
+    unsigned long wake_time_ms = millis();
+
+    // Leading guard: hold off the first send so a leaf running slightly fast
+    // doesn't transmit before the main node is listening (phase 3, FR-011).
+    yield(SLOT_LEAD_GUARD_MS);
+
     // The data sent to the main node
     // packet_t data;
 
@@ -955,41 +985,66 @@ void loop() {
     set_state_pin(STATE_2);
     IO_LOG(debug_log("STATE 2"));
 
-    log_data(get_log_filename(), data_message_to_string(&data, false));
+    // Both LoRa exchanges happen back to back here, before the SD write below
+    // (phase 3 step 1): the time request only runs if it still fits in the slot
+    // given how long the data exchange just took (open question 1 - deferred,
+    // not dropped, and not a reduced retry count).
+    bool time_request_deferred = false;
 
     if (message % TIME_REQUEST_SAMPLE_PERIOD == 0) {
-        set_state_pin(STATE_3);
-        IO_LOG(debug_log("STATE 3"));
+        unsigned long elapsed_ms = millis() - wake_time_ms;
+        if (fits_in_slot(elapsed_ms, TIME_REQUEST_BUDGET_MS, SLOT_TRAILING_GUARD_MS)) {
+            set_state_pin(STATE_3);
+            IO_LOG(debug_log("STATE 3"));
 #if LORA
-        // send time request
-        time_request_t request;
-        build_time_request(&request, NODE_ADDRESS);
-        send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
+            // send time request
+            time_request_t request;
+            build_time_request(&request, NODE_ADDRESS);
+            send_message((uint8_t *)&request, RH_BROADCAST_ADDRESS, TIME_REQUEST_SIZE);
 
-        IO_LOG(debug_log("Sent time request..."));
+            IO_LOG(debug_log("Sent time request..."));
 
-        // get the time response
-        uint8_t *response = receive_message();
-        MessageType mt = get_message_type(response);
-        if (mt == time_response) {
-            uint8_t node;
-            uint32_t time;
-            parse_time_response((time_response_t *)response, &node, &time);
+            // get the time response
+            uint8_t *response = receive_message();
+            MessageType mt = get_message_type(response);
+            if (mt == time_response) {
+                uint8_t node;
+                uint32_t time;
+                parse_time_response((time_response_t *)response, &node, &time);
 
-            IO_LOG(debug_log(time_response_to_string((time_response_t *)response, true)));
+                IO_LOG(debug_log(time_response_to_string((time_response_t *)response, true)));
 
-            if (update_time(time)) {
-                sample_time = time;  // for the elapsed-time debug output below
+                if (update_time(time)) {
+                    sample_time = time;  // for the elapsed-time debug output below
+                }
+            } else {
+                IO_LOG(debug_log("No response."));
+                status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
             }
-        } else {
-            IO_LOG(debug_log("No response."));
-            status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
-        }
 #endif
+        } else {
+            time_request_deferred = true;
+            IO_LOG(debug_log("Time request deferred: no room left in the slot."));
+        }
     }
 
     set_state_pin(STATE_4);
     IO_LOG(debug_log("STATE 4"));
+
+    // SD write happens last, after both LoRa exchanges (phase 3 step 1), so a
+    // deferred time request doesn't change what gets logged for this cycle.
+    log_data(get_log_filename(), data_message_to_string(&data, false));
+
+    // Slot-use record (phase 3 step 4): elapsed ms this cycle and whether the
+    // time request was deferred. Always written (unlike IO_LOG's debug_log()
+    // calls) since phase 5 sizes the guard bands from this across many
+    // nodes/cycles, not just from debug builds. "#"-prefixed, like
+    // write_header()'s "# Start Log" marker, so a reader skipping comment
+    // lines sees only data rows.
+    char slot_msg[80];
+    snprintf(slot_msg, sizeof(slot_msg), "# SLOT, %u, %lu, %lu, %d", (unsigned int)NODE_ADDRESS, message,
+             (unsigned long)(millis() - wake_time_ms), time_request_deferred ? 1 : 0);
+    log_data(get_log_filename(), slot_msg);
 
     sleep_node();
 
