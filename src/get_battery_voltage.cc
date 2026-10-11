@@ -8,6 +8,7 @@
 #include <Arduino.h>
 
 #include "get_battery_voltage.h"
+#include "leaf_node_logic.h"
 
 #define USE_AREF_2V23 1
 #define V_BAT A1 // A5
@@ -31,26 +32,20 @@ int get_battery_voltage() {
 
     (void)analogRead(V_BAT); // discard the first read
 
-    int raw = 0;
+    long raw = 0;
     for (int i = 0; i < VALUES_TO_AVG; ++i) {
         raw += analogRead(V_BAT);
     }
 
-    float avg_adc_reading = (float)raw / VALUES_TO_AVG;
-
 #if USE_AREF_2V23
-    // Vref = 2.23, the voltage divider cuts the voltage in half. ADC /ADC_MAX
-    // * 2.23 is the actual voltage the ADC measures. Double that to account
-    // for the voltage divider. The divider is there to keep the voltage measured
-    // below 3.3 (Vbat can be 3.7V).
-    float voltage = 4.46 * (avg_adc_reading / ADC_MAX_VALUE);
+    return adc_average_to_centivolts(raw, VALUES_TO_AVG);
 #else
     // Using the 3V3 Vref fails because when Vbat falls below 3.3V, the value of
     // Vref tracks it, so all values of Vbat < 3.3 show up as 3.3V.
+    float avg_adc_reading = (float)raw / VALUES_TO_AVG;
     float voltage = 4.3 * (avg_counts / (float)ADC_MAX_VALUE);
-#endif
-
     return (int)roundf((voltage + VOLTAGE_OFFSET) * 100.0); // voltage * 100
+#endif
 }
 
 void get_battery_voltage_setup() {

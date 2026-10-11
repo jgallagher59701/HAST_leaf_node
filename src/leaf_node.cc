@@ -13,7 +13,6 @@
 #include <Arduino.h>
 
 #include <string.h>
-#include <time.h>
 
 #include <SPI.h>
 #include <Wire.h>
@@ -30,6 +29,7 @@
 #include "blink.h"
 #include "data_packet.h"
 #include "get_battery_voltage.h"
+#include "leaf_node_logic.h"
 #include "messages.h"
 
 // Exclude some parts of the code for debugging. Zero excludes the code.
@@ -249,39 +249,8 @@ void yield(unsigned long ms_delay) {
 #endif
 }
 
-/**
-   @brief Get the current epoch from __DATE__ and __TIME__
-
-   This function returns the time in seconds since 1 Jan 1970
-   using the string values of the compile-time constants
-   __DATE__ and __TIME_. The formats of these are: mmm dd yyyy
-   (e.g. "Jan 14 2012") and hh::mm::ss in 24 hour time
-   (e.g. "22:29:12")
-
-   @note input must be formatted correctly
-   @param data The value of __DATE__ or the equiv
-   @param time The value of __TIME__ or the equiv
-   @return Seconds since Jan 1, 1970
-*/
-time_t
-get_epoch(const char *date, const char *time) {
-    char s_month[5];
-    struct tm t = {0};
-    static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-    sscanf(date, "%s %d %d", s_month, &t.tm_mday, &t.tm_year);
-
-    // pointer math
-    int month = (strstr(month_names, s_month) - month_names) / 3;
-
-    t.tm_mon = month;
-    t.tm_year -= 1900;
-    t.tm_isdst = -1;
-
-    sscanf(time, "%d:%d:%d", &t.tm_hour, &t.tm_min, &t.tm_sec);
-
-    return mktime(&t);
-}
+// get_epoch() (parses __DATE__/__TIME__ into a unix epoch) moved to
+// leaf_node_logic.cc - no Arduino dependency, TASK-001.
 
 /// Use get_log_filename() and get_new_log_filename()
 char file_name[13] = FILE_BASE_NAME "00.csv";
@@ -311,12 +280,7 @@ get_new_log_filename() {
 
     // Look for a BASE_NAME00.csv. if all are taken return BASE_NAME99.csv
     while (sd.exists(file_name)) {
-        if (file_name[BASE_NAME_SIZE + 1] != '9') {
-            file_name[BASE_NAME_SIZE + 1]++;
-        } else if (file_name[BASE_NAME_SIZE] != '9') {
-            file_name[BASE_NAME_SIZE + 1] = '0';
-            file_name[BASE_NAME_SIZE]++;
-        } else {
+        if (!bump_log_file_name(file_name, BASE_NAME_SIZE)) {
             status |= SD_NO_MORE_NAMES;
             break;
         }
@@ -543,16 +507,17 @@ uint8_t *receive_message() {
  * @return True if the time was updated, false if not.
  */
 bool update_time(uint32_t main_node_time) {
-    int32_t delta_time = main_node_time - rtc.getEpoch();
+    uint32_t local_time = rtc.getEpoch();
+    int32_t delta_time;
+    bool resync = should_resync_time(main_node_time, local_time, &delta_time);
 
     IO_LOG(
         char msg[128];
         snprintf(msg, sizeof(msg), "Time from main node: %lu, Time from this node: %lu, Delta: %ld",
-                 (unsigned long)main_node_time, (unsigned long)rtc.getEpoch(), (long)delta_time);
+                 (unsigned long)main_node_time, (unsigned long)local_time, (long)delta_time);
         debug_log(msg));
 
-    // update the time if the delta is more than a second
-    if (abs(delta_time) > 1) {
+    if (resync) {
         rtc.setEpoch(main_node_time);
         return true;
     }
@@ -908,8 +873,7 @@ void loop() {
     set_state_pin(STATE_1);
     IO_LOG(debug_log("STATE 1"));
 
-    // Preserve the 4 high bits of the status byte - the initialization errors.
-    status = status & 0xF0; // clear status low nyble for the next sample interval
+    status = clear_transient_status(status);
 
 #if LORA
     last_tx_time = millis();
@@ -927,7 +891,7 @@ void loop() {
 
     log_data(get_log_filename(), data_message_to_string(&data, false));
 
-    if (message % TIME_REQUEST_SAMPLE_PERIOD == 0) {
+    if (should_request_time(message, TIME_REQUEST_SAMPLE_PERIOD)) {
         set_state_pin(STATE_3);
         IO_LOG(debug_log("STATE 3"));
 #if LORA
