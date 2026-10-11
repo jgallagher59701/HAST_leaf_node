@@ -1,6 +1,7 @@
 # Plan: Node-address-based transmit time slots
 
-**Status:** In Progress (phases 1-3 implemented and verified)
+**Status:** In Progress (phases 1-4 implemented and verified; phase 5 needs real
+hardware and is not part of this session's work)
 **Created:** 2026-09-27
 
 ## Summary
@@ -210,21 +211,25 @@ in a form that can be converted to ppm.
 **Satisfies:** NFR-006, FR-005
 
 Steps:
-1. In `update_time()` (`src/leaf_node.cc` ~L545), write a record to the SD data log
-   on every sync: main time, local time, `delta`, seconds since the last sync, and the
-   node's current temperature (drift depends strongly on temperature). Today the
-   delta goes only to the debug log.
-2. Measurement build: always apply the correction, instead of only when `|delta| > 1`.
-   Then each recorded delta covers exactly one sync interval and isn't carried over
-   from the previous one. Whether the `> 1` threshold stays in production is decided
-   in phase 5.
-3. Make `TIME_REQUEST_SAMPLE_PERIOD` a documented test knob. A longer period gives a
-   finer ppm estimate from whole-second deltas (±1 s over 24 h ≈ ±12 ppm), and a
-   shorter one shows the residual error right after a sync.
-4. Known limit, recorded rather than fixed: the correction resolves only whole
-   seconds, and the ~0.4 s the response spends in the air is not compensated. So the
-   residual error after a sync is up to ~1–1.5 s no matter how small the drift is.
-   Sub-second sync is a separate decision (open question 2).
+1. **Done.** `update_time()` (`src/leaf_node.cc`) now writes a `# SYNC, main_time,
+   local_time, delta, since_last_sync_s, temperature` record to the SD data log on
+   every sync (was debug-log only). `last_sync_main_time`/`have_prior_sync` statics
+   track the interval between syncs, in main-node time rather than local time so the
+   interval itself isn't affected by the drift being measured. `get_temperature()`/
+   `get_humidity()` moved earlier in the file so `update_time()` can call the former.
+2. **Done.** The correction is now always applied (`update_time()` dropped the
+   `abs(delta_time) > 1` gate and its `bool` return - every call now does the same
+   thing, so both call sites in `setup()`/`loop()` just call it as a statement).
+   Whether a threshold comes back for production is still a phase 5 decision.
+3. **Done.** Documented `TIME_REQUEST_SAMPLE_PERIOD` in `leaf_node.cc` as the phase
+   4/5 drift-measurement knob, with the ppm-resolution tradeoff from this section.
+4. **Recorded, not fixed (no code change).** Whole-second sync leaves up to ~1-1.5 s
+   of residual error after every sync, regardless of drift; sub-second sync is a
+   separate decision (open question 2), left for phase 5 data to inform.
+
+Verified: `pio run -e zeroUSB` succeeds; `pio check -e zeroUSB` passes clean (no new
+warnings vs. phase 3); `pio test -e native` still passes 11/11 (`update_time()` isn't
+in the Arduino-free logic layer, so phase 4 added no new native tests).
 
 **Risks:** Leaf-side records only show drift at each sync. Knowing where a packet lands
 within its slot needs the main node to log when it received each message, which is a
@@ -337,13 +342,20 @@ passes clean of the two false positives (unrelated pre-existing ones in
 **2026-10-11** — "Back to implementing the plan Phase 2 step 4 confirmed. Complete the plan up to Phase 5, which I will need to do with real hareware. At the end of each phase, commit once complete."
 Marked phase 2 step 4 done: user confirmed on hardware that wake-to-TX latency is
 well under 100 ms for both `DEBUG_LOG=0` and `DEBUG_LOG=1`. Phase 2 is now fully
-complete; committing it before moving on. Phase 3 depends on open question 1
-(defer vs. shorten vs. accept an overrun when the time request won't fit in the
-slot), which the plan itself flags as needing a decision, so that's being
-confirmed with the user before phase 3 code changes start. Phase 5 requires
-deploying real hardware and is explicitly the user's task, not something this
-session can do; phase 6 is gated on phase 5's output. Plan is phases 3-4 get
-implemented and committed here; phase 5 is left for the user to run.
+complete; committed on its own. Phase 3 depended on open question 1 (defer vs.
+shorten retries vs. accept an overrun when the time request won't fit in the
+slot), which the plan itself flagged as needing a decision - confirmed "defer"
+with the user before writing any phase 3 code, then implemented and committed
+the reordered `loop()`, `fits_in_slot()`, the leading guard, and the per-cycle
+slot-use log line, as its own commit. Implemented and committed phase 4
+(always-applied time correction, `# SYNC` drift records, documented
+`TIME_REQUEST_SAMPLE_PERIOD`) as a third commit. Phase 5 requires deploying real
+hardware and is explicitly the user's task, not something this session can do;
+phase 6 is gated on phase 5's output, so neither is touched here. Each phase's
+commit was preceded by a clean `pio run -e zeroUSB` / `pio check -e zeroUSB` /
+`pio test -e native` (11/11); the one new warning found along the way (a
+`%u`/signed-`NODE_ADDRESS` format mismatch in the new slot-use log line) was
+fixed with an explicit cast, not suppressed.
 
 **2026-09-28 22:17** — "Implement phase one of the plan"
 Added `include/slot_schedule.h` / `src/slot_schedule.cc` (Arduino-free, C++11 because

@@ -135,8 +135,12 @@ static_assert(NODE_ADDRESS >= 1 && NODE_ADDRESS <= MAX_LEAF_NODES
 #define STANDBY_INTERVAL_S 300 // seconds to wait/sleep before next transmission; only used when STANDBY_MODE is 0
 #endif
 
+// Ask the time once for every N data samples. Also the phase 4/5 drift-measurement
+// knob (NFR-006): a longer period gives a finer ppm estimate from the whole-second
+// deltas update_time() logs (e.g. +-1 s over 24 h is only ~12 ppm of resolution), a
+// shorter one shows the residual error right after a sync instead.
 #ifndef TIME_REQUEST_SAMPLE_PERIOD
-#define TIME_REQUEST_SAMPLE_PERIOD 24  // Ask the time once for every N data samples
+#define TIME_REQUEST_SAMPLE_PERIOD 24
 #endif
 
 // Phase 3 (FR-003/FR-005): nominal time needed to send a time request and get a
@@ -583,40 +587,6 @@ uint8_t *receive_message() {
 }
 
 /**
- * Update the node's time using 'main_node_time' if the difference between
- * the two times is greater than one second.
- *
- * @param main_node_time The unix time from the main node
- * @return True if the time was updated, false if not.
- */
-bool update_time(uint32_t main_node_time) {
-    int32_t delta_time = main_node_time - rtc.getEpoch();
-
-    IO_LOG(
-        char msg[128];
-        snprintf(msg, sizeof(msg), "Time from main node: %lu, Time from this node: %lu, Delta: %ld",
-                 (unsigned long)main_node_time, (unsigned long)rtc.getEpoch(), (long)delta_time);
-        debug_log(msg));
-
-    // update the time if the delta is more than a second
-    if (abs(delta_time) > 1) {
-        rtc.setEpoch(main_node_time);
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
- */
-void radio_silence() {
-#if LORA
-    rf95.sleep(); // Turn off the LoRa
-#endif
-}
-
-/**
  * @brief Get the temperature from the SHT-30D
  * @note If the SHT30D didn't initialize correctly, this will return zero.
  * @return the temperature * 100 as a 16-bit signed int
@@ -638,6 +608,55 @@ uint16_t get_humidity() {
     return (uint16_t)(sht30d.readHumidity() * 100);
 #else
     return 0;
+#endif
+}
+
+/**
+ * Update the node's time to 'main_node_time', and record a drift measurement
+ * (phase 4, NFR-006/FR-005): main time, local time, delta, seconds since the
+ * last sync, and the node's current temperature (drift is strongly
+ * temperature-dependent). The correction is always applied - not only when
+ * |delta| > 1 as before - so every recorded delta covers exactly one sync
+ * interval rather than one carried over from a skipped correction. Whether the
+ * > 1 threshold comes back for production, after a sync interval and guard
+ * bands are sized from this data, is a phase 5 decision.
+ *
+ * @param main_node_time The unix time from the main node
+ */
+void update_time(uint32_t main_node_time) {
+    static uint32_t last_sync_main_time = 0;
+    static bool have_prior_sync = false;
+
+    uint32_t local_time = rtc.getEpoch();
+    int32_t delta_time = main_node_time - local_time;
+    uint32_t since_last_sync_s = have_prior_sync ? (main_node_time - last_sync_main_time) : 0;
+
+    IO_LOG(
+        char msg[128];
+        snprintf(msg, sizeof(msg), "Time from main node: %lu, Time from this node: %lu, Delta: %ld",
+                 (unsigned long)main_node_time, (unsigned long)local_time, (long)delta_time);
+        debug_log(msg));
+
+    // Drift record, always written to the SD data log (not just the debug log),
+    // "#"-prefixed like the phase 3 slot-use record so a reader skipping comment
+    // lines sees only data rows.
+    char sync_msg[96];
+    snprintf(sync_msg, sizeof(sync_msg), "# SYNC, %lu, %lu, %ld, %lu, %d", (unsigned long)main_node_time,
+             (unsigned long)local_time, (long)delta_time, (unsigned long)since_last_sync_s, get_temperature());
+    log_data(get_log_filename(), sync_msg);
+
+    last_sync_main_time = main_node_time;
+    have_prior_sync = true;
+
+    rtc.setEpoch(main_node_time);
+}
+
+/**
+ * @brief RMF95 sleep mode. Any API call wakes the RMF95 up.
+ */
+void radio_silence() {
+#if LORA
+    rf95.sleep(); // Turn off the LoRa
 #endif
 }
 
@@ -1014,9 +1033,10 @@ void loop() {
 
                 IO_LOG(debug_log(time_response_to_string((time_response_t *)response, true)));
 
-                if (update_time(time)) {
-                    sample_time = time;  // for the elapsed-time debug output below
-                }
+                // update_time() now always applies the correction (phase 4), so this
+                // always runs when a response was parsed.
+                update_time(time);
+                sample_time = time;  // for the elapsed-time debug output below
             } else {
                 IO_LOG(debug_log("No response."));
                 status |= RFM95_NO_REPLY;  // We're pretty lean on codes...
