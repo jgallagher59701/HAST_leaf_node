@@ -263,3 +263,8 @@ confirms each extracted block was replaced with a call, not duplicated;
 observe one wake/sleep/LoRa cycle) was not done - no hardware access in this
 session; flagged to the user as the one unverified item from the plan's
 Verification section.
+
+I fixed a remaining out-of-scope issues in get_battery_voltage.cc and
+ran the smoke test with real hardware by hand, which was the one open
+item from the plan's verification section. Note that the plan said to 
+use the serial, but the debug log is a better option.

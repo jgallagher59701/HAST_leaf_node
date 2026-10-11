@@ -10,7 +10,6 @@
 #include "get_battery_voltage.h"
 #include "leaf_node_logic.h"
 
-#define USE_AREF_2V23 1
 #define V_BAT A1 // A5
 
 #define ADC_BITS 12
@@ -37,23 +36,14 @@ int get_battery_voltage() {
         raw += analogRead(V_BAT);
     }
 
-#if USE_AREF_2V23
     return adc_average_to_centivolts(raw, VALUES_TO_AVG);
-#else
-    // Using the 3V3 Vref fails because when Vbat falls below 3.3V, the value of
-    // Vref tracks it, so all values of Vbat < 3.3 show up as 3.3V.
-    float avg_adc_reading = (float)raw / VALUES_TO_AVG;
-    float voltage = 4.3 * (avg_counts / (float)ADC_MAX_VALUE);
-    return (int)roundf((voltage + VOLTAGE_OFFSET) * 100.0); // voltage * 100
-#endif
 }
 
 void get_battery_voltage_setup() {
-#if USE_AREF_2V23
     analogReference(AR_INTERNAL2V23);
     // See https://blog.thea.codes/getting-the-most-out-of-the-samd21-adc/
     // And assume an input impedance of 500k for the 1M | 1M V divider
     ADC->SAMPCTRL.reg = ADC_SAMPCTRL_SAMPLEN(2);
-#endif
+
     analogReadResolution(ADC_BITS);
 }
