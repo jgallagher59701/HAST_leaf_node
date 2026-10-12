@@ -62,7 +62,7 @@ regression. Full investigation: `docs/deep-dives/leaf-node-cc.md`.
 ## BUG-002 — `parse_join_response` checks for the wrong `MessageType`
 
 **Severity:** Low
-**Status:** Fix Planned
+**Status:** Fixed
 **Reported:** 2026-09-19
 **Related requirements:** None found. No `FR`/`NFR`/`UC`/`IC` documents a join/handshake
 process at all — the entire `SUPPORT_JOIN` feature (join request/response messages,
