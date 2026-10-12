@@ -104,6 +104,27 @@ surrounding library: `docs/deep-dives/soil-sensor-common.md`.
 
 **Fix plan:** `plans/bugfix-join-response-type-check-plan.md`
 
+**Work Log**
+
+**2026-10-11** — "BUG-002. But note that I made the one-line file on messages.cc line 151. You need to do the verification/tests part."
+User applied the root-cause fix directly (`messages.cc:151`,
+`data->type != join_request` -> `data->type != join_response`). Verification
+needed real test coverage, not just inspection, which required fixing a second,
+related issue: `messages.h:18`'s unconditional `#undef SUPPORT_JOIN` blocked
+*any* way of enabling the join code, by build flag or local `#define` - the
+same class of authoring slip as this bug itself. Confirmed with the user before
+expanding scope to cover it; removed the line (default-undefined is already
+correct) and added `-D SUPPORT_JOIN` to `HAST_leaf_node`'s `[env:native]` only
+(not the shipped board environments) plus a new native test suite,
+`test/test_native_messages_join/`, covering the exact reproduction-step-3
+scenario plus a null-out-param case and a `parse_join_request` control case.
+`pio test -e native` passes 29/29; `pio run -e zeroUSB`/`-e debugZeroUSB` and
+`pio check -e zeroUSB` all stay clean. Incidentally surfaced 12 pre-existing
+`-Wformat` warnings in `messages.cc`/`data_packet.cc` (first time that code has
+ever compiled for the native host) - left alone, out of scope, flagged for a
+possible future `TASK-###`. Status stays `Fix Planned`, not `Fixed` - only the
+user confirms that.
+
 ---
 
 ## BUG-003 — SD card init failure is never reported to the main node over LoRa
