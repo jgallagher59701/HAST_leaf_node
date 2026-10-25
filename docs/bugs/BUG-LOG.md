@@ -171,6 +171,76 @@ failed" and "LoRa is up" are simultaneously known.
 
 ---
 
+## BUG-004 — Boot diagnostics after `USBDevice.detach()` are silently suppressed when `SERIAL_DIAG=1`
+
+**Severity:** High
+**Status:** Fix Planned
+**Reported:** 2026-10-25
+**Fix plan:** `plans/bugfix-serial-debug-after-usb-detach-plan.md`
+**Related requirements:** FR-008 ("Leaf node supports a debug mode that can route
+diagnostics over USB serial or over LoRa", status `Superseded by FR-009`) — this is
+the exact USB-serial diagnostics mechanism (`SERIAL_DIAG` / the `IO()` macro in
+`include/debug.h`) FR-008 describes. No requirement documents what should happen to
+that mechanism once `USBDevice.detach()` runs, in either direction.
+
+**Reproduction steps:**
+1. Build `env:zeroUSB` (or `env:debugZeroUSB`) with the default
+   `-D STANDBY_MODE=1` and `-D SERIAL_DIAG=1` (override the common
+   `SERIAL_DIAG=0` flag in `platformio.ini`/`[common_env_data]`) to enable
+   setup()-time USB serial diagnostics.
+2. Flash the board and open a serial monitor during boot.
+3. Observe `setup()` running in `src/leaf_node.cc`: diagnostics up through the LoRa
+   init block (through line 915, "Initializing LORA... Done.") print normally.
+4. At `src/leaf_node.cc:931`, `USBDevice.detach()` runs (guarded only by
+   `#if STANDBY_MODE`, which is on by default) and the serial port goes away.
+5. Immediately after, `setup()` sends the time request and still runs `IO()`-wrapped
+   `Serial` calls at `src/leaf_node.cc:954-955` (unexpected time-response branch) and
+   `:961` (`"Setup complete."`) — these compile in whenever `SERIAL_DIAG=1`,
+   regardless of whether USB was just detached.
+
+**Expected behavior:** When `SERIAL_DIAG=1`, all setup()-time diagnostic output
+should reach the serial monitor, per FR-008's intent of routing diagnostics over USB
+serial during debug mode.
+
+**Actual behavior:** Diagnostics for the time-request/response exchange and the
+final "Setup complete." message are silently dropped — the lines after
+`USBDevice.detach()` write to a USB serial peripheral that's already been detached,
+with no visible crash or hang on the board; they just vanish. This defeats the
+specific purpose of turning `SERIAL_DIAG` on.
+
+**Root cause:** `src/leaf_node.cc:926` guards `USBDevice.detach()` with `#if
+STANDBY_MODE` only — the inline comment on that same line, `// !SERIAL_DIAG jhrg
+6/17/23`, indicates the original intent was for the detach to also be skipped when
+`SERIAL_DIAG` is on, but the actual preprocessor condition was never updated to say
+`#if STANDBY_MODE && !SERIAL_DIAG`. Both shipped environments
+(`env:zeroUSB`, `env:debugZeroUSB` in `platformio.ini`) default to `STANDBY_MODE=1`,
+and `SERIAL_DIAG` is the flag developers flip to `1` specifically to get boot
+diagnostics — so the one time a developer turns diagnostics on is exactly the time
+`USBDevice.detach()` still fires and cuts them off mid-`setup()`. Confirmed by direct
+inspection of `src/leaf_node.cc:926-961` and `include/debug.h`'s `IO()` macro
+(compiles to a real `Serial` call whenever `SERIAL_DIAG` is non-zero, with no
+awareness of USB attach state). This is a narrow, localized defect — no deep-dive
+needed.
+
+**Work Log**
+
+**2026-10-25 00:00** — "During startup, when SERIAL_DEBUG is on, the call to
+USBDevice.detach() turns off the serial port. However there is code that follows the
+detach() call that uses the serial port when SERIAL_DEBUG is true."
+Traced the report (user's "SERIAL_DEBUG" is actually `SERIAL_DIAG`) to
+`src/leaf_node.cc:926`: `USBDevice.detach()` is guarded only by `#if STANDBY_MODE`,
+while a stale trailing comment (`// !SERIAL_DIAG jhrg 6/17/23`) shows the condition
+was originally meant to also exclude `SERIAL_DIAG`. Confirmed via code inspection
+(no deep-dive needed — single, localized defect) that `IO()`-wrapped `Serial` calls
+at lines 954-955 and 961 still compile in under `SERIAL_DIAG=1` and run after the
+detach. User confirmed severity (High) and the observed symptom (some boot
+diagnostics silently suppressed, no crash/hang) before logging. Related requirement:
+FR-008 (superseded by FR-009 but still the live mechanism this bug affects). Wrote
+fix plan to `plans/bugfix-serial-debug-after-usb-detach-plan.md`; status set to
+`Fix Planned`.
+
+---
+
 <!-- Add new bugs via /fix-bug, or by hand — keep the section format: metadata lines,
      then Reproduction / Expected / Actual / Root Cause. A bug with no reproduction
      steps yet is a symptom report, not a bug entry — get concrete steps before

@@ -915,22 +915,6 @@ void setup() {
     IO(Serial.println(F(" Done.")));
 #endif // LORA
 
-    // Because the RS Ultra Pro board's native USB won't work with the standby() mode
-    // in the LowPower or RTCZero libraries, the MCU board can easily wind up bricked
-    // when using standby(). It will then become impossible to upload new/fixed
-    // code. Add a 10s delay here so a coordinated reset/upload will work.
-    //
-    // 'tries' is the number of times the code tries to init the USB serial object.
-    yield(max(0, BOOT_SAFETY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
-
-#if STANDBY_MODE  // !SERIAL_DIAG jhrg 6/17/23
-    // Once past setup(), the USB cannot be used unless SERIAL_DIAG is on. Then it must
-    // be toggled during the sleep period.
-    // NB: I cannot get the SerialUSB class to work after the RS has woken from its
-    // StandbyMode.
-    USBDevice.detach();
-#endif
-
 #if LORA
     // send time request
     time_request_t request;
@@ -947,6 +931,13 @@ void setup() {
             parse_time_response((time_response_t *)response, &node, &time);
 
             update_time(time);
+               IO(
+                Serial.print(F("Updated Date, Time from main node: "));
+                char date_str[32] = {0};
+                snprintf(date_str, sizeof(date_str), "%d/%d/%dT%d:%d:%d", rtc.getMonth(), rtc.getDay(), rtc.getYear(),
+                        rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+                Serial.print(F("RTC: "));
+                Serial.println((const char *)date_str));
             break;
         }
 
@@ -959,6 +950,22 @@ void setup() {
 #endif
 
     IO(Serial.println(F("Setup complete.")));
+
+    // Because the RS Ultra Pro board's native USB won't work with the standby() mode
+    // in the LowPower or RTCZero libraries, the MCU board can easily wind up bricked
+    // when using standby(). It will then become impossible to upload new/fixed
+    // code. Add a 10s delay here so a coordinated reset/upload will work.
+    //
+    // 'tries' is the number of times the code tries to init the USB serial object.
+    yield(max(0, BOOT_SAFETY_DELAY - tries * SERIAL_CONNECT_INTERVAL));
+
+#if STANDBY_MODE  // !SERIAL_DIAG jhrg 6/17/23
+    // Once past setup(), the USB cannot be used unless SERIAL_DIAG is on. Then it must
+    // be toggled during the sleep period.
+    // NB: I cannot get the SerialUSB class to work after the RS has woken from its
+    // StandbyMode.
+    USBDevice.detach();
+#endif
 }
 
 void loop() {
