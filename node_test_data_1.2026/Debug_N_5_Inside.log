@@ -1,0 +1,546 @@
+9/22/26T20:4:27 Time from main node: 1789937351, Time from this node: 1790107467, Delta: -170116
+9/20/26T20:49:11 STATE 1
+9/20/26T20:49:12 Data msg: node: 5, message: 1, time: 1789937351, Vbat 333 v, Tx dur 0 ms, T: 1829 C, RH: 4502 %, status: 0x00
+9/20/26T20:49:12 STATE 2
+9/20/26T20:49:12 STATE 4
+9/20/26T20:49:12 Radio silence
+9/20/26T20:49:12 SD/SPI shutdown
+9/20/26T21:2:6 SPI/SD up
+9/20/26T21:2:6 STATE 5
+9/20/26T21:2:6 t: 775, o: 59
+9/20/26T21:2:6 STATE 1
+9/20/26T21:2:7 Data msg: node: 5, message: 2, time: 1789938126, Vbat 280 v, Tx dur 427 ms, T: 1836 C, RH: 4498 %, status: 0x00
+9/20/26T21:2:7 STATE 2
+9/20/26T21:2:7 STATE 4
+9/20/26T21:2:7 Radio silence
+9/20/26T21:2:7 SD/SPI shutdown
+9/20/26T22:2:6 SPI/SD up
+9/20/26T22:2:6 STATE 5
+9/20/26T22:2:6 t: 3600, o: 59
+9/20/26T22:2:6 STATE 1
+9/20/26T22:2:7 Data msg: node: 5, message: 3, time: 1789941726, Vbat 277 v, Tx dur 427 ms, T: 1833 C, RH: 4484 %, status: 0x00
+9/20/26T22:2:7 STATE 2
+9/20/26T22:2:7 STATE 3
+9/20/26T22:2:7 Sent time request...
+9/20/26T22:2:8 node: 0, time: 1789941727
+9/20/26T22:2:8 Time from main node: 1789941727, Time from this node: 1789941728, Delta: -1
+9/20/26T22:2:8 STATE 4
+9/20/26T22:2:8 Radio silence
+9/20/26T22:2:8 SD/SPI shutdown
+9/20/26T23:2:6 SPI/SD up
+9/20/26T23:2:6 STATE 5
+9/20/26T23:2:6 t: 3600, o: 59
+9/20/26T23:2:6 STATE 1
+9/20/26T23:2:7 Data msg: node: 5, message: 4, time: 1789945326, Vbat 279 v, Tx dur 427 ms, T: 1841 C, RH: 4520 %, status: 0x00
+9/20/26T23:2:7 STATE 2
+9/20/26T23:2:7 STATE 4
+9/20/26T23:2:7 Radio silence
+9/20/26T23:2:7 SD/SPI shutdown
+9/21/26T0:2:6 SPI/SD up
+9/21/26T0:2:6 STATE 5
+9/21/26T0:2:6 t: 3600, o: 59
+9/21/26T0:2:6 STATE 1
+9/21/26T0:2:7 Data msg: node: 5, message: 5, time: 1789948926, Vbat 257 v, Tx dur 427 ms, T: 1842 C, RH: 4533 %, status: 0x00
+9/21/26T0:2:7 STATE 2
+9/21/26T0:2:7 STATE 4
+9/21/26T0:2:7 Radio silence
+9/21/26T0:2:7 SD/SPI shutdown
+9/21/26T1:2:6 SPI/SD up
+9/21/26T1:2:6 STATE 5
+9/21/26T1:2:6 t: 3600, o: 59
+9/21/26T1:2:6 STATE 1
+9/21/26T1:2:7 Data msg: node: 5, message: 6, time: 1789952526, Vbat 266 v, Tx dur 428 ms, T: 1842 C, RH: 4554 %, status: 0x00
+9/21/26T1:2:7 STATE 2
+9/21/26T1:2:7 STATE 3
+9/21/26T1:2:7 Sent time request...
+9/21/26T1:2:8 node: 0, time: 1789952527
+9/21/26T1:2:8 Time from main node: 1789952527, Time from this node: 1789952528, Delta: -1
+9/21/26T1:2:8 STATE 4
+9/21/26T1:2:8 Radio silence
+9/21/26T1:2:8 SD/SPI shutdown
+9/21/26T2:2:6 SPI/SD up
+9/21/26T2:2:6 STATE 5
+9/21/26T2:2:6 t: 3600, o: 59
+9/21/26T2:2:6 STATE 1
+9/21/26T2:2:7 Data msg: node: 5, message: 7, time: 1789956126, Vbat 300 v, Tx dur 427 ms, T: 1832 C, RH: 4543 %, status: 0x00
+9/21/26T2:2:7 STATE 2
+9/21/26T2:2:7 STATE 4
+9/21/26T2:2:7 Radio silence
+9/21/26T2:2:7 SD/SPI shutdown
+9/21/26T3:2:6 SPI/SD up
+9/21/26T3:2:6 STATE 5
+9/21/26T3:2:6 t: 3600, o: 59
+9/21/26T3:2:6 STATE 1
+9/21/26T3:2:7 Data msg: node: 5, message: 8, time: 1789959726, Vbat 261 v, Tx dur 427 ms, T: 1826 C, RH: 4624 %, status: 0x00
+9/21/26T3:2:7 STATE 2
+9/21/26T3:2:7 STATE 4
+9/21/26T3:2:7 Radio silence
+9/21/26T3:2:7 SD/SPI shutdown
+9/21/26T4:2:6 SPI/SD up
+9/21/26T4:2:6 STATE 5
+9/21/26T4:2:6 t: 3600, o: 59
+9/21/26T4:2:6 STATE 1
+9/21/26T4:2:7 Data msg: node: 5, message: 9, time: 1789963326, Vbat 272 v, Tx dur 427 ms, T: 1815 C, RH: 4612 %, status: 0x00
+9/21/26T4:2:7 STATE 2
+9/21/26T4:2:7 STATE 3
+9/21/26T4:2:7 Sent time request...
+9/21/26T4:2:8 node: 0, time: 1789963326
+9/21/26T4:2:8 Time from main node: 1789963326, Time from this node: 1789963328, Delta: -2
+9/21/26T4:2:6 STATE 4
+9/21/26T4:2:6 Radio silence
+9/21/26T4:2:6 SD/SPI shutdown
+9/21/26T5:2:6 SPI/SD up
+9/21/26T5:2:6 STATE 5
+9/21/26T5:2:6 t: 3600, o: 59
+9/21/26T5:2:6 STATE 1
+9/21/26T5:2:7 Data msg: node: 5, message: 10, time: 1789966926, Vbat 296 v, Tx dur 427 ms, T: 1796 C, RH: 4588 %, status: 0x00
+9/21/26T5:2:7 STATE 2
+9/21/26T5:2:7 STATE 4
+9/21/26T5:2:7 Radio silence
+9/21/26T5:2:7 SD/SPI shutdown
+9/21/26T6:2:6 SPI/SD up
+9/21/26T6:2:6 STATE 5
+9/21/26T6:2:6 t: 3600, o: 59
+9/21/26T6:2:6 STATE 1
+9/21/26T6:2:7 Data msg: node: 5, message: 11, time: 1789970526, Vbat 273 v, Tx dur 427 ms, T: 1784 C, RH: 4602 %, status: 0x00
+9/21/26T6:2:7 STATE 2
+9/21/26T6:2:7 STATE 4
+9/21/26T6:2:7 Radio silence
+9/21/26T6:2:7 SD/SPI shutdown
+9/21/26T7:2:6 SPI/SD up
+9/21/26T7:2:6 STATE 5
+9/21/26T7:2:6 t: 3600, o: 59
+9/21/26T7:2:6 STATE 1
+9/21/26T7:2:7 Data msg: node: 5, message: 12, time: 1789974126, Vbat 295 v, Tx dur 427 ms, T: 1775 C, RH: 4636 %, status: 0x00
+9/21/26T7:2:7 STATE 2
+9/21/26T7:2:7 STATE 3
+9/21/26T7:2:7 Sent time request...
+9/21/26T7:2:8 node: 0, time: 1789974128
+9/21/26T7:2:8 Time from main node: 1789974128, Time from this node: 1789974128, Delta: 0
+9/21/26T7:2:8 STATE 4
+9/21/26T7:2:8 Radio silence
+9/21/26T7:2:8 SD/SPI shutdown
+9/21/26T8:2:6 SPI/SD up
+9/21/26T8:2:6 STATE 5
+9/21/26T8:2:6 t: 3600, o: 59
+9/21/26T8:2:6 STATE 1
+9/21/26T8:2:7 Data msg: node: 5, message: 13, time: 1789977726, Vbat 292 v, Tx dur 427 ms, T: 1766 C, RH: 4661 %, status: 0x00
+9/21/26T8:2:7 STATE 2
+9/21/26T8:2:7 STATE 4
+9/21/26T8:2:7 Radio silence
+9/21/26T8:2:7 SD/SPI shutdown
+9/21/26T9:2:6 SPI/SD up
+9/21/26T9:2:6 STATE 5
+9/21/26T9:2:6 t: 3600, o: 59
+9/21/26T9:2:6 STATE 1
+9/21/26T9:2:7 Data msg: node: 5, message: 14, time: 1789981326, Vbat 256 v, Tx dur 427 ms, T: 1757 C, RH: 4724 %, status: 0x00
+9/21/26T9:2:7 STATE 2
+9/21/26T9:2:7 STATE 4
+9/21/26T9:2:7 Radio silence
+9/21/26T9:2:7 SD/SPI shutdown
+9/21/26T10:2:6 SPI/SD up
+9/21/26T10:2:6 STATE 5
+9/21/26T10:2:6 t: 3600, o: 59
+9/21/26T10:2:6 STATE 1
+9/21/26T10:2:7 Data msg: node: 5, message: 15, time: 1789984926, Vbat 246 v, Tx dur 427 ms, T: 1754 C, RH: 4764 %, status: 0x00
+9/21/26T10:2:7 STATE 2
+9/21/26T10:2:7 STATE 3
+9/21/26T10:2:7 Sent time request...
+9/21/26T10:2:8 node: 0, time: 1789984927
+9/21/26T10:2:8 Time from main node: 1789984927, Time from this node: 1789984928, Delta: -1
+9/21/26T10:2:8 STATE 4
+9/21/26T10:2:8 Radio silence
+9/21/26T10:2:8 SD/SPI shutdown
+9/21/26T11:2:6 SPI/SD up
+9/21/26T11:2:6 STATE 5
+9/21/26T11:2:6 t: 3600, o: 59
+9/21/26T11:2:6 STATE 1
+9/21/26T11:2:7 Data msg: node: 5, message: 16, time: 1789988526, Vbat 286 v, Tx dur 427 ms, T: 1773 C, RH: 4723 %, status: 0x00
+9/21/26T11:2:7 STATE 2
+9/21/26T11:2:7 STATE 4
+9/21/26T11:2:7 Radio silence
+9/21/26T11:2:7 SD/SPI shutdown
+9/21/26T12:2:6 SPI/SD up
+9/21/26T12:2:6 STATE 5
+9/21/26T12:2:6 t: 3600, o: 59
+9/21/26T12:2:6 STATE 1
+9/21/26T12:2:7 Data msg: node: 5, message: 17, time: 1789992126, Vbat 287 v, Tx dur 427 ms, T: 1808 C, RH: 4715 %, status: 0x00
+9/21/26T12:2:7 STATE 2
+9/21/26T12:2:7 STATE 4
+9/21/26T12:2:7 Radio silence
+9/21/26T12:2:7 SD/SPI shutdown
+9/21/26T13:2:6 SPI/SD up
+9/21/26T13:2:6 STATE 5
+9/21/26T13:2:6 t: 3600, o: 59
+9/21/26T13:2:6 STATE 1
+9/21/26T13:2:7 Data msg: node: 5, message: 18, time: 1789995726, Vbat 284 v, Tx dur 427 ms, T: 1836 C, RH: 4711 %, status: 0x00
+9/21/26T13:2:7 STATE 2
+9/21/26T13:2:7 STATE 3
+9/21/26T13:2:7 Sent time request...
+9/21/26T13:2:8 node: 0, time: 1789995727
+9/21/26T13:2:8 Time from main node: 1789995727, Time from this node: 1789995728, Delta: -1
+9/21/26T13:2:8 STATE 4
+9/21/26T13:2:8 Radio silence
+9/21/26T13:2:8 SD/SPI shutdown
+9/21/26T14:2:6 SPI/SD up
+9/21/26T14:2:6 STATE 5
+9/21/26T14:2:6 t: 3600, o: 59
+9/21/26T14:2:6 STATE 1
+9/21/26T14:2:7 Data msg: node: 5, message: 19, time: 1789999326, Vbat 268 v, Tx dur 427 ms, T: 1852 C, RH: 4686 %, status: 0x00
+9/21/26T14:2:7 STATE 2
+9/21/26T14:2:7 STATE 4
+9/21/26T14:2:7 Radio silence
+9/21/26T14:2:7 SD/SPI shutdown
+9/21/26T15:2:6 SPI/SD up
+9/21/26T15:2:6 STATE 5
+9/21/26T15:2:6 t: 3600, o: 59
+9/21/26T15:2:6 STATE 1
+9/21/26T15:2:7 Data msg: node: 5, message: 20, time: 1790002926, Vbat 262 v, Tx dur 427 ms, T: 1862 C, RH: 4669 %, status: 0x00
+9/21/26T15:2:7 STATE 2
+9/21/26T15:2:7 STATE 4
+9/21/26T15:2:7 Radio silence
+9/21/26T15:2:7 SD/SPI shutdown
+9/21/26T16:2:6 SPI/SD up
+9/21/26T16:2:6 STATE 5
+9/21/26T16:2:6 t: 3600, o: 59
+9/21/26T16:2:6 STATE 1
+9/21/26T16:2:7 Data msg: node: 5, message: 21, time: 1790006526, Vbat 272 v, Tx dur 427 ms, T: 1873 C, RH: 4668 %, status: 0x00
+9/21/26T16:2:7 STATE 2
+9/21/26T16:2:7 STATE 3
+9/21/26T16:2:7 Sent time request...
+9/21/26T16:2:8 node: 0, time: 1790006527
+9/21/26T16:2:8 Time from main node: 1790006527, Time from this node: 1790006528, Delta: -1
+9/21/26T16:2:8 STATE 4
+9/21/26T16:2:8 Radio silence
+9/21/26T16:2:8 SD/SPI shutdown
+9/21/26T17:2:6 SPI/SD up
+9/21/26T17:2:6 STATE 5
+9/21/26T17:2:6 t: 3600, o: 59
+9/21/26T17:2:6 STATE 1
+9/21/26T17:2:7 Data msg: node: 5, message: 22, time: 1790010126, Vbat 275 v, Tx dur 427 ms, T: 1879 C, RH: 4661 %, status: 0x00
+9/21/26T17:2:7 STATE 2
+9/21/26T17:2:7 STATE 4
+9/21/26T17:2:7 Radio silence
+9/21/26T17:2:7 SD/SPI shutdown
+9/21/26T18:2:6 SPI/SD up
+9/21/26T18:2:6 STATE 5
+9/21/26T18:2:6 t: 3600, o: 59
+9/21/26T18:2:6 STATE 1
+9/21/26T18:2:7 Data msg: node: 5, message: 23, time: 1790013726, Vbat 296 v, Tx dur 427 ms, T: 1885 C, RH: 4661 %, status: 0x00
+9/21/26T18:2:7 STATE 2
+9/21/26T18:2:7 STATE 4
+9/21/26T18:2:7 Radio silence
+9/21/26T18:2:7 SD/SPI shutdown
+9/21/26T19:2:6 SPI/SD up
+9/21/26T19:2:6 STATE 5
+9/21/26T19:2:6 t: 3600, o: 59
+9/21/26T19:2:6 STATE 1
+9/21/26T19:2:7 Data msg: node: 5, message: 24, time: 1790017326, Vbat 278 v, Tx dur 427 ms, T: 1887 C, RH: 4652 %, status: 0x00
+9/21/26T19:2:7 STATE 2
+9/21/26T19:2:7 STATE 3
+9/21/26T19:2:7 Sent time request...
+9/21/26T19:2:8 node: 0, time: 1790017326
+9/21/26T19:2:8 Time from main node: 1790017326, Time from this node: 1790017328, Delta: -2
+9/21/26T19:2:6 STATE 4
+9/21/26T19:2:6 Radio silence
+9/21/26T19:2:6 SD/SPI shutdown
+9/21/26T20:2:6 SPI/SD up
+9/21/26T20:2:6 STATE 5
+9/21/26T20:2:6 t: 3600, o: 59
+9/21/26T20:2:6 STATE 1
+9/21/26T20:2:7 Data msg: node: 5, message: 25, time: 1790020926, Vbat 265 v, Tx dur 427 ms, T: 1884 C, RH: 4650 %, status: 0x00
+9/21/26T20:2:7 STATE 2
+9/21/26T20:2:7 STATE 4
+9/21/26T20:2:7 Radio silence
+9/21/26T20:2:7 SD/SPI shutdown
+9/21/26T21:2:6 SPI/SD up
+9/21/26T21:2:6 STATE 5
+9/21/26T21:2:6 t: 3600, o: 59
+9/21/26T21:2:6 STATE 1
+9/21/26T21:2:7 Data msg: node: 5, message: 26, time: 1790024526, Vbat 273 v, Tx dur 427 ms, T: 1883 C, RH: 4637 %, status: 0x00
+9/21/26T21:2:7 STATE 2
+9/21/26T21:2:7 STATE 4
+9/21/26T21:2:7 Radio silence
+9/21/26T21:2:7 SD/SPI shutdown
+9/21/26T22:2:6 SPI/SD up
+9/21/26T22:2:6 STATE 5
+9/21/26T22:2:6 t: 3600, o: 59
+9/21/26T22:2:6 STATE 1
+9/21/26T22:2:7 Data msg: node: 5, message: 27, time: 1790028126, Vbat 269 v, Tx dur 427 ms, T: 1877 C, RH: 4629 %, status: 0x00
+9/21/26T22:2:7 STATE 2
+9/21/26T22:2:7 STATE 3
+9/21/26T22:2:7 Sent time request...
+9/21/26T22:2:8 node: 0, time: 1790028128
+9/21/26T22:2:8 Time from main node: 1790028128, Time from this node: 1790028128, Delta: 0
+9/21/26T22:2:8 STATE 4
+9/21/26T22:2:8 Radio silence
+9/21/26T22:2:8 SD/SPI shutdown
+9/22/26T20:4:20 Time from main node: 1790029499, Time from this node: 1790107460, Delta: -77961
+9/21/26T22:24:59 STATE 1
+9/21/26T22:25:0 Data msg: node: 5, message: 1, time: 1790029499, Vbat 317 v, Tx dur 0 ms, T: 1898 C, RH: 4566 %, status: 0x00
+9/21/26T22:25:0 STATE 2
+9/21/26T22:25:0 STATE 4
+9/21/26T22:25:0 Radio silence
+9/21/26T22:25:0 SD/SPI shutdown
+9/21/26T23:2:6 SPI/SD up
+9/21/26T23:2:6 STATE 5
+9/21/26T23:2:6 t: 2227, o: 59
+9/21/26T23:2:6 STATE 1
+9/21/26T23:2:7 Data msg: node: 5, message: 2, time: 1790031726, Vbat 262 v, Tx dur 427 ms, T: 1874 C, RH: 4604 %, status: 0x00
+9/21/26T23:2:7 STATE 2
+9/21/26T23:2:7 STATE 4
+9/21/26T23:2:7 Radio silence
+9/21/26T23:2:7 SD/SPI shutdown
+9/22/26T0:2:6 SPI/SD up
+9/22/26T0:2:6 STATE 5
+9/22/26T0:2:6 t: 3600, o: 59
+9/22/26T0:2:6 STATE 1
+9/22/26T0:2:7 Data msg: node: 5, message: 3, time: 1790035326, Vbat 277 v, Tx dur 427 ms, T: 1862 C, RH: 4586 %, status: 0x00
+9/22/26T0:2:7 STATE 2
+9/22/26T0:2:7 STATE 3
+9/22/26T0:2:7 Sent time request...
+9/22/26T0:2:8 node: 0, time: 1790035327
+9/22/26T0:2:8 Time from main node: 1790035327, Time from this node: 1790035328, Delta: -1
+9/22/26T0:2:8 STATE 4
+9/22/26T0:2:8 Radio silence
+9/22/26T0:2:8 SD/SPI shutdown
+9/22/26T1:2:6 SPI/SD up
+9/22/26T1:2:6 STATE 5
+9/22/26T1:2:6 t: 3600, o: 59
+9/22/26T1:2:6 STATE 1
+9/22/26T1:2:7 Data msg: node: 5, message: 4, time: 1790038926, Vbat 278 v, Tx dur 427 ms, T: 1841 C, RH: 4524 %, status: 0x00
+9/22/26T1:2:7 STATE 2
+9/22/26T1:2:7 STATE 4
+9/22/26T1:2:7 Radio silence
+9/22/26T1:2:7 SD/SPI shutdown
+9/22/26T2:2:6 SPI/SD up
+9/22/26T2:2:6 STATE 5
+9/22/26T2:2:6 t: 3600, o: 59
+9/22/26T2:2:6 STATE 1
+9/22/26T2:2:7 Data msg: node: 5, message: 5, time: 1790042526, Vbat 278 v, Tx dur 427 ms, T: 1821 C, RH: 4516 %, status: 0x00
+9/22/26T2:2:7 STATE 2
+9/22/26T2:2:7 STATE 4
+9/22/26T2:2:7 Radio silence
+9/22/26T2:2:7 SD/SPI shutdown
+9/22/26T3:2:6 SPI/SD up
+9/22/26T3:2:6 STATE 5
+9/22/26T3:2:6 t: 3600, o: 59
+9/22/26T3:2:6 STATE 1
+9/22/26T3:2:7 Data msg: node: 5, message: 6, time: 1790046126, Vbat 267 v, Tx dur 427 ms, T: 1800 C, RH: 4447 %, status: 0x00
+9/22/26T3:2:7 STATE 2
+9/22/26T3:2:7 STATE 3
+9/22/26T3:2:7 Sent time request...
+9/22/26T3:2:8 node: 0, time: 1790046127
+9/22/26T3:2:8 Time from main node: 1790046127, Time from this node: 1790046128, Delta: -1
+9/22/26T3:2:8 STATE 4
+9/22/26T3:2:8 Radio silence
+9/22/26T3:2:8 SD/SPI shutdown
+9/22/26T4:2:6 SPI/SD up
+9/22/26T4:2:6 STATE 5
+9/22/26T4:2:6 t: 3600, o: 59
+9/22/26T4:2:6 STATE 1
+9/22/26T4:2:7 Data msg: node: 5, message: 7, time: 1790049726, Vbat 287 v, Tx dur 427 ms, T: 1770 C, RH: 4383 %, status: 0x00
+9/22/26T4:2:7 STATE 2
+9/22/26T4:2:7 STATE 4
+9/22/26T4:2:7 Radio silence
+9/22/26T4:2:7 SD/SPI shutdown
+9/22/26T5:2:6 SPI/SD up
+9/22/26T5:2:6 STATE 5
+9/22/26T5:2:6 t: 3600, o: 59
+9/22/26T5:2:6 STATE 1
+9/22/26T5:2:7 Data msg: node: 5, message: 8, time: 1790053326, Vbat 269 v, Tx dur 426 ms, T: 1746 C, RH: 4355 %, status: 0x00
+9/22/26T5:2:7 STATE 2
+9/22/26T5:2:7 STATE 4
+9/22/26T5:2:7 Radio silence
+9/22/26T5:2:7 SD/SPI shutdown
+9/22/26T6:2:6 SPI/SD up
+9/22/26T6:2:6 STATE 5
+9/22/26T6:2:6 t: 3600, o: 59
+9/22/26T6:2:6 STATE 1
+9/22/26T6:2:7 Data msg: node: 5, message: 9, time: 1790056926, Vbat 265 v, Tx dur 427 ms, T: 1718 C, RH: 4316 %, status: 0x00
+9/22/26T6:2:7 STATE 2
+9/22/26T6:2:7 STATE 3
+9/22/26T6:2:7 Sent time request...
+9/22/26T6:2:8 node: 0, time: 1790056926
+9/22/26T6:2:8 Time from main node: 1790056926, Time from this node: 1790056928, Delta: -2
+9/22/26T6:2:6 STATE 4
+9/22/26T6:2:6 Radio silence
+9/22/26T6:2:6 SD/SPI shutdown
+9/22/26T7:2:6 SPI/SD up
+9/22/26T7:2:6 STATE 5
+9/22/26T7:2:6 t: 3600, o: 59
+9/22/26T7:2:6 STATE 1
+9/22/26T7:2:7 Data msg: node: 5, message: 10, time: 1790060526, Vbat 299 v, Tx dur 427 ms, T: 1689 C, RH: 4268 %, status: 0x00
+9/22/26T7:2:7 STATE 2
+9/22/26T7:2:7 STATE 4
+9/22/26T7:2:7 Radio silence
+9/22/26T7:2:7 SD/SPI shutdown
+9/22/26T8:2:6 SPI/SD up
+9/22/26T8:2:6 STATE 5
+9/22/26T8:2:6 t: 3600, o: 59
+9/22/26T8:2:6 STATE 1
+9/22/26T8:2:7 Data msg: node: 5, message: 11, time: 1790064126, Vbat 255 v, Tx dur 427 ms, T: 1662 C, RH: 4244 %, status: 0x00
+9/22/26T8:2:7 STATE 2
+9/22/26T8:2:7 STATE 4
+9/22/26T8:2:7 Radio silence
+9/22/26T8:2:7 SD/SPI shutdown
+9/22/26T9:2:6 SPI/SD up
+9/22/26T9:2:6 STATE 5
+9/22/26T9:2:6 t: 3600, o: 59
+9/22/26T9:2:6 STATE 1
+9/22/26T9:2:7 Data msg: node: 5, message: 12, time: 1790067726, Vbat 280 v, Tx dur 427 ms, T: 1641 C, RH: 4260 %, status: 0x00
+9/22/26T9:2:7 STATE 2
+9/22/26T9:2:7 STATE 3
+9/22/26T9:2:7 Sent time request...
+9/22/26T9:2:8 node: 0, time: 1790067728
+9/22/26T9:2:8 Time from main node: 1790067728, Time from this node: 1790067728, Delta: 0
+9/22/26T9:2:8 STATE 4
+9/22/26T9:2:8 Radio silence
+9/22/26T9:2:8 SD/SPI shutdown
+9/22/26T10:2:6 SPI/SD up
+9/22/26T10:2:6 STATE 5
+9/22/26T10:2:6 t: 3600, o: 59
+9/22/26T10:2:6 STATE 1
+9/22/26T10:2:7 Data msg: node: 5, message: 13, time: 1790071326, Vbat 282 v, Tx dur 427 ms, T: 1650 C, RH: 4374 %, status: 0x00
+9/22/26T10:2:7 STATE 2
+9/22/26T10:2:7 STATE 4
+9/22/26T10:2:7 Radio silence
+9/22/26T10:2:7 SD/SPI shutdown
+9/22/26T11:2:6 SPI/SD up
+9/22/26T11:2:6 STATE 5
+9/22/26T11:2:6 t: 3600, o: 59
+9/22/26T11:2:6 STATE 1
+9/22/26T11:2:7 Data msg: node: 5, message: 14, time: 1790074926, Vbat 283 v, Tx dur 427 ms, T: 1695 C, RH: 4355 %, status: 0x00
+9/22/26T11:2:7 STATE 2
+9/22/26T11:2:7 STATE 4
+9/22/26T11:2:7 Radio silence
+9/22/26T11:2:7 SD/SPI shutdown
+9/22/26T12:2:6 SPI/SD up
+9/22/26T12:2:6 STATE 5
+9/22/26T12:2:6 t: 3600, o: 59
+9/22/26T12:2:6 STATE 1
+9/22/26T12:2:7 Data msg: node: 5, message: 15, time: 1790078526, Vbat 259 v, Tx dur 427 ms, T: 1749 C, RH: 4386 %, status: 0x00
+9/22/26T12:2:7 STATE 2
+9/22/26T12:2:7 STATE 3
+9/22/26T12:2:7 Sent time request...
+9/22/26T12:2:8 node: 0, time: 1790078528
+9/22/26T12:2:8 Time from main node: 1790078528, Time from this node: 1790078528, Delta: 0
+9/22/26T12:2:8 STATE 4
+9/22/26T12:2:8 Radio silence
+9/22/26T12:2:8 SD/SPI shutdown
+9/22/26T13:2:6 SPI/SD up
+9/22/26T13:2:6 STATE 5
+9/22/26T13:2:6 t: 3600, o: 59
+9/22/26T13:2:6 STATE 1
+9/22/26T13:2:7 Data msg: node: 5, message: 16, time: 1790082126, Vbat 289 v, Tx dur 427 ms, T: 1790 C, RH: 4399 %, status: 0x00
+9/22/26T13:2:7 STATE 2
+9/22/26T13:2:7 STATE 4
+9/22/26T13:2:7 Radio silence
+9/22/26T13:2:7 SD/SPI shutdown
+9/22/26T14:2:6 SPI/SD up
+9/22/26T14:2:6 STATE 5
+9/22/26T14:2:6 t: 3600, o: 59
+9/22/26T14:2:6 STATE 1
+9/22/26T14:2:7 Data msg: node: 5, message: 17, time: 1790085726, Vbat 281 v, Tx dur 427 ms, T: 1809 C, RH: 4418 %, status: 0x00
+9/22/26T14:2:7 STATE 2
+9/22/26T14:2:7 STATE 4
+9/22/26T14:2:7 Radio silence
+9/22/26T14:2:7 SD/SPI shutdown
+9/22/26T15:2:6 SPI/SD up
+9/22/26T15:2:6 STATE 5
+9/22/26T15:2:6 t: 3600, o: 59
+9/22/26T15:2:6 STATE 1
+9/22/26T15:2:7 Data msg: node: 5, message: 18, time: 1790089326, Vbat 297 v, Tx dur 427 ms, T: 1823 C, RH: 4429 %, status: 0x00
+9/22/26T15:2:7 STATE 2
+9/22/26T15:2:7 STATE 3
+9/22/26T15:2:7 Sent time request...
+9/22/26T15:2:8 node: 0, time: 1790089327
+9/22/26T15:2:8 Time from main node: 1790089327, Time from this node: 1790089328, Delta: -1
+9/22/26T15:2:8 STATE 4
+9/22/26T15:2:8 Radio silence
+9/22/26T15:2:8 SD/SPI shutdown
+9/22/26T16:2:6 SPI/SD up
+9/22/26T16:2:6 STATE 5
+9/22/26T16:2:6 t: 3600, o: 59
+9/22/26T16:2:6 STATE 1
+9/22/26T16:2:7 Data msg: node: 5, message: 19, time: 1790092926, Vbat 273 v, Tx dur 427 ms, T: 1841 C, RH: 4440 %, status: 0x00
+9/22/26T16:2:7 STATE 2
+9/22/26T16:2:7 STATE 4
+9/22/26T16:2:7 Radio silence
+9/22/26T16:2:7 SD/SPI shutdown
+9/22/26T17:2:6 SPI/SD up
+9/22/26T17:2:6 STATE 5
+9/22/26T17:2:6 t: 3600, o: 59
+9/22/26T17:2:6 STATE 1
+9/22/26T17:2:7 Data msg: node: 5, message: 20, time: 1790096526, Vbat 266 v, Tx dur 427 ms, T: 1857 C, RH: 4446 %, status: 0x00
+9/22/26T17:2:7 STATE 2
+9/22/26T17:2:7 STATE 4
+9/22/26T17:2:7 Radio silence
+9/22/26T17:2:7 SD/SPI shutdown
+9/22/26T18:2:6 SPI/SD up
+9/22/26T18:2:6 STATE 5
+9/22/26T18:2:6 t: 3600, o: 59
+9/22/26T18:2:6 STATE 1
+9/22/26T18:2:7 Data msg: node: 5, message: 21, time: 1790100126, Vbat 253 v, Tx dur 427 ms, T: 1867 C, RH: 4446 %, status: 0x00
+9/22/26T18:2:7 STATE 2
+9/22/26T18:2:7 STATE 3
+9/22/26T18:2:7 Sent time request...
+9/22/26T18:2:8 node: 0, time: 1790100127
+9/22/26T18:2:8 Time from main node: 1790100127, Time from this node: 1790100128, Delta: -1
+9/22/26T18:2:8 STATE 4
+9/22/26T18:2:8 Radio silence
+9/22/26T18:2:8 SD/SPI shutdown
+9/22/26T19:2:6 SPI/SD up
+9/22/26T19:2:6 STATE 5
+9/22/26T19:2:6 t: 3600, o: 59
+9/22/26T19:2:6 STATE 1
+9/22/26T19:2:7 Data msg: node: 5, message: 22, time: 1790103726, Vbat 281 v, Tx dur 427 ms, T: 1871 C, RH: 4441 %, status: 0x00
+9/22/26T19:2:7 STATE 2
+9/22/26T19:2:7 STATE 4
+9/22/26T19:2:7 Radio silence
+9/22/26T19:2:7 SD/SPI shutdown
+9/22/26T20:2:6 SPI/SD up
+9/22/26T20:2:6 STATE 5
+9/22/26T20:2:6 t: 3600, o: 59
+9/22/26T20:2:6 STATE 1
+9/22/26T20:2:7 Data msg: node: 5, message: 23, time: 1790107326, Vbat 302 v, Tx dur 427 ms, T: 1876 C, RH: 4436 %, status: 0x00
+9/22/26T20:2:7 STATE 2
+9/22/26T20:2:7 STATE 4
+9/22/26T20:2:7 Radio silence
+9/22/26T20:2:7 SD/SPI shutdown
+9/22/26T21:2:6 SPI/SD up
+9/22/26T21:2:6 STATE 5
+9/22/26T21:2:6 t: 3600, o: 59
+9/22/26T21:2:6 STATE 1
+9/22/26T21:2:7 Data msg: node: 5, message: 24, time: 1790110926, Vbat 288 v, Tx dur 427 ms, T: 1881 C, RH: 4426 %, status: 0x00
+9/22/26T21:2:7 STATE 2
+9/22/26T21:2:7 STATE 3
+9/22/26T21:2:7 Sent time request...
+9/22/26T21:2:8 node: 0, time: 1790110927
+9/22/26T21:2:8 Time from main node: 1790110927, Time from this node: 1790110928, Delta: -1
+9/22/26T21:2:8 STATE 4
+9/22/26T21:2:8 Radio silence
+9/22/26T21:2:8 SD/SPI shutdown
+9/22/26T22:2:6 SPI/SD up
+9/22/26T22:2:6 STATE 5
+9/22/26T22:2:6 t: 3600, o: 59
+9/22/26T22:2:6 STATE 1
+9/22/26T22:2:7 Data msg: node: 5, message: 25, time: 1790114526, Vbat 275 v, Tx dur 427 ms, T: 1884 C, RH: 4428 %, status: 0x00
+9/22/26T22:2:7 STATE 2
+9/22/26T22:2:7 STATE 4
+9/22/26T22:2:7 Radio silence
+9/22/26T22:2:7 SD/SPI shutdown
+10/11/26T15:13:41 Time from main node: 1791561528, Time from this node: 1791731621, Delta: -170093
+10/9/26T15:58:49 STATE 1
+10/9/26T15:58:49 Data msg: node: 5, message: 1, time: 1791561528, Vbat 339 v, Tx dur 0 ms, T: 1908 C, RH: 3566 %, status: 0x00
+10/9/26T15:58:49 STATE 2
+10/9/26T15:58:49 STATE 4
+10/9/26T15:58:49 Radio silence
+10/9/26T15:58:49 SD/SPI shutdown
+10/11/26T17:0:8 Time from main node: 1791567873, Time from this node: 1791738008, Delta: -170135
+10/9/26T17:44:34 STATE 1
+10/9/26T17:44:34 Data msg: node: 5, message: 1, time: 1791567873, Vbat 323 v, Tx dur 0 ms, T: 1901 C, RH: 3565 %, status: 0x00
+10/9/26T17:44:34 STATE 2
+10/9/26T17:44:34 STATE 4
+10/9/26T17:44:34 Radio silence
+10/9/26T17:44:34 SD/SPI shutdown

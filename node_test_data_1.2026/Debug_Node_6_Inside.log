@@ -1,0 +1,1427 @@
+10/12/26T10:58:35 Time from main node: 1791632584, Time from this node: 1791802715, Delta: -170131
+10/10/26T11:43:4 STATE 1
+10/10/26T11:43:5 Data msg: node: 6, message: 1, time: 1791632584, Vbat 447 v, Tx dur 0 ms, T: 1961 C, RH: 3395 %, status: 0x00
+10/10/26T11:43:5 STATE 2
+10/10/26T11:43:5 Time request deferred: no room left in the slot.
+10/10/26T11:43:5 STATE 4
+10/10/26T11:43:5 Radio silence
+10/10/26T11:43:5 SD/SPI shutdown
+10/12/26T10:58:28 Time from main node: 1791632630, Time from this node: 1791802708, Delta: -170078
+10/10/26T11:43:50 STATE 1
+10/10/26T11:43:51 Data msg: node: 6, message: 1, time: 1791632630, Vbat 447 v, Tx dur 0 ms, T: 1962 C, RH: 3395 %, status: 0x00
+10/10/26T11:43:51 STATE 2
+10/10/26T11:43:51 Time request deferred: no room left in the slot.
+10/10/26T11:43:51 STATE 4
+10/10/26T11:43:51 Radio silence
+10/10/26T11:43:51 SD/SPI shutdown
+10/10/26T12:5:1 SPI/SD up
+10/10/26T12:5:1 STATE 5
+10/10/26T12:5:1 t: 1271, o: 59
+10/10/26T12:5:1 STATE 1
+10/10/26T12:5:2 Data msg: node: 6, message: 2, time: 1791633901, Vbat 343 v, Tx dur 427 ms, T: 1968 C, RH: 3371 %, status: 0x00
+10/10/26T12:5:2 STATE 2
+10/10/26T12:5:2 Time request deferred: no room left in the slot.
+10/10/26T12:5:2 STATE 4
+10/10/26T12:5:2 Radio silence
+10/10/26T12:5:2 SD/SPI shutdown
+10/10/26T13:5:1 SPI/SD up
+10/10/26T13:5:1 STATE 5
+10/10/26T13:5:1 t: 3600, o: 59
+10/10/26T13:5:1 STATE 1
+10/10/26T13:5:2 Data msg: node: 6, message: 3, time: 1791637501, Vbat 343 v, Tx dur 427 ms, T: 1957 C, RH: 3398 %, status: 0x00
+10/10/26T13:5:2 STATE 2
+10/10/26T13:5:2 STATE 3
+10/10/26T13:5:2 Sent time request...
+10/10/26T13:5:3 node: 0, time: 1791637502
+10/10/26T13:5:3 Time from main node: 1791637502, Time from this node: 1791637503, Delta: -1
+10/10/26T13:5:2 STATE 4
+10/10/26T13:5:2 Radio silence
+10/10/26T13:5:2 SD/SPI shutdown
+10/10/26T14:5:1 SPI/SD up
+10/10/26T14:5:1 STATE 5
+10/10/26T14:5:1 t: 3599, o: 59
+10/10/26T14:5:1 STATE 1
+10/10/26T14:5:2 Data msg: node: 6, message: 4, time: 1791641101, Vbat 337 v, Tx dur 428 ms, T: 1929 C, RH: 3431 %, status: 0x00
+10/10/26T14:5:2 STATE 2
+10/10/26T14:5:2 Time request deferred: no room left in the slot.
+10/10/26T14:5:2 STATE 4
+10/10/26T14:5:2 Radio silence
+10/10/26T14:5:2 SD/SPI shutdown
+10/10/26T15:5:1 SPI/SD up
+10/10/26T15:5:1 STATE 5
+10/10/26T15:5:1 t: 3600, o: 59
+10/10/26T15:5:1 STATE 1
+10/10/26T15:5:2 Data msg: node: 6, message: 5, time: 1791644701, Vbat 347 v, Tx dur 428 ms, T: 1912 C, RH: 3438 %, status: 0x00
+10/10/26T15:5:2 STATE 2
+10/10/26T15:5:2 Time request deferred: no room left in the slot.
+10/10/26T15:5:2 STATE 4
+10/10/26T15:5:2 Radio silence
+10/10/26T15:5:2 SD/SPI shutdown
+10/10/26T16:5:1 SPI/SD up
+10/10/26T16:5:1 STATE 5
+10/10/26T16:5:1 t: 3600, o: 59
+10/10/26T16:5:1 STATE 1
+10/10/26T16:5:2 Data msg: node: 6, message: 6, time: 1791648301, Vbat 347 v, Tx dur 427 ms, T: 1924 C, RH: 3421 %, status: 0x00
+10/10/26T16:5:2 STATE 2
+10/10/26T16:5:2 STATE 3
+10/10/26T16:5:2 Sent time request...
+10/10/26T16:5:3 node: 0, time: 1791648302
+10/10/26T16:5:3 Time from main node: 1791648302, Time from this node: 1791648303, Delta: -1
+10/10/26T16:5:2 STATE 4
+10/10/26T16:5:2 Radio silence
+10/10/26T16:5:2 SD/SPI shutdown
+10/10/26T17:5:1 SPI/SD up
+10/10/26T17:5:1 STATE 5
+10/10/26T17:5:1 t: 3599, o: 59
+10/10/26T17:5:1 STATE 1
+10/10/26T17:5:2 Data msg: node: 6, message: 7, time: 1791651901, Vbat 347 v, Tx dur 427 ms, T: 1920 C, RH: 3439 %, status: 0x00
+10/10/26T17:5:2 STATE 2
+10/10/26T17:5:2 Time request deferred: no room left in the slot.
+10/10/26T17:5:2 STATE 4
+10/10/26T17:5:2 Radio silence
+10/10/26T17:5:2 SD/SPI shutdown
+10/10/26T18:5:1 SPI/SD up
+10/10/26T18:5:1 STATE 5
+10/10/26T18:5:1 t: 3600, o: 59
+10/10/26T18:5:1 STATE 1
+10/10/26T18:5:2 Data msg: node: 6, message: 8, time: 1791655501, Vbat 347 v, Tx dur 427 ms, T: 1900 C, RH: 3441 %, status: 0x00
+10/10/26T18:5:2 STATE 2
+10/10/26T18:5:2 Time request deferred: no room left in the slot.
+10/10/26T18:5:2 STATE 4
+10/10/26T18:5:2 Radio silence
+10/10/26T18:5:2 SD/SPI shutdown
+10/10/26T19:5:1 SPI/SD up
+10/10/26T19:5:1 STATE 5
+10/10/26T19:5:1 t: 3600, o: 59
+10/10/26T19:5:1 STATE 1
+10/10/26T19:5:2 Data msg: node: 6, message: 9, time: 1791659101, Vbat 347 v, Tx dur 427 ms, T: 1915 C, RH: 3421 %, status: 0x00
+10/10/26T19:5:2 STATE 2
+10/10/26T19:5:2 STATE 3
+10/10/26T19:5:2 Sent time request...
+10/10/26T19:5:3 node: 0, time: 1791659103
+10/10/26T19:5:3 Time from main node: 1791659103, Time from this node: 1791659103, Delta: 0
+10/10/26T19:5:3 STATE 4
+10/10/26T19:5:3 Radio silence
+10/10/26T19:5:3 SD/SPI shutdown
+10/10/26T20:5:1 SPI/SD up
+10/10/26T20:5:1 STATE 5
+10/10/26T20:5:1 t: 3598, o: 59
+10/10/26T20:5:1 STATE 1
+10/10/26T20:5:2 Data msg: node: 6, message: 10, time: 1791662701, Vbat 347 v, Tx dur 427 ms, T: 1939 C, RH: 3390 %, status: 0x00
+10/10/26T20:5:2 STATE 2
+10/10/26T20:5:2 Time request deferred: no room left in the slot.
+10/10/26T20:5:2 STATE 4
+10/10/26T20:5:2 Radio silence
+10/10/26T20:5:2 SD/SPI shutdown
+10/10/26T21:5:1 SPI/SD up
+10/10/26T21:5:1 STATE 5
+10/10/26T21:5:1 t: 3600, o: 59
+10/10/26T21:5:1 STATE 1
+10/10/26T21:5:2 Data msg: node: 6, message: 11, time: 1791666301, Vbat 331 v, Tx dur 427 ms, T: 1912 C, RH: 3459 %, status: 0x00
+10/10/26T21:5:2 STATE 2
+10/10/26T21:5:2 Time request deferred: no room left in the slot.
+10/10/26T21:5:2 STATE 4
+10/10/26T21:5:2 Radio silence
+10/10/26T21:5:2 SD/SPI shutdown
+10/10/26T22:5:1 SPI/SD up
+10/10/26T22:5:1 STATE 5
+10/10/26T22:5:1 t: 3600, o: 59
+10/10/26T22:5:1 STATE 1
+10/10/26T22:5:2 Data msg: node: 6, message: 12, time: 1791669901, Vbat 346 v, Tx dur 427 ms, T: 1886 C, RH: 3543 %, status: 0x00
+10/10/26T22:5:2 STATE 2
+10/10/26T22:5:2 STATE 3
+10/12/26T10:58:28 Time from main node: 1791748848, Time from this node: 1791802708, Delta: -53860
+10/11/26T20:0:48 STATE 1
+10/11/26T20:0:49 Data msg: node: 6, message: 1, time: 1791748848, Vbat 447 v, Tx dur 0 ms, T: 1864 C, RH: 3465 %, status: 0x00
+10/11/26T20:0:49 STATE 2
+10/11/26T20:0:49 Time request deferred: no room left in the slot.
+10/11/26T20:0:49 STATE 4
+10/11/26T20:0:49 Radio silence
+10/11/26T20:0:49 SD/SPI shutdown
+10/11/26T20:5:1 SPI/SD up
+10/11/26T20:5:1 STATE 5
+10/11/26T20:5:1 t: 253, o: 59
+10/11/26T20:5:1 STATE 1
+10/11/26T20:5:2 Data msg: node: 6, message: 2, time: 1791749101, Vbat 351 v, Tx dur 428 ms, T: 1867 C, RH: 3468 %, status: 0x00
+10/11/26T20:5:2 STATE 2
+10/11/26T20:5:2 Time request deferred: no room left in the slot.
+10/11/26T20:5:2 STATE 4
+10/11/26T20:5:2 Radio silence
+10/11/26T20:5:2 SD/SPI shutdown
+10/11/26T21:5:1 SPI/SD up
+10/11/26T21:5:1 STATE 5
+10/11/26T21:5:1 t: 3600, o: 59
+10/11/26T21:5:1 STATE 1
+10/11/26T21:5:2 Data msg: node: 6, message: 3, time: 1791752701, Vbat 356 v, Tx dur 427 ms, T: 1871 C, RH: 3452 %, status: 0x00
+10/11/26T21:5:2 STATE 2
+10/11/26T21:5:2 STATE 3
+10/11/26T21:5:2 Sent time request...
+10/11/26T21:5:3 node: 0, time: 1791752703
+10/11/26T21:5:3 Time from main node: 1791752703, Time from this node: 1791752703, Delta: 0
+10/11/26T21:5:3 STATE 4
+10/11/26T21:5:3 Radio silence
+10/11/26T21:5:3 SD/SPI shutdown
+10/11/26T22:5:1 SPI/SD up
+10/11/26T22:5:1 STATE 5
+10/11/26T22:5:1 t: 3598, o: 59
+10/11/26T22:5:1 STATE 1
+10/11/26T22:5:2 Data msg: node: 6, message: 4, time: 1791756301, Vbat 356 v, Tx dur 427 ms, T: 1856 C, RH: 3480 %, status: 0x00
+10/11/26T22:5:2 STATE 2
+10/11/26T22:5:2 Time request deferred: no room left in the slot.
+10/11/26T22:5:2 STATE 4
+10/11/26T22:5:2 Radio silence
+10/11/26T22:5:2 SD/SPI shutdown
+10/11/26T23:5:1 SPI/SD up
+10/11/26T23:5:1 STATE 5
+10/11/26T23:5:1 t: 3600, o: 59
+10/11/26T23:5:1 STATE 1
+10/11/26T23:5:2 Data msg: node: 6, message: 5, time: 1791759901, Vbat 357 v, Tx dur 427 ms, T: 1866 C, RH: 3491 %, status: 0x00
+10/11/26T23:5:2 STATE 2
+10/11/26T23:5:2 Time request deferred: no room left in the slot.
+10/11/26T23:5:2 STATE 4
+10/11/26T23:5:2 Radio silence
+10/11/26T23:5:2 SD/SPI shutdown
+10/12/26T0:5:1 SPI/SD up
+10/12/26T0:5:1 STATE 5
+10/12/26T0:5:1 t: 3600, o: 59
+10/12/26T0:5:1 STATE 1
+10/12/26T0:5:2 Data msg: node: 6, message: 6, time: 1791763501, Vbat 355 v, Tx dur 427 ms, T: 1895 C, RH: 3497 %, status: 0x00
+10/12/26T0:5:2 STATE 2
+10/12/26T0:5:2 STATE 3
+10/12/26T0:5:2 Sent time request...
+10/12/26T0:5:3 node: 0, time: 1791763502
+10/12/26T0:5:3 Time from main node: 1791763502, Time from this node: 1791763503, Delta: -1
+10/12/26T0:5:2 STATE 4
+10/12/26T0:5:2 Radio silence
+10/12/26T0:5:2 SD/SPI shutdown
+10/12/26T1:5:1 SPI/SD up
+10/12/26T1:5:1 STATE 5
+10/12/26T1:5:1 t: 3599, o: 59
+10/12/26T1:5:1 STATE 1
+10/12/26T1:5:2 Data msg: node: 6, message: 7, time: 1791767101, Vbat 356 v, Tx dur 427 ms, T: 1871 C, RH: 3550 %, status: 0x00
+10/12/26T1:5:2 STATE 2
+10/12/26T1:5:2 Time request deferred: no room left in the slot.
+10/12/26T1:5:2 STATE 4
+10/12/26T1:5:2 Radio silence
+10/12/26T1:5:2 SD/SPI shutdown
+10/12/26T2:5:1 SPI/SD up
+10/12/26T2:5:1 STATE 5
+10/12/26T2:5:1 t: 3600, o: 59
+10/12/26T2:5:1 STATE 1
+10/12/26T2:5:2 Data msg: node: 6, message: 8, time: 1791770701, Vbat 356 v, Tx dur 427 ms, T: 1866 C, RH: 3553 %, status: 0x00
+10/12/26T2:5:2 STATE 2
+10/12/26T2:5:2 Time request deferred: no room left in the slot.
+10/12/26T2:5:2 STATE 4
+10/12/26T2:5:2 Radio silence
+10/12/26T2:5:2 SD/SPI shutdown
+10/12/26T3:5:1 SPI/SD up
+10/12/26T3:5:1 STATE 5
+10/12/26T3:5:1 t: 3600, o: 59
+10/12/26T3:5:1 STATE 1
+10/12/26T3:5:2 Data msg: node: 6, message: 9, time: 1791774301, Vbat 356 v, Tx dur 428 ms, T: 1857 C, RH: 3553 %, status: 0x00
+10/12/26T3:5:2 STATE 2
+10/12/26T3:5:2 STATE 3
+10/12/26T3:5:2 Sent time request...
+10/12/26T3:5:3 node: 0, time: 1791774303
+10/12/26T3:5:3 Time from main node: 1791774303, Time from this node: 1791774303, Delta: 0
+10/12/26T3:5:3 STATE 4
+10/12/26T3:5:3 Radio silence
+10/12/26T3:5:3 SD/SPI shutdown
+10/12/26T4:5:1 SPI/SD up
+10/12/26T4:5:1 STATE 5
+10/12/26T4:5:1 t: 3598, o: 59
+10/12/26T4:5:1 STATE 1
+10/12/26T4:5:2 Data msg: node: 6, message: 10, time: 1791777901, Vbat 356 v, Tx dur 427 ms, T: 1856 C, RH: 3541 %, status: 0x00
+10/12/26T4:5:2 STATE 2
+10/12/26T4:5:2 Time request deferred: no room left in the slot.
+10/12/26T4:5:2 STATE 4
+10/12/26T4:5:2 Radio silence
+10/12/26T4:5:2 SD/SPI shutdown
+10/12/26T5:5:1 SPI/SD up
+10/12/26T5:5:1 STATE 5
+10/12/26T5:5:1 t: 3600, o: 59
+10/12/26T5:5:1 STATE 1
+10/12/26T5:5:2 Data msg: node: 6, message: 11, time: 1791781501, Vbat 356 v, Tx dur 427 ms, T: 1856 C, RH: 3523 %, status: 0x00
+10/12/26T5:5:2 STATE 2
+10/12/26T5:5:2 Time request deferred: no room left in the slot.
+10/12/26T5:5:2 STATE 4
+10/12/26T5:5:2 Radio silence
+10/12/26T5:5:2 SD/SPI shutdown
+10/12/26T6:5:1 SPI/SD up
+10/12/26T6:5:1 STATE 5
+10/12/26T6:5:1 t: 3600, o: 59
+10/12/26T6:5:1 STATE 1
+10/12/26T6:5:2 Data msg: node: 6, message: 12, time: 1791785101, Vbat 356 v, Tx dur 427 ms, T: 1854 C, RH: 3512 %, status: 0x00
+10/12/26T6:5:2 STATE 2
+10/12/26T6:5:2 STATE 3
+10/12/26T6:5:2 Sent time request...
+10/12/26T6:5:3 node: 0, time: 1791785102
+10/12/26T6:5:3 Time from main node: 1791785102, Time from this node: 1791785103, Delta: -1
+10/12/26T6:5:2 STATE 4
+10/12/26T6:5:2 Radio silence
+10/12/26T6:5:2 SD/SPI shutdown
+10/12/26T7:5:1 SPI/SD up
+10/12/26T7:5:1 STATE 5
+10/12/26T7:5:1 t: 3599, o: 59
+10/12/26T7:5:1 STATE 1
+10/12/26T7:5:2 Data msg: node: 6, message: 13, time: 1791788701, Vbat 356 v, Tx dur 427 ms, T: 1854 C, RH: 3503 %, status: 0x00
+10/12/26T7:5:2 STATE 2
+10/12/26T7:5:2 Time request deferred: no room left in the slot.
+10/12/26T7:5:2 STATE 4
+10/12/26T7:5:2 Radio silence
+10/12/26T7:5:2 SD/SPI shutdown
+10/12/26T8:5:1 SPI/SD up
+10/12/26T8:5:1 STATE 5
+10/12/26T8:5:1 t: 3600, o: 59
+10/12/26T8:5:1 STATE 1
+10/12/26T8:5:2 Data msg: node: 6, message: 14, time: 1791792301, Vbat 356 v, Tx dur 427 ms, T: 1853 C, RH: 3488 %, status: 0x00
+10/12/26T8:5:2 STATE 2
+10/12/26T8:5:2 Time request deferred: no room left in the slot.
+10/12/26T8:5:2 STATE 4
+10/12/26T8:5:2 Radio silence
+10/12/26T8:5:2 SD/SPI shutdown
+10/12/26T9:5:1 SPI/SD up
+10/12/26T9:5:1 STATE 5
+10/12/26T9:5:1 t: 3600, o: 59
+10/12/26T9:5:1 STATE 1
+10/12/26T9:5:2 Data msg: node: 6, message: 15, time: 1791795901, Vbat 356 v, Tx dur 427 ms, T: 1856 C, RH: 3493 %, status: 0x00
+10/12/26T9:5:2 STATE 2
+10/12/26T9:5:2 STATE 3
+10/12/26T9:5:2 Sent time request...
+10/12/26T9:5:3 node: 0, time: 1791795902
+10/12/26T9:5:3 Time from main node: 1791795902, Time from this node: 1791795903, Delta: -1
+10/12/26T9:5:2 STATE 4
+10/12/26T9:5:2 Radio silence
+10/12/26T9:5:2 SD/SPI shutdown
+10/12/26T10:5:1 SPI/SD up
+10/12/26T10:5:1 STATE 5
+10/12/26T10:5:1 t: 3599, o: 59
+10/12/26T10:5:1 STATE 1
+10/12/26T10:5:2 Data msg: node: 6, message: 16, time: 1791799501, Vbat 356 v, Tx dur 428 ms, T: 1879 C, RH: 3480 %, status: 0x00
+10/12/26T10:5:2 STATE 2
+10/12/26T10:5:2 Time request deferred: no room left in the slot.
+10/12/26T10:5:2 STATE 4
+10/12/26T10:5:2 Radio silence
+10/12/26T10:5:2 SD/SPI shutdown
+10/12/26T11:5:1 SPI/SD up
+10/12/26T11:5:1 STATE 5
+10/12/26T11:5:1 t: 3600, o: 59
+10/12/26T11:5:1 STATE 1
+10/12/26T11:5:2 Data msg: node: 6, message: 17, time: 1791803101, Vbat 356 v, Tx dur 427 ms, T: 1906 C, RH: 3466 %, status: 0x00
+10/12/26T11:5:2 STATE 2
+10/12/26T11:5:2 Time request deferred: no room left in the slot.
+10/12/26T11:5:2 STATE 4
+10/12/26T11:5:2 Radio silence
+10/12/26T11:5:2 SD/SPI shutdown
+10/12/26T12:5:1 SPI/SD up
+10/12/26T12:5:1 STATE 5
+10/12/26T12:5:1 t: 3600, o: 59
+10/12/26T12:5:1 STATE 1
+10/12/26T12:5:2 Data msg: node: 6, message: 18, time: 1791806701, Vbat 356 v, Tx dur 427 ms, T: 1920 C, RH: 3458 %, status: 0x00
+10/12/26T12:5:2 STATE 2
+10/12/26T12:5:2 STATE 3
+10/12/26T12:5:2 Sent time request...
+10/12/26T12:5:3 node: 0, time: 1791806703
+10/12/26T12:5:3 Time from main node: 1791806703, Time from this node: 1791806703, Delta: 0
+10/12/26T12:5:3 STATE 4
+10/12/26T12:5:3 Radio silence
+10/12/26T12:5:3 SD/SPI shutdown
+10/12/26T13:5:1 SPI/SD up
+10/12/26T13:5:1 STATE 5
+10/12/26T13:5:1 t: 3598, o: 59
+10/12/26T13:5:1 STATE 1
+10/12/26T13:5:2 Data msg: node: 6, message: 19, time: 1791810301, Vbat 356 v, Tx dur 427 ms, T: 1932 C, RH: 3455 %, status: 0x00
+10/12/26T13:5:2 STATE 2
+10/12/26T13:5:2 Time request deferred: no room left in the slot.
+10/12/26T13:5:2 STATE 4
+10/12/26T13:5:2 Radio silence
+10/12/26T13:5:2 SD/SPI shutdown
+10/12/26T14:5:1 SPI/SD up
+10/12/26T14:5:1 STATE 5
+10/12/26T14:5:1 t: 3600, o: 59
+10/12/26T14:5:1 STATE 1
+10/12/26T14:5:2 Data msg: node: 6, message: 20, time: 1791813901, Vbat 356 v, Tx dur 427 ms, T: 1917 C, RH: 3464 %, status: 0x00
+10/12/26T14:5:2 STATE 2
+10/12/26T14:5:2 Time request deferred: no room left in the slot.
+10/12/26T14:5:2 STATE 4
+10/12/26T14:5:2 Radio silence
+10/12/26T14:5:2 SD/SPI shutdown
+10/12/26T15:5:1 SPI/SD up
+10/12/26T15:5:1 STATE 5
+10/12/26T15:5:1 t: 3600, o: 59
+10/12/26T15:5:1 STATE 1
+10/12/26T15:5:2 Data msg: node: 6, message: 21, time: 1791817501, Vbat 356 v, Tx dur 427 ms, T: 1914 C, RH: 3473 %, status: 0x00
+10/12/26T15:5:2 STATE 2
+10/12/26T15:5:2 STATE 3
+10/12/26T15:5:2 Sent time request...
+10/12/26T15:5:3 node: 0, time: 1791817502
+10/12/26T15:5:3 Time from main node: 1791817502, Time from this node: 1791817503, Delta: -1
+10/12/26T15:5:2 STATE 4
+10/12/26T15:5:2 Radio silence
+10/12/26T15:5:2 SD/SPI shutdown
+10/12/26T16:5:1 SPI/SD up
+10/12/26T16:5:1 STATE 5
+10/12/26T16:5:1 t: 3599, o: 59
+10/12/26T16:5:1 STATE 1
+10/12/26T16:5:2 Data msg: node: 6, message: 22, time: 1791821101, Vbat 356 v, Tx dur 427 ms, T: 1906 C, RH: 3480 %, status: 0x00
+10/12/26T16:5:2 STATE 2
+10/12/26T16:5:2 Time request deferred: no room left in the slot.
+10/12/26T16:5:2 STATE 4
+10/12/26T16:5:2 Radio silence
+10/12/26T16:5:2 SD/SPI shutdown
+10/12/26T17:5:1 SPI/SD up
+10/12/26T17:5:1 STATE 5
+10/12/26T17:5:1 t: 3600, o: 59
+10/12/26T17:5:1 STATE 1
+10/12/26T17:5:2 Data msg: node: 6, message: 23, time: 1791824701, Vbat 356 v, Tx dur 427 ms, T: 1894 C, RH: 3491 %, status: 0x00
+10/12/26T17:5:2 STATE 2
+10/12/26T17:5:2 Time request deferred: no room left in the slot.
+10/12/26T17:5:2 STATE 4
+10/12/26T17:5:2 Radio silence
+10/12/26T17:5:2 SD/SPI shutdown
+10/12/26T18:5:1 SPI/SD up
+10/12/26T18:5:1 STATE 5
+10/12/26T18:5:1 t: 3600, o: 59
+10/12/26T18:5:1 STATE 1
+10/12/26T18:5:2 Data msg: node: 6, message: 24, time: 1791828301, Vbat 356 v, Tx dur 427 ms, T: 1879 C, RH: 3497 %, status: 0x00
+10/12/26T18:5:2 STATE 2
+10/12/26T18:5:2 STATE 3
+10/12/26T18:5:2 Sent time request...
+10/12/26T18:5:3 node: 0, time: 1791828302
+10/12/26T18:5:3 Time from main node: 1791828302, Time from this node: 1791828303, Delta: -1
+10/12/26T18:5:2 STATE 4
+10/12/26T18:5:2 Radio silence
+10/12/26T18:5:2 SD/SPI shutdown
+10/12/26T19:5:1 SPI/SD up
+10/12/26T19:5:1 STATE 5
+10/12/26T19:5:1 t: 3599, o: 59
+10/12/26T19:5:1 STATE 1
+10/12/26T19:5:2 Data msg: node: 6, message: 25, time: 1791831901, Vbat 356 v, Tx dur 427 ms, T: 1860 C, RH: 3502 %, status: 0x00
+10/12/26T19:5:2 STATE 2
+10/12/26T19:5:2 Time request deferred: no room left in the slot.
+10/12/26T19:5:2 STATE 4
+10/12/26T19:5:2 Radio silence
+10/12/26T19:5:2 SD/SPI shutdown
+10/12/26T20:5:1 SPI/SD up
+10/12/26T20:5:1 STATE 5
+10/12/26T20:5:1 t: 3600, o: 59
+10/12/26T20:5:1 STATE 1
+10/12/26T20:5:2 Data msg: node: 6, message: 26, time: 1791835501, Vbat 356 v, Tx dur 427 ms, T: 1862 C, RH: 3512 %, status: 0x00
+10/12/26T20:5:2 STATE 2
+10/12/26T20:5:2 Time request deferred: no room left in the slot.
+10/12/26T20:5:2 STATE 4
+10/12/26T20:5:2 Radio silence
+10/12/26T20:5:2 SD/SPI shutdown
+10/12/26T21:5:1 SPI/SD up
+10/12/26T21:5:1 STATE 5
+10/12/26T21:5:1 t: 3600, o: 59
+10/12/26T21:5:1 STATE 1
+10/12/26T21:5:2 Data msg: node: 6, message: 27, time: 1791839101, Vbat 356 v, Tx dur 427 ms, T: 1893 C, RH: 3538 %, status: 0x00
+10/12/26T21:5:2 STATE 2
+10/12/26T21:5:2 STATE 3
+10/12/26T21:5:2 Sent time request...
+10/12/26T21:5:3 node: 0, time: 1791839103
+10/12/26T21:5:3 Time from main node: 1791839103, Time from this node: 1791839103, Delta: 0
+10/12/26T21:5:3 STATE 4
+10/12/26T21:5:3 Radio silence
+10/12/26T21:5:3 SD/SPI shutdown
+10/12/26T22:5:1 SPI/SD up
+10/12/26T22:5:1 STATE 5
+10/12/26T22:5:1 t: 3598, o: 59
+10/12/26T22:5:1 STATE 1
+10/12/26T22:5:2 Data msg: node: 6, message: 28, time: 1791842701, Vbat 356 v, Tx dur 428 ms, T: 1870 C, RH: 3565 %, status: 0x00
+10/12/26T22:5:2 STATE 2
+10/12/26T22:5:2 Time request deferred: no room left in the slot.
+10/12/26T22:5:2 STATE 4
+10/12/26T22:5:2 Radio silence
+10/12/26T22:5:2 SD/SPI shutdown
+10/12/26T23:5:1 SPI/SD up
+10/12/26T23:5:1 STATE 5
+10/12/26T23:5:1 t: 3600, o: 59
+10/12/26T23:5:1 STATE 1
+10/12/26T23:5:2 Data msg: node: 6, message: 29, time: 1791846301, Vbat 356 v, Tx dur 427 ms, T: 1862 C, RH: 3641 %, status: 0x00
+10/12/26T23:5:2 STATE 2
+10/12/26T23:5:2 Time request deferred: no room left in the slot.
+10/12/26T23:5:2 STATE 4
+10/12/26T23:5:2 Radio silence
+10/12/26T23:5:2 SD/SPI shutdown
+10/13/26T0:5:1 SPI/SD up
+10/13/26T0:5:1 STATE 5
+10/13/26T0:5:1 t: 3600, o: 59
+10/13/26T0:5:1 STATE 1
+10/13/26T0:5:2 Data msg: node: 6, message: 30, time: 1791849901, Vbat 356 v, Tx dur 427 ms, T: 1862 C, RH: 3656 %, status: 0x00
+10/13/26T0:5:2 STATE 2
+10/13/26T0:5:2 STATE 3
+10/13/26T0:5:2 Sent time request...
+10/13/26T0:5:3 node: 0, time: 1791849902
+10/13/26T0:5:3 Time from main node: 1791849902, Time from this node: 1791849903, Delta: -1
+10/13/26T0:5:2 STATE 4
+10/13/26T0:5:2 Radio silence
+10/13/26T0:5:2 SD/SPI shutdown
+10/13/26T1:5:1 SPI/SD up
+10/13/26T1:5:1 STATE 5
+10/13/26T1:5:1 t: 3599, o: 59
+10/13/26T1:5:1 STATE 1
+10/13/26T1:5:2 Data msg: node: 6, message: 31, time: 1791853501, Vbat 356 v, Tx dur 428 ms, T: 1860 C, RH: 3649 %, status: 0x00
+10/13/26T1:5:2 STATE 2
+10/13/26T1:5:2 Time request deferred: no room left in the slot.
+10/13/26T1:5:2 STATE 4
+10/13/26T1:5:2 Radio silence
+10/13/26T1:5:2 SD/SPI shutdown
+10/13/26T2:5:1 SPI/SD up
+10/13/26T2:5:1 STATE 5
+10/13/26T2:5:1 t: 3600, o: 59
+10/13/26T2:5:1 STATE 1
+10/13/26T2:5:2 Data msg: node: 6, message: 32, time: 1791857101, Vbat 356 v, Tx dur 427 ms, T: 1856 C, RH: 3625 %, status: 0x00
+10/13/26T2:5:2 STATE 2
+10/13/26T2:5:2 Time request deferred: no room left in the slot.
+10/13/26T2:5:2 STATE 4
+10/13/26T2:5:2 Radio silence
+10/13/26T2:5:2 SD/SPI shutdown
+10/13/26T3:5:1 SPI/SD up
+10/13/26T3:5:1 STATE 5
+10/13/26T3:5:1 t: 3600, o: 59
+10/13/26T3:5:1 STATE 1
+10/13/26T3:5:2 Data msg: node: 6, message: 33, time: 1791860701, Vbat 356 v, Tx dur 427 ms, T: 1851 C, RH: 3603 %, status: 0x00
+10/13/26T3:5:2 STATE 2
+10/13/26T3:5:2 STATE 3
+10/13/26T3:5:2 Sent time request...
+10/13/26T3:5:3 node: 0, time: 1791860703
+10/13/26T3:5:3 Time from main node: 1791860703, Time from this node: 1791860703, Delta: 0
+10/13/26T3:5:3 STATE 4
+10/13/26T3:5:3 Radio silence
+10/13/26T3:5:3 SD/SPI shutdown
+10/13/26T4:5:1 SPI/SD up
+10/13/26T4:5:1 STATE 5
+10/13/26T4:5:1 t: 3598, o: 59
+10/13/26T4:5:1 STATE 1
+10/13/26T4:5:2 Data msg: node: 6, message: 34, time: 1791864301, Vbat 357 v, Tx dur 427 ms, T: 1845 C, RH: 3573 %, status: 0x00
+10/13/26T4:5:2 STATE 2
+10/13/26T4:5:2 Time request deferred: no room left in the slot.
+10/13/26T4:5:2 STATE 4
+10/13/26T4:5:2 Radio silence
+10/13/26T4:5:2 SD/SPI shutdown
+10/13/26T5:5:1 SPI/SD up
+10/13/26T5:5:1 STATE 5
+10/13/26T5:5:1 t: 3600, o: 59
+10/13/26T5:5:1 STATE 1
+10/13/26T5:5:2 Data msg: node: 6, message: 35, time: 1791867901, Vbat 357 v, Tx dur 427 ms, T: 1845 C, RH: 3543 %, status: 0x00
+10/13/26T5:5:2 STATE 2
+10/13/26T5:5:2 Time request deferred: no room left in the slot.
+10/13/26T5:5:2 STATE 4
+10/13/26T5:5:2 Radio silence
+10/13/26T5:5:2 SD/SPI shutdown
+10/13/26T6:5:1 SPI/SD up
+10/13/26T6:5:1 STATE 5
+10/13/26T6:5:1 t: 3600, o: 59
+10/13/26T6:5:1 STATE 1
+10/13/26T6:5:2 Data msg: node: 6, message: 36, time: 1791871501, Vbat 357 v, Tx dur 427 ms, T: 1845 C, RH: 3524 %, status: 0x00
+10/13/26T6:5:2 STATE 2
+10/13/26T6:5:2 STATE 3
+10/13/26T6:5:2 Sent time request...
+10/13/26T6:5:3 node: 0, time: 1791871502
+10/13/26T6:5:3 Time from main node: 1791871502, Time from this node: 1791871503, Delta: -1
+10/13/26T6:5:2 STATE 4
+10/13/26T6:5:2 Radio silence
+10/13/26T6:5:2 SD/SPI shutdown
+10/13/26T7:5:1 SPI/SD up
+10/13/26T7:5:1 STATE 5
+10/13/26T7:5:1 t: 3599, o: 59
+10/13/26T7:5:1 STATE 1
+10/13/26T7:5:2 Data msg: node: 6, message: 37, time: 1791875101, Vbat 357 v, Tx dur 427 ms, T: 1842 C, RH: 3506 %, status: 0x00
+10/13/26T7:5:2 STATE 2
+10/13/26T7:5:2 Time request deferred: no room left in the slot.
+10/13/26T7:5:2 STATE 4
+10/13/26T7:5:2 Radio silence
+10/13/26T7:5:2 SD/SPI shutdown
+10/13/26T8:5:1 SPI/SD up
+10/13/26T8:5:1 STATE 5
+10/13/26T8:5:1 t: 3600, o: 59
+10/13/26T8:5:1 STATE 1
+10/13/26T8:5:2 Data msg: node: 6, message: 38, time: 1791878701, Vbat 357 v, Tx dur 427 ms, T: 1843 C, RH: 3487 %, status: 0x00
+10/13/26T8:5:2 STATE 2
+10/13/26T8:5:2 Time request deferred: no room left in the slot.
+10/13/26T8:5:2 STATE 4
+10/13/26T8:5:2 Radio silence
+10/13/26T8:5:2 SD/SPI shutdown
+10/13/26T9:5:1 SPI/SD up
+10/13/26T9:5:1 STATE 5
+10/13/26T9:5:1 t: 3600, o: 59
+10/13/26T9:5:1 STATE 1
+10/13/26T9:5:2 Data msg: node: 6, message: 39, time: 1791882301, Vbat 357 v, Tx dur 428 ms, T: 1849 C, RH: 3484 %, status: 0x00
+10/13/26T9:5:2 STATE 2
+10/13/26T9:5:2 STATE 3
+10/13/26T9:5:2 Sent time request...
+10/13/26T9:5:3 node: 0, time: 1791882302
+10/13/26T9:5:3 Time from main node: 1791882302, Time from this node: 1791882303, Delta: -1
+10/13/26T9:5:2 STATE 4
+10/13/26T9:5:2 Radio silence
+10/13/26T9:5:2 SD/SPI shutdown
+10/13/26T10:5:1 SPI/SD up
+10/13/26T10:5:1 STATE 5
+10/13/26T10:5:1 t: 3599, o: 59
+10/13/26T10:5:1 STATE 1
+10/13/26T10:5:2 Data msg: node: 6, message: 40, time: 1791885901, Vbat 357 v, Tx dur 427 ms, T: 1860 C, RH: 3475 %, status: 0x00
+10/13/26T10:5:2 STATE 2
+10/13/26T10:5:2 Time request deferred: no room left in the slot.
+10/13/26T10:5:2 STATE 4
+10/13/26T10:5:2 Radio silence
+10/13/26T10:5:2 SD/SPI shutdown
+10/13/26T11:5:1 SPI/SD up
+10/13/26T11:5:1 STATE 5
+10/13/26T11:5:1 t: 3600, o: 59
+10/13/26T11:5:1 STATE 1
+10/13/26T11:5:2 Data msg: node: 6, message: 41, time: 1791889501, Vbat 357 v, Tx dur 427 ms, T: 1924 C, RH: 3457 %, status: 0x00
+10/13/26T11:5:2 STATE 2
+10/13/26T11:5:2 Time request deferred: no room left in the slot.
+10/13/26T11:5:2 STATE 4
+10/13/26T11:5:2 Radio silence
+10/13/26T11:5:2 SD/SPI shutdown
+10/13/26T12:5:1 SPI/SD up
+10/13/26T12:5:1 STATE 5
+10/13/26T12:5:1 t: 3600, o: 59
+10/13/26T12:5:1 STATE 1
+10/13/26T12:5:2 Data msg: node: 6, message: 42, time: 1791893101, Vbat 357 v, Tx dur 427 ms, T: 1986 C, RH: 3436 %, status: 0x00
+10/13/26T12:5:2 STATE 2
+10/13/26T12:5:2 STATE 3
+10/13/26T12:5:2 Sent time request...
+10/13/26T12:5:3 node: 0, time: 1791893103
+10/13/26T12:5:3 Time from main node: 1791893103, Time from this node: 1791893103, Delta: 0
+10/13/26T12:5:3 STATE 4
+10/13/26T12:5:3 Radio silence
+10/13/26T12:5:3 SD/SPI shutdown
+10/13/26T13:5:1 SPI/SD up
+10/13/26T13:5:1 STATE 5
+10/13/26T13:5:1 t: 3598, o: 59
+10/13/26T13:5:1 STATE 1
+10/13/26T13:5:2 Data msg: node: 6, message: 43, time: 1791896701, Vbat 357 v, Tx dur 428 ms, T: 2023 C, RH: 3424 %, status: 0x00
+10/13/26T13:5:2 STATE 2
+10/13/26T13:5:2 Time request deferred: no room left in the slot.
+10/13/26T13:5:2 STATE 4
+10/13/26T13:5:2 Radio silence
+10/13/26T13:5:2 SD/SPI shutdown
+10/13/26T14:5:1 SPI/SD up
+10/13/26T14:5:1 STATE 5
+10/13/26T14:5:1 t: 3600, o: 59
+10/13/26T14:5:1 STATE 1
+10/13/26T14:5:2 Data msg: node: 6, message: 44, time: 1791900301, Vbat 357 v, Tx dur 427 ms, T: 2006 C, RH: 3440 %, status: 0x00
+10/13/26T14:5:2 STATE 2
+10/13/26T14:5:2 Time request deferred: no room left in the slot.
+10/13/26T14:5:2 STATE 4
+10/13/26T14:5:2 Radio silence
+10/13/26T14:5:2 SD/SPI shutdown
+10/13/26T15:5:1 SPI/SD up
+10/13/26T15:5:1 STATE 5
+10/13/26T15:5:1 t: 3600, o: 59
+10/13/26T15:5:1 STATE 1
+10/13/26T15:5:2 Data msg: node: 6, message: 45, time: 1791903901, Vbat 357 v, Tx dur 428 ms, T: 1993 C, RH: 3475 %, status: 0x00
+10/13/26T15:5:2 STATE 2
+10/13/26T15:5:2 STATE 3
+10/13/26T15:5:2 Sent time request...
+10/13/26T15:5:3 node: 0, time: 1791903902
+10/13/26T15:5:3 Time from main node: 1791903902, Time from this node: 1791903903, Delta: -1
+10/13/26T15:5:2 STATE 4
+10/13/26T15:5:2 Radio silence
+10/13/26T15:5:2 SD/SPI shutdown
+10/13/26T16:5:1 SPI/SD up
+10/13/26T16:5:1 STATE 5
+10/13/26T16:5:1 t: 3599, o: 59
+10/13/26T16:5:1 STATE 1
+10/13/26T16:5:2 Data msg: node: 6, message: 46, time: 1791907501, Vbat 357 v, Tx dur 427 ms, T: 1981 C, RH: 3500 %, status: 0x00
+10/13/26T16:5:2 STATE 2
+10/13/26T16:5:2 Time request deferred: no room left in the slot.
+10/13/26T16:5:2 STATE 4
+10/13/26T16:5:2 Radio silence
+10/13/26T16:5:2 SD/SPI shutdown
+10/13/26T17:5:1 SPI/SD up
+10/13/26T17:5:1 STATE 5
+10/13/26T17:5:1 t: 3600, o: 59
+10/13/26T17:5:1 STATE 1
+10/13/26T17:5:2 Data msg: node: 6, message: 47, time: 1791911101, Vbat 357 v, Tx dur 428 ms, T: 1974 C, RH: 3511 %, status: 0x00
+10/13/26T17:5:2 STATE 2
+10/13/26T17:5:2 Time request deferred: no room left in the slot.
+10/13/26T17:5:2 STATE 4
+10/13/26T17:5:2 Radio silence
+10/13/26T17:5:2 SD/SPI shutdown
+10/13/26T18:5:1 SPI/SD up
+10/13/26T18:5:1 STATE 5
+10/13/26T18:5:1 t: 3600, o: 59
+10/13/26T18:5:1 STATE 1
+10/13/26T18:5:2 Data msg: node: 6, message: 48, time: 1791914701, Vbat 357 v, Tx dur 427 ms, T: 1959 C, RH: 3516 %, status: 0x00
+10/13/26T18:5:2 STATE 2
+10/13/26T18:5:2 STATE 3
+10/13/26T18:5:2 Sent time request...
+10/13/26T18:5:3 node: 0, time: 1791914702
+10/13/26T18:5:3 Time from main node: 1791914702, Time from this node: 1791914703, Delta: -1
+10/13/26T18:5:2 STATE 4
+10/13/26T18:5:2 Radio silence
+10/13/26T18:5:2 SD/SPI shutdown
+10/13/26T19:5:1 SPI/SD up
+10/13/26T19:5:1 STATE 5
+10/13/26T19:5:1 t: 3599, o: 59
+10/13/26T19:5:1 STATE 1
+10/13/26T19:5:2 Data msg: node: 6, message: 49, time: 1791918301, Vbat 357 v, Tx dur 427 ms, T: 1943 C, RH: 3515 %, status: 0x00
+10/13/26T19:5:2 STATE 2
+10/13/26T19:5:2 Time request deferred: no room left in the slot.
+10/13/26T19:5:2 STATE 4
+10/13/26T19:5:2 Radio silence
+10/13/26T19:5:2 SD/SPI shutdown
+10/13/26T20:5:1 SPI/SD up
+10/13/26T20:5:1 STATE 5
+10/13/26T20:5:1 t: 3600, o: 59
+10/13/26T20:5:1 STATE 1
+10/13/26T20:5:2 Data msg: node: 6, message: 50, time: 1791921901, Vbat 357 v, Tx dur 427 ms, T: 1924 C, RH: 3553 %, status: 0x00
+10/13/26T20:5:2 STATE 2
+10/13/26T20:5:2 Time request deferred: no room left in the slot.
+10/13/26T20:5:2 STATE 4
+10/13/26T20:5:2 Radio silence
+10/13/26T20:5:2 SD/SPI shutdown
+10/13/26T21:5:1 SPI/SD up
+10/13/26T21:5:1 STATE 5
+10/13/26T21:5:1 t: 3600, o: 59
+10/13/26T21:5:1 STATE 1
+10/13/26T21:5:2 Data msg: node: 6, message: 51, time: 1791925501, Vbat 357 v, Tx dur 427 ms, T: 1900 C, RH: 3559 %, status: 0x00
+10/13/26T21:5:2 STATE 2
+10/13/26T21:5:2 STATE 3
+10/13/26T21:5:2 Sent time request...
+10/13/26T21:5:3 node: 0, time: 1791925503
+10/13/26T21:5:3 Time from main node: 1791925503, Time from this node: 1791925503, Delta: 0
+10/13/26T21:5:3 STATE 4
+10/13/26T21:5:3 Radio silence
+10/13/26T21:5:3 SD/SPI shutdown
+10/13/26T22:5:1 SPI/SD up
+10/13/26T22:5:1 STATE 5
+10/13/26T22:5:1 t: 3598, o: 59
+10/13/26T22:5:1 STATE 1
+10/13/26T22:5:2 Data msg: node: 6, message: 52, time: 1791929101, Vbat 357 v, Tx dur 427 ms, T: 1873 C, RH: 3559 %, status: 0x00
+10/13/26T22:5:2 STATE 2
+10/13/26T22:5:2 Time request deferred: no room left in the slot.
+10/13/26T22:5:2 STATE 4
+10/13/26T22:5:2 Radio silence
+10/13/26T22:5:2 SD/SPI shutdown
+10/13/26T23:5:1 SPI/SD up
+10/13/26T23:5:1 STATE 5
+10/13/26T23:5:1 t: 3600, o: 59
+10/13/26T23:5:1 STATE 1
+10/13/26T23:5:2 Data msg: node: 6, message: 53, time: 1791932701, Vbat 357 v, Tx dur 428 ms, T: 1852 C, RH: 3550 %, status: 0x00
+10/13/26T23:5:2 STATE 2
+10/13/26T23:5:2 Time request deferred: no room left in the slot.
+10/13/26T23:5:2 STATE 4
+10/13/26T23:5:2 Radio silence
+10/13/26T23:5:2 SD/SPI shutdown
+10/14/26T0:5:1 SPI/SD up
+10/14/26T0:5:1 STATE 5
+10/14/26T0:5:1 t: 3600, o: 59
+10/14/26T0:5:1 STATE 1
+10/14/26T0:5:2 Data msg: node: 6, message: 54, time: 1791936301, Vbat 357 v, Tx dur 427 ms, T: 1867 C, RH: 3537 %, status: 0x00
+10/14/26T0:5:2 STATE 2
+10/14/26T0:5:2 STATE 3
+10/14/26T0:5:2 Sent time request...
+10/14/26T0:5:3 node: 0, time: 1791936302
+10/14/26T0:5:3 Time from main node: 1791936302, Time from this node: 1791936303, Delta: -1
+10/14/26T0:5:2 STATE 4
+10/14/26T0:5:2 Radio silence
+10/14/26T0:5:2 SD/SPI shutdown
+10/14/26T1:5:1 SPI/SD up
+10/14/26T1:5:1 STATE 5
+10/14/26T1:5:1 t: 3599, o: 59
+10/14/26T1:5:1 STATE 1
+10/14/26T1:5:2 Data msg: node: 6, message: 55, time: 1791939901, Vbat 357 v, Tx dur 427 ms, T: 1848 C, RH: 3584 %, status: 0x00
+10/14/26T1:5:2 STATE 2
+10/14/26T1:5:2 Time request deferred: no room left in the slot.
+10/14/26T1:5:2 STATE 4
+10/14/26T1:5:2 Radio silence
+10/14/26T1:5:2 SD/SPI shutdown
+10/14/26T2:5:1 SPI/SD up
+10/14/26T2:5:1 STATE 5
+10/14/26T2:5:1 t: 3600, o: 59
+10/14/26T2:5:1 STATE 1
+10/14/26T2:5:2 Data msg: node: 6, message: 56, time: 1791943501, Vbat 357 v, Tx dur 427 ms, T: 1845 C, RH: 3568 %, status: 0x00
+10/14/26T2:5:2 STATE 2
+10/14/26T2:5:2 Time request deferred: no room left in the slot.
+10/14/26T2:5:2 STATE 4
+10/14/26T2:5:2 Radio silence
+10/14/26T2:5:2 SD/SPI shutdown
+10/14/26T3:5:1 SPI/SD up
+10/14/26T3:5:1 STATE 5
+10/14/26T3:5:1 t: 3600, o: 59
+10/14/26T3:5:1 STATE 1
+10/14/26T3:5:2 Data msg: node: 6, message: 57, time: 1791947101, Vbat 357 v, Tx dur 427 ms, T: 1842 C, RH: 3550 %, status: 0x00
+10/14/26T3:5:2 STATE 2
+10/14/26T3:5:2 STATE 3
+10/14/26T3:5:2 Sent time request...
+10/14/26T3:5:3 node: 0, time: 1791947102
+10/14/26T3:5:3 Time from main node: 1791947102, Time from this node: 1791947103, Delta: -1
+10/14/26T3:5:2 STATE 4
+10/14/26T3:5:2 Radio silence
+10/14/26T3:5:2 SD/SPI shutdown
+10/14/26T4:5:1 SPI/SD up
+10/14/26T4:5:1 STATE 5
+10/14/26T4:5:1 t: 3599, o: 59
+10/14/26T4:5:1 STATE 1
+10/14/26T4:5:2 Data msg: node: 6, message: 58, time: 1791950701, Vbat 357 v, Tx dur 427 ms, T: 1842 C, RH: 3524 %, status: 0x00
+10/14/26T4:5:2 STATE 2
+10/14/26T4:5:2 Time request deferred: no room left in the slot.
+10/14/26T4:5:2 STATE 4
+10/14/26T4:5:2 Radio silence
+10/14/26T4:5:2 SD/SPI shutdown
+10/14/26T5:5:1 SPI/SD up
+10/14/26T5:5:1 STATE 5
+10/14/26T5:5:1 t: 3600, o: 59
+10/14/26T5:5:1 STATE 1
+10/14/26T5:5:2 Data msg: node: 6, message: 59, time: 1791954301, Vbat 357 v, Tx dur 427 ms, T: 1841 C, RH: 3500 %, status: 0x00
+10/14/26T5:5:2 STATE 2
+10/14/26T5:5:2 Time request deferred: no room left in the slot.
+10/14/26T5:5:2 STATE 4
+10/14/26T5:5:2 Radio silence
+10/14/26T5:5:2 SD/SPI shutdown
+10/14/26T6:5:1 SPI/SD up
+10/14/26T6:5:1 STATE 5
+10/14/26T6:5:1 t: 3600, o: 59
+10/14/26T6:5:1 STATE 1
+10/14/26T6:5:2 Data msg: node: 6, message: 60, time: 1791957901, Vbat 357 v, Tx dur 427 ms, T: 1842 C, RH: 3480 %, status: 0x00
+10/14/26T6:5:2 STATE 2
+10/14/26T6:5:2 STATE 3
+10/14/26T6:5:2 Sent time request...
+10/14/26T6:5:3 node: 0, time: 1791957903
+10/14/26T6:5:3 Time from main node: 1791957903, Time from this node: 1791957903, Delta: 0
+10/14/26T6:5:3 STATE 4
+10/14/26T6:5:3 Radio silence
+10/14/26T6:5:3 SD/SPI shutdown
+10/14/26T7:5:1 SPI/SD up
+10/14/26T7:5:1 STATE 5
+10/14/26T7:5:1 t: 3598, o: 59
+10/14/26T7:5:1 STATE 1
+10/14/26T7:5:2 Data msg: node: 6, message: 61, time: 1791961501, Vbat 357 v, Tx dur 427 ms, T: 1843 C, RH: 3452 %, status: 0x00
+10/14/26T7:5:2 STATE 2
+10/14/26T7:5:2 Time request deferred: no room left in the slot.
+10/14/26T7:5:2 STATE 4
+10/14/26T7:5:2 Radio silence
+10/14/26T7:5:2 SD/SPI shutdown
+10/14/26T8:5:1 SPI/SD up
+10/14/26T8:5:1 STATE 5
+10/14/26T8:5:1 t: 3600, o: 59
+10/14/26T8:5:1 STATE 1
+10/14/26T8:5:2 Data msg: node: 6, message: 62, time: 1791965101, Vbat 357 v, Tx dur 427 ms, T: 1841 C, RH: 3430 %, status: 0x00
+10/14/26T8:5:2 STATE 2
+10/14/26T8:5:2 Time request deferred: no room left in the slot.
+10/14/26T8:5:2 STATE 4
+10/14/26T8:5:2 Radio silence
+10/14/26T8:5:2 SD/SPI shutdown
+10/14/26T9:5:1 SPI/SD up
+10/14/26T9:5:1 STATE 5
+10/14/26T9:5:1 t: 3600, o: 59
+10/14/26T9:5:1 STATE 1
+10/14/26T9:5:2 Data msg: node: 6, message: 63, time: 1791968701, Vbat 357 v, Tx dur 427 ms, T: 1845 C, RH: 3424 %, status: 0x00
+10/14/26T9:5:2 STATE 2
+10/14/26T9:5:2 STATE 3
+10/14/26T9:5:2 Sent time request...
+10/14/26T9:5:3 node: 0, time: 1791968702
+10/14/26T9:5:3 Time from main node: 1791968702, Time from this node: 1791968703, Delta: -1
+10/14/26T9:5:2 STATE 4
+10/14/26T9:5:2 Radio silence
+10/14/26T9:5:2 SD/SPI shutdown
+10/14/26T10:5:1 SPI/SD up
+10/14/26T10:5:1 STATE 5
+10/14/26T10:5:1 t: 3599, o: 59
+10/14/26T10:5:1 STATE 1
+10/14/26T10:5:2 Data msg: node: 6, message: 64, time: 1791972301, Vbat 357 v, Tx dur 428 ms, T: 1874 C, RH: 3409 %, status: 0x00
+10/14/26T10:5:2 STATE 2
+10/14/26T10:5:2 Time request deferred: no room left in the slot.
+10/14/26T10:5:2 STATE 4
+10/14/26T10:5:2 Radio silence
+10/14/26T10:5:2 SD/SPI shutdown
+10/14/26T11:5:1 SPI/SD up
+10/14/26T11:5:1 STATE 5
+10/14/26T11:5:1 t: 3600, o: 59
+10/14/26T11:5:1 STATE 1
+10/14/26T11:5:2 Data msg: node: 6, message: 65, time: 1791975901, Vbat 357 v, Tx dur 427 ms, T: 1954 C, RH: 3382 %, status: 0x00
+10/14/26T11:5:2 STATE 2
+10/14/26T11:5:2 Time request deferred: no room left in the slot.
+10/14/26T11:5:2 STATE 4
+10/14/26T11:5:2 Radio silence
+10/14/26T11:5:2 SD/SPI shutdown
+10/14/26T12:5:1 SPI/SD up
+10/14/26T12:5:1 STATE 5
+10/14/26T12:5:1 t: 3600, o: 59
+10/14/26T12:5:1 STATE 1
+10/14/26T12:5:2 Data msg: node: 6, message: 66, time: 1791979501, Vbat 357 v, Tx dur 427 ms, T: 2012 C, RH: 3366 %, status: 0x00
+10/14/26T12:5:2 STATE 2
+10/14/26T12:5:2 STATE 3
+10/14/26T12:5:2 Sent time request...
+10/14/26T12:5:3 node: 0, time: 1791979503
+10/14/26T12:5:3 Time from main node: 1791979503, Time from this node: 1791979503, Delta: 0
+10/14/26T12:5:3 STATE 4
+10/14/26T12:5:3 Radio silence
+10/14/26T12:5:3 SD/SPI shutdown
+10/14/26T13:5:1 SPI/SD up
+10/14/26T13:5:1 STATE 5
+10/14/26T13:5:1 t: 3598, o: 59
+10/14/26T13:5:1 STATE 1
+10/14/26T13:5:2 Data msg: node: 6, message: 67, time: 1791983101, Vbat 357 v, Tx dur 427 ms, T: 2039 C, RH: 3318 %, status: 0x00
+10/14/26T13:5:2 STATE 2
+10/14/26T13:5:2 Time request deferred: no room left in the slot.
+10/14/26T13:5:2 STATE 4
+10/14/26T13:5:2 Radio silence
+10/14/26T13:5:2 SD/SPI shutdown
+10/14/26T14:5:1 SPI/SD up
+10/14/26T14:5:1 STATE 5
+10/14/26T14:5:1 t: 3600, o: 59
+10/14/26T14:5:1 STATE 1
+10/14/26T14:5:2 Data msg: node: 6, message: 68, time: 1791986701, Vbat 357 v, Tx dur 427 ms, T: 2021 C, RH: 3334 %, status: 0x00
+10/14/26T14:5:2 STATE 2
+10/14/26T14:5:2 Time request deferred: no room left in the slot.
+10/14/26T14:5:2 STATE 4
+10/14/26T14:5:2 Radio silence
+10/14/26T14:5:2 SD/SPI shutdown
+10/14/26T15:5:1 SPI/SD up
+10/14/26T15:5:1 STATE 5
+10/14/26T15:5:1 t: 3600, o: 59
+10/14/26T15:5:1 STATE 1
+10/14/26T15:5:2 Data msg: node: 6, message: 69, time: 1791990301, Vbat 357 v, Tx dur 427 ms, T: 2009 C, RH: 3357 %, status: 0x00
+10/14/26T15:5:2 STATE 2
+10/14/26T15:5:2 STATE 3
+10/14/26T15:5:2 Sent time request...
+10/14/26T15:5:3 node: 0, time: 1791990302
+10/14/26T15:5:3 Time from main node: 1791990302, Time from this node: 1791990303, Delta: -1
+10/14/26T15:5:2 STATE 4
+10/14/26T15:5:2 Radio silence
+10/14/26T15:5:2 SD/SPI shutdown
+10/14/26T16:5:1 SPI/SD up
+10/14/26T16:5:1 STATE 5
+10/14/26T16:5:1 t: 3599, o: 59
+10/14/26T16:5:1 STATE 1
+10/14/26T16:5:2 Data msg: node: 6, message: 70, time: 1791993901, Vbat 357 v, Tx dur 427 ms, T: 2003 C, RH: 3359 %, status: 0x00
+10/14/26T16:5:2 STATE 2
+10/14/26T16:5:2 Time request deferred: no room left in the slot.
+10/14/26T16:5:2 STATE 4
+10/14/26T16:5:2 Radio silence
+10/14/26T16:5:2 SD/SPI shutdown
+10/14/26T17:5:1 SPI/SD up
+10/14/26T17:5:1 STATE 5
+10/14/26T17:5:1 t: 3600, o: 59
+10/14/26T17:5:1 STATE 1
+10/14/26T17:5:2 Data msg: node: 6, message: 71, time: 1791997501, Vbat 357 v, Tx dur 427 ms, T: 1999 C, RH: 3363 %, status: 0x00
+10/14/26T17:5:2 STATE 2
+10/14/26T17:5:2 Time request deferred: no room left in the slot.
+10/14/26T17:5:2 STATE 4
+10/14/26T17:5:2 Radio silence
+10/14/26T17:5:2 SD/SPI shutdown
+10/14/26T18:5:1 SPI/SD up
+10/14/26T18:5:1 STATE 5
+10/14/26T18:5:1 t: 3600, o: 59
+10/14/26T18:5:1 STATE 1
+10/14/26T18:5:2 Data msg: node: 6, message: 72, time: 1792001101, Vbat 357 v, Tx dur 427 ms, T: 1987 C, RH: 3365 %, status: 0x00
+10/14/26T18:5:2 STATE 2
+10/14/26T18:5:2 STATE 3
+10/14/26T18:5:2 Sent time request...
+10/14/26T18:5:3 node: 0, time: 1792001102
+10/14/26T18:5:3 Time from main node: 1792001102, Time from this node: 1792001103, Delta: -1
+10/14/26T18:5:2 STATE 4
+10/14/26T18:5:2 Radio silence
+10/14/26T18:5:2 SD/SPI shutdown
+10/14/26T19:5:1 SPI/SD up
+10/14/26T19:5:1 STATE 5
+10/14/26T19:5:1 t: 3599, o: 59
+10/14/26T19:5:1 STATE 1
+10/14/26T19:5:2 Data msg: node: 6, message: 73, time: 1792004701, Vbat 357 v, Tx dur 427 ms, T: 1971 C, RH: 3364 %, status: 0x00
+10/14/26T19:5:2 STATE 2
+10/14/26T19:5:2 Time request deferred: no room left in the slot.
+10/14/26T19:5:2 STATE 4
+10/14/26T19:5:2 Radio silence
+10/14/26T19:5:2 SD/SPI shutdown
+10/14/26T20:5:1 SPI/SD up
+10/14/26T20:5:1 STATE 5
+10/14/26T20:5:1 t: 3600, o: 59
+10/14/26T20:5:1 STATE 1
+10/14/26T20:5:2 Data msg: node: 6, message: 74, time: 1792008301, Vbat 357 v, Tx dur 427 ms, T: 1954 C, RH: 3366 %, status: 0x00
+10/14/26T20:5:2 STATE 2
+10/14/26T20:5:2 Time request deferred: no room left in the slot.
+10/14/26T20:5:2 STATE 4
+10/14/26T20:5:2 Radio silence
+10/14/26T20:5:2 SD/SPI shutdown
+10/14/26T21:5:1 SPI/SD up
+10/14/26T21:5:1 STATE 5
+10/14/26T21:5:1 t: 3600, o: 59
+10/14/26T21:5:1 STATE 1
+10/14/26T21:5:2 Data msg: node: 6, message: 75, time: 1792011901, Vbat 357 v, Tx dur 427 ms, T: 1939 C, RH: 3358 %, status: 0x00
+10/14/26T21:5:2 STATE 2
+10/14/26T21:5:2 STATE 3
+10/14/26T21:5:2 Sent time request...
+10/14/26T21:5:3 node: 0, time: 1792011903
+10/14/26T21:5:3 Time from main node: 1792011903, Time from this node: 1792011903, Delta: 0
+10/14/26T21:5:3 STATE 4
+10/14/26T21:5:3 Radio silence
+10/14/26T21:5:3 SD/SPI shutdown
+10/14/26T22:5:1 SPI/SD up
+10/14/26T22:5:1 STATE 5
+10/14/26T22:5:1 t: 3598, o: 59
+10/14/26T22:5:1 STATE 1
+10/14/26T22:5:2 Data msg: node: 6, message: 76, time: 1792015501, Vbat 357 v, Tx dur 428 ms, T: 1912 C, RH: 3384 %, status: 0x00
+10/14/26T22:5:2 STATE 2
+10/14/26T22:5:2 Time request deferred: no room left in the slot.
+10/14/26T22:5:2 STATE 4
+10/14/26T22:5:2 Radio silence
+10/14/26T22:5:2 SD/SPI shutdown
+10/14/26T23:5:1 SPI/SD up
+10/14/26T23:5:1 STATE 5
+10/14/26T23:5:1 t: 3600, o: 59
+10/14/26T23:5:1 STATE 1
+10/14/26T23:5:2 Data msg: node: 6, message: 77, time: 1792019101, Vbat 357 v, Tx dur 427 ms, T: 1902 C, RH: 3406 %, status: 0x00
+10/14/26T23:5:2 STATE 2
+10/14/26T23:5:2 Time request deferred: no room left in the slot.
+10/14/26T23:5:2 STATE 4
+10/14/26T23:5:2 Radio silence
+10/14/26T23:5:2 SD/SPI shutdown
+10/15/26T0:5:1 SPI/SD up
+10/15/26T0:5:1 STATE 5
+10/15/26T0:5:1 t: 3600, o: 59
+10/15/26T0:5:1 STATE 1
+10/15/26T0:5:2 Data msg: node: 6, message: 78, time: 1792022701, Vbat 357 v, Tx dur 427 ms, T: 1874 C, RH: 3456 %, status: 0x00
+10/15/26T0:5:2 STATE 2
+10/15/26T0:5:2 STATE 3
+10/15/26T0:5:2 Sent time request...
+10/15/26T0:5:3 node: 0, time: 1792022702
+10/15/26T0:5:3 Time from main node: 1792022702, Time from this node: 1792022703, Delta: -1
+10/15/26T0:5:2 STATE 4
+10/15/26T0:5:2 Radio silence
+10/15/26T0:5:2 SD/SPI shutdown
+10/15/26T1:5:1 SPI/SD up
+10/15/26T1:5:1 STATE 5
+10/15/26T1:5:1 t: 3599, o: 59
+10/15/26T1:5:1 STATE 1
+10/15/26T1:5:2 Data msg: node: 6, message: 79, time: 1792026301, Vbat 357 v, Tx dur 428 ms, T: 1836 C, RH: 3446 %, status: 0x00
+10/15/26T1:5:2 STATE 2
+10/15/26T1:5:2 Time request deferred: no room left in the slot.
+10/15/26T1:5:2 STATE 4
+10/15/26T1:5:2 Radio silence
+10/15/26T1:5:2 SD/SPI shutdown
+10/15/26T2:5:1 SPI/SD up
+10/15/26T2:5:1 STATE 5
+10/15/26T2:5:1 t: 3600, o: 59
+10/15/26T2:5:1 STATE 1
+10/15/26T2:5:2 Data msg: node: 6, message: 80, time: 1792029901, Vbat 357 v, Tx dur 427 ms, T: 1804 C, RH: 3428 %, status: 0x00
+10/15/26T2:5:2 STATE 2
+10/15/26T2:5:2 Time request deferred: no room left in the slot.
+10/15/26T2:5:2 STATE 4
+10/15/26T2:5:2 Radio silence
+10/15/26T2:5:2 SD/SPI shutdown
+10/15/26T3:5:1 SPI/SD up
+10/15/26T3:5:1 STATE 5
+10/15/26T3:5:1 t: 3600, o: 59
+10/15/26T3:5:1 STATE 1
+10/15/26T3:5:2 Data msg: node: 6, message: 81, time: 1792033501, Vbat 357 v, Tx dur 427 ms, T: 1770 C, RH: 3391 %, status: 0x00
+10/15/26T3:5:2 STATE 2
+10/15/26T3:5:2 STATE 3
+10/15/26T3:5:2 Sent time request...
+10/15/26T3:5:3 node: 0, time: 1792033502
+10/15/26T3:5:3 Time from main node: 1792033502, Time from this node: 1792033503, Delta: -1
+10/15/26T3:5:2 STATE 4
+10/15/26T3:5:2 Radio silence
+10/15/26T3:5:2 SD/SPI shutdown
+10/15/26T4:5:1 SPI/SD up
+10/15/26T4:5:1 STATE 5
+10/15/26T4:5:1 t: 3599, o: 59
+10/15/26T4:5:1 STATE 1
+10/15/26T4:5:2 Data msg: node: 6, message: 82, time: 1792037101, Vbat 357 v, Tx dur 428 ms, T: 1741 C, RH: 3368 %, status: 0x00
+10/15/26T4:5:2 STATE 2
+10/15/26T4:5:2 Time request deferred: no room left in the slot.
+10/15/26T4:5:2 STATE 4
+10/15/26T4:5:2 Radio silence
+10/15/26T4:5:2 SD/SPI shutdown
+10/15/26T5:5:1 SPI/SD up
+10/15/26T5:5:1 STATE 5
+10/15/26T5:5:1 t: 3600, o: 59
+10/15/26T5:5:1 STATE 1
+10/15/26T5:5:2 Data msg: node: 6, message: 83, time: 1792040701, Vbat 357 v, Tx dur 427 ms, T: 1712 C, RH: 3321 %, status: 0x00
+10/15/26T5:5:2 STATE 2
+10/15/26T5:5:2 Time request deferred: no room left in the slot.
+10/15/26T5:5:2 STATE 4
+10/15/26T5:5:2 Radio silence
+10/15/26T5:5:2 SD/SPI shutdown
+10/15/26T6:5:1 SPI/SD up
+10/15/26T6:5:1 STATE 5
+10/15/26T6:5:1 t: 3600, o: 59
+10/15/26T6:5:1 STATE 1
+10/15/26T6:5:2 Data msg: node: 6, message: 84, time: 1792044301, Vbat 357 v, Tx dur 428 ms, T: 1681 C, RH: 3300 %, status: 0x00
+10/15/26T6:5:2 STATE 2
+10/15/26T6:5:2 STATE 3
+10/15/26T6:5:2 Sent time request...
+10/15/26T6:5:3 node: 0, time: 1792044303
+10/15/26T6:5:3 Time from main node: 1792044303, Time from this node: 1792044303, Delta: 0
+10/15/26T6:5:3 STATE 4
+10/15/26T6:5:3 Radio silence
+10/15/26T6:5:3 SD/SPI shutdown
+10/15/26T7:5:1 SPI/SD up
+10/15/26T7:5:1 STATE 5
+10/15/26T7:5:1 t: 3598, o: 59
+10/15/26T7:5:1 STATE 1
+10/15/26T7:5:2 Data msg: node: 6, message: 85, time: 1792047901, Vbat 357 v, Tx dur 427 ms, T: 1654 C, RH: 3266 %, status: 0x00
+10/15/26T7:5:2 STATE 2
+10/15/26T7:5:2 Time request deferred: no room left in the slot.
+10/15/26T7:5:2 STATE 4
+10/15/26T7:5:2 Radio silence
+10/15/26T7:5:2 SD/SPI shutdown
+10/15/26T8:5:1 SPI/SD up
+10/15/26T8:5:1 STATE 5
+10/15/26T8:5:1 t: 3600, o: 59
+10/15/26T8:5:1 STATE 1
+10/15/26T8:5:2 Data msg: node: 6, message: 86, time: 1792051501, Vbat 357 v, Tx dur 427 ms, T: 1624 C, RH: 3250 %, status: 0x00
+10/15/26T8:5:2 STATE 2
+10/15/26T8:5:2 Time request deferred: no room left in the slot.
+10/15/26T8:5:2 STATE 4
+10/15/26T8:5:2 Radio silence
+10/15/26T8:5:2 SD/SPI shutdown
+10/15/26T9:5:1 SPI/SD up
+10/15/26T9:5:1 STATE 5
+10/15/26T9:5:1 t: 3600, o: 59
+10/15/26T9:5:1 STATE 1
+10/15/26T9:5:2 Data msg: node: 6, message: 87, time: 1792055101, Vbat 356 v, Tx dur 428 ms, T: 1601 C, RH: 3228 %, status: 0x00
+10/15/26T9:5:2 STATE 2
+10/15/26T9:5:2 STATE 3
+10/15/26T9:5:2 Sent time request...
+10/15/26T9:5:3 node: 0, time: 1792055102
+10/15/26T9:5:3 Time from main node: 1792055102, Time from this node: 1792055103, Delta: -1
+10/15/26T9:5:2 STATE 4
+10/15/26T9:5:2 Radio silence
+10/15/26T9:5:2 SD/SPI shutdown
+10/15/26T10:5:1 SPI/SD up
+10/15/26T10:5:1 STATE 5
+10/15/26T10:5:1 t: 3599, o: 59
+10/15/26T10:5:1 STATE 1
+10/15/26T10:5:2 Data msg: node: 6, message: 88, time: 1792058701, Vbat 356 v, Tx dur 428 ms, T: 1612 C, RH: 3250 %, status: 0x00
+10/15/26T10:5:2 STATE 2
+10/15/26T10:5:2 Time request deferred: no room left in the slot.
+10/15/26T10:5:2 STATE 4
+10/15/26T10:5:2 Radio silence
+10/15/26T10:5:2 SD/SPI shutdown
+10/15/26T11:5:1 SPI/SD up
+10/15/26T11:5:1 STATE 5
+10/15/26T11:5:1 t: 3600, o: 59
+10/15/26T11:5:1 STATE 1
+10/15/26T11:5:2 Data msg: node: 6, message: 89, time: 1792062301, Vbat 357 v, Tx dur 427 ms, T: 1659 C, RH: 3264 %, status: 0x00
+10/15/26T11:5:2 STATE 2
+10/15/26T11:5:2 Time request deferred: no room left in the slot.
+10/15/26T11:5:2 STATE 4
+10/15/26T11:5:2 Radio silence
+10/15/26T11:5:2 SD/SPI shutdown
+10/15/26T12:5:1 SPI/SD up
+10/15/26T12:5:1 STATE 5
+10/15/26T12:5:1 t: 3600, o: 59
+10/15/26T12:5:1 STATE 1
+10/15/26T12:5:2 Data msg: node: 6, message: 90, time: 1792065901, Vbat 357 v, Tx dur 427 ms, T: 1724 C, RH: 3263 %, status: 0x00
+10/15/26T12:5:2 STATE 2
+10/15/26T12:5:2 STATE 3
+10/15/26T12:5:2 Sent time request...
+10/15/26T12:5:3 node: 0, time: 1792065903
+10/15/26T12:5:3 Time from main node: 1792065903, Time from this node: 1792065903, Delta: 0
+10/15/26T12:5:3 STATE 4
+10/15/26T12:5:3 Radio silence
+10/15/26T12:5:3 SD/SPI shutdown
+10/15/26T13:5:1 SPI/SD up
+10/15/26T13:5:1 STATE 5
+10/15/26T13:5:1 t: 3598, o: 59
+10/15/26T13:5:1 STATE 1
+10/15/26T13:5:2 Data msg: node: 6, message: 91, time: 1792069501, Vbat 357 v, Tx dur 428 ms, T: 1767 C, RH: 3266 %, status: 0x00
+10/15/26T13:5:2 STATE 2
+10/15/26T13:5:2 Time request deferred: no room left in the slot.
+10/15/26T13:5:2 STATE 4
+10/15/26T13:5:2 Radio silence
+10/15/26T13:5:2 SD/SPI shutdown
+10/15/26T14:5:1 SPI/SD up
+10/15/26T14:5:1 STATE 5
+10/15/26T14:5:1 t: 3600, o: 59
+10/15/26T14:5:1 STATE 1
+10/15/26T14:5:2 Data msg: node: 6, message: 92, time: 1792073101, Vbat 357 v, Tx dur 427 ms, T: 1767 C, RH: 3283 %, status: 0x00
+10/15/26T14:5:2 STATE 2
+10/15/26T14:5:2 Time request deferred: no room left in the slot.
+10/15/26T14:5:2 STATE 4
+10/15/26T14:5:2 Radio silence
+10/15/26T14:5:2 SD/SPI shutdown
+10/15/26T15:5:1 SPI/SD up
+10/15/26T15:5:1 STATE 5
+10/15/26T15:5:1 t: 3600, o: 59
+10/15/26T15:5:1 STATE 1
+10/15/26T15:5:2 Data msg: node: 6, message: 93, time: 1792076701, Vbat 357 v, Tx dur 427 ms, T: 1775 C, RH: 3290 %, status: 0x00
+10/15/26T15:5:2 STATE 2
+10/15/26T15:5:2 STATE 3
+10/15/26T15:5:2 Sent time request...
+10/15/26T15:5:3 node: 0, time: 1792076702
+10/15/26T15:5:3 Time from main node: 1792076702, Time from this node: 1792076703, Delta: -1
+10/15/26T15:5:2 STATE 4
+10/15/26T15:5:2 Radio silence
+10/15/26T15:5:2 SD/SPI shutdown
+10/15/26T16:5:1 SPI/SD up
+10/15/26T16:5:1 STATE 5
+10/15/26T16:5:1 t: 3599, o: 59
+10/15/26T16:5:1 STATE 1
+10/15/26T16:5:2 Data msg: node: 6, message: 94, time: 1792080301, Vbat 357 v, Tx dur 428 ms, T: 1833 C, RH: 3278 %, status: 0x00
+10/15/26T16:5:2 STATE 2
+10/15/26T16:5:2 Time request deferred: no room left in the slot.
+10/15/26T16:5:2 STATE 4
+10/15/26T16:5:2 Radio silence
+10/15/26T16:5:2 SD/SPI shutdown
+10/15/26T17:5:1 SPI/SD up
+10/15/26T17:5:1 STATE 5
+10/15/26T17:5:1 t: 3600, o: 59
+10/15/26T17:5:1 STATE 1
+10/15/26T17:5:2 Data msg: node: 6, message: 95, time: 1792083901, Vbat 357 v, Tx dur 427 ms, T: 1825 C, RH: 3289 %, status: 0x00
+10/15/26T17:5:2 STATE 2
+10/15/26T17:5:2 Time request deferred: no room left in the slot.
+10/15/26T17:5:2 STATE 4
+10/15/26T17:5:2 Radio silence
+10/15/26T17:5:2 SD/SPI shutdown
+10/15/26T18:5:1 SPI/SD up
+10/15/26T18:5:1 STATE 5
+10/15/26T18:5:1 t: 3600, o: 59
+10/15/26T18:5:1 STATE 1
+10/15/26T18:5:2 Data msg: node: 6, message: 96, time: 1792087501, Vbat 357 v, Tx dur 428 ms, T: 1804 C, RH: 3284 %, status: 0x00
+10/15/26T18:5:2 STATE 2
+10/15/26T18:5:2 STATE 3
+10/15/26T18:5:2 Sent time request...
+10/15/26T18:5:3 node: 0, time: 1792087502
+10/15/26T18:5:3 Time from main node: 1792087502, Time from this node: 1792087503, Delta: -1
+10/15/26T18:5:2 STATE 4
+10/15/26T18:5:2 Radio silence
+10/15/26T18:5:2 SD/SPI shutdown
+10/15/26T19:5:1 SPI/SD up
+10/15/26T19:5:1 STATE 5
+10/15/26T19:5:1 t: 3599, o: 59
+10/15/26T19:5:1 STATE 1
+10/15/26T19:5:2 Data msg: node: 6, message: 97, time: 1792091101, Vbat 357 v, Tx dur 428 ms, T: 1790 C, RH: 3293 %, status: 0x00
+10/15/26T19:5:2 STATE 2
+10/15/26T19:5:2 Time request deferred: no room left in the slot.
+10/15/26T19:5:2 STATE 4
+10/15/26T19:5:2 Radio silence
+10/15/26T19:5:2 SD/SPI shutdown
+10/15/26T20:5:1 SPI/SD up
+10/15/26T20:5:1 STATE 5
+10/15/26T20:5:1 t: 3600, o: 59
+10/15/26T20:5:1 STATE 1
+10/15/26T20:5:2 Data msg: node: 6, message: 98, time: 1792094701, Vbat 357 v, Tx dur 427 ms, T: 1782 C, RH: 3274 %, status: 0x00
+10/15/26T20:5:2 STATE 2
+10/15/26T20:5:2 Time request deferred: no room left in the slot.
+10/15/26T20:5:2 STATE 4
+10/15/26T20:5:2 Radio silence
+10/15/26T20:5:2 SD/SPI shutdown
+10/15/26T21:5:1 SPI/SD up
+10/15/26T21:5:1 STATE 5
+10/15/26T21:5:1 t: 3600, o: 59
+10/15/26T21:5:1 STATE 1
+10/15/26T21:5:2 Data msg: node: 6, message: 99, time: 1792098301, Vbat 357 v, Tx dur 427 ms, T: 1766 C, RH: 3266 %, status: 0x00
+10/15/26T21:5:2 STATE 2
+10/15/26T21:5:2 STATE 3
+10/15/26T21:5:2 Sent time request...
+10/15/26T21:5:3 node: 0, time: 1792098303
+10/15/26T21:5:3 Time from main node: 1792098303, Time from this node: 1792098303, Delta: 0
+10/15/26T21:5:3 STATE 4
+10/15/26T21:5:3 Radio silence
+10/15/26T21:5:3 SD/SPI shutdown
+10/15/26T22:5:1 SPI/SD up
+10/15/26T22:5:1 STATE 5
+10/15/26T22:5:1 t: 3598, o: 59
+10/15/26T22:5:1 STATE 1
+10/15/26T22:5:2 Data msg: node: 6, message: 100, time: 1792101901, Vbat 357 v, Tx dur 428 ms, T: 1749 C, RH: 3278 %, status: 0x00
+10/15/26T22:5:2 STATE 2
+10/15/26T22:5:2 Time request deferred: no room left in the slot.
+10/15/26T22:5:2 STATE 4
+10/15/26T22:5:2 Radio silence
+10/15/26T22:5:2 SD/SPI shutdown
+10/15/26T23:5:1 SPI/SD up
+10/15/26T23:5:1 STATE 5
+10/15/26T23:5:1 t: 3600, o: 59
+10/15/26T23:5:1 STATE 1
+10/15/26T23:5:2 Data msg: node: 6, message: 101, time: 1792105501, Vbat 357 v, Tx dur 427 ms, T: 1723 C, RH: 3270 %, status: 0x00
+10/15/26T23:5:2 STATE 2
+10/15/26T23:5:2 Time request deferred: no room left in the slot.
+10/15/26T23:5:2 STATE 4
+10/15/26T23:5:2 Radio silence
+10/15/26T23:5:2 SD/SPI shutdown
+10/16/26T0:5:1 SPI/SD up
+10/16/26T0:5:1 STATE 5
+10/16/26T0:5:1 t: 3600, o: 59
+10/16/26T0:5:1 STATE 1
+10/16/26T0:5:2 Data msg: node: 6, message: 102, time: 1792109101, Vbat 357 v, Tx dur 428 ms, T: 1702 C, RH: 3282 %, status: 0x00
+10/16/26T0:5:2 STATE 2
+10/16/26T0:5:2 STATE 3
+10/16/26T0:5:2 Sent time request...
+10/16/26T0:5:3 node: 0, time: 1792109102
+10/16/26T0:5:3 Time from main node: 1792109102, Time from this node: 1792109103, Delta: -1
+10/16/26T0:5:2 STATE 4
+10/16/26T0:5:2 Radio silence
+10/16/26T0:5:2 SD/SPI shutdown
+10/16/26T1:5:1 SPI/SD up
+10/16/26T1:5:1 STATE 5
+10/16/26T1:5:1 t: 3599, o: 59
+10/16/26T1:5:1 STATE 1
+10/16/26T1:5:2 Data msg: node: 6, message: 103, time: 1792112701, Vbat 357 v, Tx dur 427 ms, T: 1682 C, RH: 3293 %, status: 0x00
+10/16/26T1:5:2 STATE 2
+10/16/26T1:5:2 Time request deferred: no room left in the slot.
+10/16/26T1:5:2 STATE 4
+10/16/26T1:5:2 Radio silence
+10/16/26T1:5:2 SD/SPI shutdown
+10/16/26T2:5:1 SPI/SD up
+10/16/26T2:5:1 STATE 5
+10/16/26T2:5:1 t: 3600, o: 59
+10/16/26T2:5:1 STATE 1
+10/16/26T2:5:2 Data msg: node: 6, message: 104, time: 1792116301, Vbat 357 v, Tx dur 427 ms, T: 1662 C, RH: 3325 %, status: 0x00
+10/16/26T2:5:2 STATE 2
+10/16/26T2:5:2 Time request deferred: no room left in the slot.
+10/16/26T2:5:2 STATE 4
+10/16/26T2:5:2 Radio silence
+10/16/26T2:5:2 SD/SPI shutdown
+10/16/26T3:5:1 SPI/SD up
+10/16/26T3:5:1 STATE 5
+10/16/26T3:5:1 t: 3600, o: 59
+10/16/26T3:5:1 STATE 1
+10/16/26T3:5:2 Data msg: node: 6, message: 105, time: 1792119901, Vbat 356 v, Tx dur 427 ms, T: 1632 C, RH: 3329 %, status: 0x00
+10/16/26T3:5:2 STATE 2
+10/16/26T3:5:2 STATE 3
+10/16/26T3:5:2 Sent time request...
+10/16/26T3:5:3 node: 0, time: 1792119903
+10/16/26T3:5:3 Time from main node: 1792119903, Time from this node: 1792119903, Delta: 0
+10/16/26T3:5:3 STATE 4
+10/16/26T3:5:3 Radio silence
+10/16/26T3:5:3 SD/SPI shutdown
+10/16/26T4:5:1 SPI/SD up
+10/16/26T4:5:1 STATE 5
+10/16/26T4:5:1 t: 3598, o: 59
+10/16/26T4:5:1 STATE 1
+10/16/26T4:5:2 Data msg: node: 6, message: 106, time: 1792123501, Vbat 356 v, Tx dur 428 ms, T: 1607 C, RH: 3338 %, status: 0x00
+10/16/26T4:5:2 STATE 2
+10/16/26T4:5:2 Time request deferred: no room left in the slot.
+10/16/26T4:5:2 STATE 4
+10/16/26T4:5:2 Radio silence
+10/16/26T4:5:2 SD/SPI shutdown
+10/16/26T5:5:1 SPI/SD up
+10/16/26T5:5:1 STATE 5
+10/16/26T5:5:1 t: 3600, o: 59
+10/16/26T5:5:1 STATE 1
+10/16/26T5:5:2 Data msg: node: 6, message: 107, time: 1792127101, Vbat 356 v, Tx dur 428 ms, T: 1585 C, RH: 3331 %, status: 0x00
+10/16/26T5:5:2 STATE 2
+10/16/26T5:5:2 Time request deferred: no room left in the slot.
+10/16/26T5:5:2 STATE 4
+10/16/26T5:5:2 Radio silence
+10/16/26T5:5:2 SD/SPI shutdown
+10/16/26T6:5:1 SPI/SD up
+10/16/26T6:5:1 STATE 5
+10/16/26T6:5:1 t: 3600, o: 59
+10/16/26T6:5:1 STATE 1
+10/16/26T6:5:2 Data msg: node: 6, message: 108, time: 1792130701, Vbat 356 v, Tx dur 428 ms, T: 1560 C, RH: 3341 %, status: 0x00
+10/16/26T6:5:2 STATE 2
+10/16/26T6:5:2 STATE 3
+10/16/26T6:5:2 Sent time request...
+10/16/26T6:5:3 node: 0, time: 1792130702
+10/16/26T6:5:3 Time from main node: 1792130702, Time from this node: 1792130703, Delta: -1
+10/16/26T6:5:2 STATE 4
+10/16/26T6:5:2 Radio silence
+10/16/26T6:5:2 SD/SPI shutdown
+10/16/26T7:5:1 SPI/SD up
+10/16/26T7:5:1 STATE 5
+10/16/26T7:5:1 t: 3599, o: 59
+10/16/26T7:5:1 STATE 1
+10/16/26T7:5:2 Data msg: node: 6, message: 109, time: 1792134301, Vbat 356 v, Tx dur 427 ms, T: 1536 C, RH: 3363 %, status: 0x00
+10/16/26T7:5:2 STATE 2
+10/16/26T7:5:2 Time request deferred: no room left in the slot.
+10/16/26T7:5:2 STATE 4
+10/16/26T7:5:2 Radio silence
+10/16/26T7:5:2 SD/SPI shutdown
+10/16/26T8:5:1 SPI/SD up
+10/16/26T8:5:1 STATE 5
+10/16/26T8:5:1 t: 3600, o: 59
+10/16/26T8:5:1 STATE 1
+10/16/26T8:5:2 Data msg: node: 6, message: 110, time: 1792137901, Vbat 356 v, Tx dur 428 ms, T: 1517 C, RH: 3359 %, status: 0x00
+10/16/26T8:5:2 STATE 2
+10/16/26T8:5:2 Time request deferred: no room left in the slot.
+10/16/26T8:5:2 STATE 4
+10/16/26T8:5:2 Radio silence
+10/16/26T8:5:2 SD/SPI shutdown
+10/16/26T9:5:1 SPI/SD up
+10/16/26T9:5:1 STATE 5
+10/16/26T9:5:1 t: 3600, o: 59
+10/16/26T9:5:1 STATE 1
+10/16/26T9:5:2 Data msg: node: 6, message: 111, time: 1792141501, Vbat 356 v, Tx dur 427 ms, T: 1488 C, RH: 3373 %, status: 0x00
+10/16/26T9:5:2 STATE 2
+10/16/26T9:5:2 STATE 3
+10/16/26T9:5:2 Sent time request...
+10/16/26T9:5:3 node: 0, time: 1792141502
+10/16/26T9:5:3 Time from main node: 1792141502, Time from this node: 1792141503, Delta: -1
+10/16/26T9:5:2 STATE 4
+10/16/26T9:5:2 Radio silence
+10/16/26T9:5:2 SD/SPI shutdown
+10/16/26T10:5:1 SPI/SD up
+10/16/26T10:5:1 STATE 5
+10/16/26T10:5:1 t: 3599, o: 59
+10/16/26T10:5:1 STATE 1
+10/16/26T10:5:2 Data msg: node: 6, message: 112, time: 1792145101, Vbat 357 v, Tx dur 427 ms, T: 1632 C, RH: 3393 %, status: 0x00
+10/16/26T10:5:2 STATE 2
+10/16/26T10:5:2 Time request deferred: no room left in the slot.
+10/16/26T10:5:2 STATE 4
+10/16/26T10:5:2 Radio silence
+10/16/26T10:5:2 SD/SPI shutdown
+10/16/26T11:5:1 SPI/SD up
+10/16/26T11:5:1 STATE 5
+10/16/26T11:5:1 t: 3600, o: 59
+10/16/26T11:5:1 STATE 1
+10/16/26T11:5:2 Data msg: node: 6, message: 113, time: 1792148701, Vbat 357 v, Tx dur 428 ms, T: 1706 C, RH: 3405 %, status: 0x00
+10/16/26T11:5:2 STATE 2
+10/16/26T11:5:2 Time request deferred: no room left in the slot.
+10/16/26T11:5:2 STATE 4
+10/16/26T11:5:2 Radio silence
+10/16/26T11:5:2 SD/SPI shutdown
+10/16/26T12:5:1 SPI/SD up
+10/16/26T12:5:1 STATE 5
+10/16/26T12:5:1 t: 3600, o: 59
+10/16/26T12:5:1 STATE 1
+10/16/26T12:5:2 Data msg: node: 6, message: 114, time: 1792152301, Vbat 357 v, Tx dur 427 ms, T: 1712 C, RH: 3406 %, status: 0x00
+10/16/26T12:5:2 STATE 2
+10/16/26T12:5:2 STATE 3
+10/16/26T12:5:2 Sent time request...
+10/16/26T12:5:3 node: 0, time: 1792152303
+10/16/26T12:5:3 Time from main node: 1792152303, Time from this node: 1792152303, Delta: 0
+10/16/26T12:5:3 STATE 4
+10/16/26T12:5:3 Radio silence
+10/16/26T12:5:3 SD/SPI shutdown
+10/16/26T13:5:1 SPI/SD up
+10/16/26T13:5:1 STATE 5
+10/16/26T13:5:1 t: 3598, o: 59
+10/16/26T13:5:1 STATE 1
+10/16/26T13:5:2 Data msg: node: 6, message: 115, time: 1792155901, Vbat 357 v, Tx dur 428 ms, T: 1796 C, RH: 3379 %, status: 0x00
+10/16/26T13:5:2 STATE 2
+10/16/26T13:5:2 Time request deferred: no room left in the slot.
+10/16/26T13:5:2 STATE 4
+10/16/26T13:5:2 Radio silence
+10/16/26T13:5:2 SD/SPI shutdown
+10/16/26T14:5:1 SPI/SD up
+10/16/26T14:5:1 STATE 5
+10/16/26T14:5:1 t: 3600, o: 59
+10/16/26T14:5:1 STATE 1
+10/16/26T14:5:2 Data msg: node: 6, message: 116, time: 1792159501, Vbat 357 v, Tx dur 428 ms, T: 1806 C, RH: 3395 %, status: 0x00
+10/16/26T14:5:2 STATE 2
+10/16/26T14:5:2 Time request deferred: no room left in the slot.
+10/16/26T14:5:2 STATE 4
+10/16/26T14:5:2 Radio silence
+10/16/26T14:5:2 SD/SPI shutdown
+10/16/26T15:5:1 SPI/SD up
+10/16/26T15:5:1 STATE 5
+10/16/26T15:5:1 t: 3600, o: 59
+10/16/26T15:5:1 STATE 1
+10/16/26T15:5:2 Data msg: node: 6, message: 117, time: 1792163101, Vbat 357 v, Tx dur 428 ms, T: 1794 C, RH: 3416 %, status: 0x00
+10/16/26T15:5:2 STATE 2
+10/16/26T15:5:2 STATE 3
+10/16/26T15:5:2 Sent time request...
+10/16/26T15:5:3 node: 0, time: 1792163102
+10/16/26T15:5:3 Time from main node: 1792163102, Time from this node: 1792163103, Delta: -1
+10/16/26T15:5:2 STATE 4
+10/16/26T15:5:2 Radio silence
+10/16/26T15:5:2 SD/SPI shutdown
+10/16/26T16:5:1 SPI/SD up
+10/16/26T16:5:1 STATE 5
+10/16/26T16:5:1 t: 3599, o: 59
+10/16/26T16:5:1 STATE 1
+10/16/26T16:5:2 Data msg: node: 6, message: 118, time: 1792166701, Vbat 357 v, Tx dur 427 ms, T: 1787 C, RH: 3443 %, status: 0x00
+10/16/26T16:5:2 STATE 2
+10/16/26T16:5:2 Time request deferred: no room left in the slot.
+10/16/26T16:5:2 STATE 4
+10/16/26T16:5:2 Radio silence
+10/16/26T16:5:2 SD/SPI shutdown
