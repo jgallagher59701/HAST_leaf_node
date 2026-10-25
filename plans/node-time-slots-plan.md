@@ -320,6 +320,31 @@ left unchanged: the staggered v1 is run as a measurement campaign (drift per syn
 exchange duration) whose results feed a later NFR-006 revision and an ADR.
 BUG-001 is a prerequisite because timing without ACKs would understate slot use.
 
+**2026-09-28 22:17** — "Implement phase one of the plan"
+Added `include/slot_schedule.h` / `src/slot_schedule.cc` (Arduino-free, C++11 because
+the SAMD core builds with gnu++11), the `SLOT_SCHEDULE`/`GROUPED_START_S` flags, a
+compile-time address/slot check in `leaf_node.cc`, and `test/native_slot_schedule/`.
+Verified: `pio run -e zeroUSB` succeeds; the `static_assert` rejects addresses 0, 16 and
+260 and accepts 15; `pio check` reports only two "unused function" notices, which go
+away when phase 2 wires the functions in; `pio test -e native` passes all 9 cases
+(9/9), once the Xcode license was accepted and the test suite directory was renamed
+to `test_native_slot_schedule` (this PlatformIO version's `list_test_names()`
+requires suite directories to start with `test_`, or it silently falls back to
+building the whole `test/` tree as one suite named `*` and finds nothing under
+`test_build_src`'s src filter - not documented anywhere in this repo before now).
+While implementing, I found the `NODE_ADDRESS` / SD-pin coupling and added it as
+open question 7.
+
+**2026-09-28 22:45** — (continued) "xcode is now installed"
+User accepted the Xcode license, unblocking `pio test -e native`. Running it
+surfaced a second issue: the test suite directory must start with `test_`
+(`platformio/test/helpers.py:list_test_names`), not just match `test_filter`;
+`native_slot_schedule` was silently never being discovered. Renamed the directory
+to `test_native_slot_schedule`, updated `test_filter` to `test_native_*` in
+`platformio.ini`, and reran - all 9 test cases pass. Re-ran the board build and
+`pio check` afterward to confirm the `platformio.ini` fix didn't disturb them.
+Phase 1 is now fully implemented and verified.
+
 **2026-09-30 (session start)** — "Continue with the plan, phase 2. For question 7, about nodes below 3, we can ignore that - those nodes are no longer used. It does limit this code a bit, but it should be simple enough to shift the set of 15 node ids to other values later. For this version of the code, skipping node 1 and 2 is not a problem."
 Resolved open question 7: since the hand-built units (`NODE_ADDRESS` 1-2) are
 retired, the `NODE_ADDRESS < 3` -> `SD_PWR` pin-11 coupling doesn't need its own
@@ -356,28 +381,3 @@ commit was preceded by a clean `pio run -e zeroUSB` / `pio check -e zeroUSB` /
 `pio test -e native` (11/11); the one new warning found along the way (a
 `%u`/signed-`NODE_ADDRESS` format mismatch in the new slot-use log line) was
 fixed with an explicit cast, not suppressed.
-
-**2026-09-28 22:17** — "Implement phase one of the plan"
-Added `include/slot_schedule.h` / `src/slot_schedule.cc` (Arduino-free, C++11 because
-the SAMD core builds with gnu++11), the `SLOT_SCHEDULE`/`GROUPED_START_S` flags, a
-compile-time address/slot check in `leaf_node.cc`, and `test/native_slot_schedule/`.
-Verified: `pio run -e zeroUSB` succeeds; the `static_assert` rejects addresses 0, 16 and
-260 and accepts 15; `pio check` reports only two "unused function" notices, which go
-away when phase 2 wires the functions in; `pio test -e native` passes all 9 cases
-(9/9), once the Xcode license was accepted and the test suite directory was renamed
-to `test_native_slot_schedule` (this PlatformIO version's `list_test_names()`
-requires suite directories to start with `test_`, or it silently falls back to
-building the whole `test/` tree as one suite named `*` and finds nothing under
-`test_build_src`'s src filter - not documented anywhere in this repo before now).
-While implementing, I found the `NODE_ADDRESS` / SD-pin coupling and added it as
-open question 7.
-
-**2026-09-28 22:45** — (continued) "xcode is now installed"
-User accepted the Xcode license, unblocking `pio test -e native`. Running it
-surfaced a second issue: the test suite directory must start with `test_`
-(`platformio/test/helpers.py:list_test_names`), not just match `test_filter`;
-`native_slot_schedule` was silently never being discovered. Renamed the directory
-to `test_native_slot_schedule`, updated `test_filter` to `test_native_*` in
-`platformio.ini`, and reran - all 9 test cases pass. Re-ran the board build and
-`pio check` afterward to confirm the `platformio.ini` fix didn't disturb them.
-Phase 1 is now fully implemented and verified.
