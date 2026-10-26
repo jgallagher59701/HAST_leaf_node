@@ -1,7 +1,7 @@
 # Bugfix Plan: Boot diagnostics after `USBDevice.detach()` are silently suppressed when `SERIAL_DIAG=1`
 
 **Bug:** BUG-004
-**Status:** Draft
+**Status:** Done
 **Created:** 2026-10-25
 
 ## Summary
@@ -32,52 +32,68 @@ laster things called before loop().
 
 ## Fix approach
 
-Narrow, two-part fix scoped to the exact interaction that's broken:
+Reorder rather than re-gate: `USBDevice.detach()` (and the `BOOT_SAFETY_DELAY` yield
+before it) is moved to the very end of `setup()`, after every remaining `IO(Serial...)`
+diagnostic call — including a new one added at the same time, printing the RTC
+date/time once it's updated from the main node's time response. The `#if
+STANDBY_MODE` guard on the detach itself is unchanged: USB still always detaches when
+`STANDBY_MODE=1`, regardless of `SERIAL_DIAG`. What changes is that detach now happens
+*after* all diagnostics have had a chance to print, not before. This satisfies both
+goals at once — standby/power behavior is untouched, and `SERIAL_DIAG=1` diagnostics
+are no longer cut off — without introducing a new macro or conditional.
 
-1. Move the new code before the call to detach().
+The one leftover rough edge: the inline comment on the `#if STANDBY_MODE` line
+(`// !SERIAL_DIAG jhrg 6/17/23`) still implies the detach is conditioned on
+`SERIAL_DIAG`, which was true of the *intent* but still isn't true of the *code* —
+the guard is still `STANDBY_MODE` alone. Left as-is since it's cosmetic (the actual
+bug — diagnostics after detach — is fixed by the reordering) and not part of what was
+asked; worth a follow-up comment cleanup if it causes confusion again.
 
 ## Regression risk
 
-- `USBDevice.detach()` at line 931 is the only call site affected. Nothing else in
-  `src/leaf_node.cc` depends on USB being detached immediately at that point in
-  `setup()` — the surrounding code (time-request send/receive, "Setup complete." log)
-  only *writes* to `Serial`, it doesn't branch on USB attach state.
-- Behavior changes only when `SERIAL_DIAG=1` (not the default in either shipped
-  environment — `platformio.ini`'s `[common_env_data]` sets `SERIAL_DIAG=0`). With
-  `SERIAL_DIAG=0` (the normal, shipped configuration), `USB_DETACH_AFTER_SETUP`
-  evaluates identically to the current `STANDBY_MODE` check, so production firmware
-  behavior is unchanged.
-- With `SERIAL_DIAG=1`, USB now stays attached through the rest of `setup()` instead
-  of detaching early. This trades a small amount of power draw during `setup()` for
-  working diagnostics — acceptable since `SERIAL_DIAG=1` is a debug-only
-  configuration, never shipped.
-- `src/leaf_node.cc` is excluded from `env:native`
-  (`platformio.ini`'s `build_src_filter`, since it includes `Arduino.h`), so this
-  change can't be exercised by the existing native leaf-node-logic tests — those cover
-  `leaf_node_logic.cc`, not `leaf_node.cc`'s `setup()`/`loop()` directly.
+- The only code moved is the `BOOT_SAFETY_DELAY` yield and the `#if STANDBY_MODE`
+  `USBDevice.detach()` block, now running after the time-request/response exchange
+  and the final `"Setup complete."` log instead of before them. Nothing between the
+  old and new detach location branches on USB attach state, so moving it doesn't skip
+  or duplicate any logic — confirmed by reading the intervening code (time
+  request/response handling, status bit, loop() start).
+- Behavior is unchanged in the shipped configuration (`SERIAL_DIAG=0`,
+  `STANDBY_MODE=1`, both shipped environments' default): the `IO()` macro
+  (`include/debug.h`) compiles to nothing when `SERIAL_DIAG=0`, so moving `IO()` call
+  sites around has no runtime effect, and `USBDevice.detach()` still fires
+  unconditionally under `STANDBY_MODE=1` — just a few lines/one LoRa round-trip later
+  in `setup()`. Verified via `pio run -e zeroUSB` (default flags): builds clean,
+  unchanged RAM/flash usage.
+- With `SERIAL_DIAG=1` (debug-only, never shipped), the detach now happens slightly
+  later in wall-clock terms — after the time-request LoRa round trip — rather than
+  before it. That round trip already happens whether or not USB is attached, so this
+  doesn't change LoRa timing or behavior, only when the USB detach relative to it
+  occurs.
+- `src/leaf_node.cc` is excluded from `env:native` (`platformio.ini`'s
+  `build_src_filter`, since it includes `Arduino.h`), so this reorder can't be and
+  isn't exercised by the existing native test suites (`test_native_leaf_node_logic`,
+  `test_native_messages_join`, `test_native_slot_schedule`) — all three cover other
+  files/logic and are unaffected, confirmed by running them (see Verification).
 
 ## Verification
 
-1. **New native test** (regression guard for the actual logic bug): add
-   `test/test_native_debug_macros/` that includes `include/debug.h` under each of the
-   four `(STANDBY_MODE, SERIAL_DIAG)` combinations and asserts
-   `USB_DETACH_AFTER_SETUP` evaluates to `1` only when `STANDBY_MODE=1 &&
-   SERIAL_DIAG=0`. This is the part of the bug that's actually unit-testable —
-   `debug.h` has no `Arduino.h` dependency, unlike `leaf_node.cc` itself. Run via
-   `pio test -e native`.
-2. **Hardware verification** (re-run BUG-004's reproduction steps, since the
-   `setup()` interaction itself isn't natively testable):
-   - Build and flash `env:zeroUSB` with `SERIAL_DIAG=1` (override the default) and the
-     default `STANDBY_MODE=1`.
-   - Open a serial monitor during boot.
-   - Confirm diagnostic output continues past the former detach point: the
-     time-request/response branch's output (or `"Unexpected response type: ..."` if no
-     main node is present to respond) and the final `"Setup complete."` line now
-     appear, where they previously did not.
-   - Build and flash with `SERIAL_DIAG=0` (the shipped default) and confirm no change
-     in behavior (USB still detaches at the same point, since
-     `USB_DETACH_AFTER_SETUP` reduces to the old condition).
-3. `pio check -e zeroUSB` and `pio check -e debugZeroUSB` stay clean.
+1. `pio test -e native` — all 29 existing test cases pass unchanged; none of them
+   touch `leaf_node.cc`'s `setup()`/`loop()`, so this is a no-regression check on
+   unrelated logic, not a test of this fix itself.
+2. `pio run -e zeroUSB` and `pio run -e debugZeroUSB` — both build clean with the
+   shipped default flags (`SERIAL_DIAG=0`). RAM/flash usage unchanged
+   (6752 B / 64856 B on zeroUSB) from before the fix.
+3. `pio run -e zeroUSB -e debugZeroUSB` rebuilt with `SERIAL_DIAG=1` (temporarily
+   overriding `platformio.ini`'s default to exercise the previously-broken path) —
+   both build clean (flash usage grows by ~1 KB, matching the new RTC-print `IO()`
+   block compiling in).
+4. `pio check -e zeroUSB` under `SERIAL_DIAG=1` — passes with 0 high-severity
+   findings; nothing new on the lines touched by this fix (pre-existing
+   style/C-style-cast findings elsewhere in the file are unrelated and unchanged).
+5. **Hardware verification — done.** User confirmed on an actual board that
+   `setup()`-time diagnostics (time-request/response branch, `"Setup complete."`)
+   now visibly print over USB serial under `SERIAL_DIAG=1` before `USBDevice.detach()`
+   runs.
 
 ## Out of scope
 

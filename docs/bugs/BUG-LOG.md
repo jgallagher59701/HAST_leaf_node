@@ -174,7 +174,7 @@ failed" and "LoRa is up" are simultaneously known.
 ## BUG-004 — Boot diagnostics after `USBDevice.detach()` are silently suppressed when `SERIAL_DIAG=1`
 
 **Severity:** High
-**Status:** Fix Planned
+**Status:** Fixed
 **Reported:** 2026-10-25
 **Fix plan:** `plans/bugfix-serial-debug-after-usb-detach-plan.md`
 **Related requirements:** FR-008 ("Leaf node supports a debug mode that can route
@@ -238,6 +238,33 @@ diagnostics silently suppressed, no crash/hang) before logging. Related requirem
 FR-008 (superseded by FR-009 but still the live mechanism this bug affects). Wrote
 fix plan to `plans/bugfix-serial-debug-after-usb-detach-plan.md`; status set to
 `Fix Planned`.
+
+**2026-10-25 18:10** — "Fixed and Committed. Please update tests for this if needed.
+I don't think any tests will need to be changed since the edits are all in setup().
+Also evaluate requirements, use cases, etc., in case this fix affect those (unlikely)."
+User implemented the fix themselves (commit `159f84f`), taking a different approach
+than the plan's draft: instead of adding a `SERIAL_DIAG`-aware macro, they reordered
+`setup()` so `BOOT_SAFETY_DELAY`'s yield and the `#if STANDBY_MODE` `USBDevice.detach()`
+block now run last, after all `IO(Serial...)` diagnostic calls (including a new one
+printing the RTC date/time once updated from the main node) — detach is still
+unconditional on `STANDBY_MODE` alone, it just now happens after diagnostics instead
+of before them. Updated the plan's Regression risk/Verification/Out-of-scope sections
+to match what was actually implemented (they still described the abandoned macro
+approach). Confirmed no test changes needed: `pio test -e native` (29/29 pass,
+unaffected — `leaf_node.cc` is excluded from `env:native`), `pio run`/`pio check` on
+`zeroUSB`/`debugZeroUSB` clean under both `SERIAL_DIAG=0` (shipped default) and a
+temporary `SERIAL_DIAG=1` override. Checked requirements/constraints docs: no FR/NFR/
+UC/IC references `STANDBY_MODE` or `SERIAL_DIAG`, so none are affected; FR-008
+(superseded) remains the only related requirement, and this fix only brings the code
+closer to FR-008's original intent. Hardware verification (confirming the serial
+monitor actually shows output end-to-end) is still open — noted in the plan as not
+yet done. Status stays `Fix Planned`, not `Fixed` — only the user confirms that.
+
+**2026-10-25 18:20** — "hardware verification complete - it works"
+User confirmed on real hardware that `setup()`-time diagnostics (time-request/
+response branch, "Setup complete.") now print over USB serial under `SERIAL_DIAG=1`
+before `USBDevice.detach()` runs. Status set to `Fixed` per the user's confirmation;
+plan's Verification section item 5 (hardware check) marked done.
 
 ---
 
